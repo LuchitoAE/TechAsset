@@ -100,5 +100,5 @@ El detalle está en `ESTANDARES.md`.
 **Iteración 1 (17/11/2026):** análisis, ERS 0100, SDD 0100, diagramas, estándares y el esqueleto.
 **Iteración 2 (17/11/2026):** usuarios y acceso completos: RF-01 a RF-04, RN-08, RN-09 y RN-11;
 ingreso, sesión y salida con cookie; migración `CrearUsuarios`; listado, registro, edición y
-deshabilitación en la SPA; 50 pruebas de backend y 28 de frontend. Equipos, préstamos y reportes
+deshabilitación en la SPA; 51 pruebas de backend y 28 de frontend. Equipos, préstamos y reportes
 llegan en las iteraciones 3 a 5.
