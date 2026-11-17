@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="TechAsset: inventario y préstamo de equipos tecnológicos de Innovatech Solutions" />
+    <title>TechAsset</title>
+    <script>
+      // Modo claro u oscuro antes de dibujar la página (sin destello): la elección guardada o la del sistema.
+      try {
+        var elegido = localStorage.getItem('techasset.tema')
+      } catch (e) {}
+      document.documentElement.dataset.tema =
+        elegido || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro')
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

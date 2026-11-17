@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TechAsset.Domain/TechAsset.Domain.csproj" />
+    <Project Path="src/TechAsset.Application/TechAsset.Application.csproj" />
+    <Project Path="src/TechAsset.Infrastructure/TechAsset.Infrastructure.csproj" />
+    <Project Path="src/TechAsset.WebApi/TechAsset.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TechAsset.Pruebas/TechAsset.Pruebas.csproj" />
+  </Folder>
+</Solution>
