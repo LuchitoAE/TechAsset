@@ -4,6 +4,7 @@ import {
   menuDelRol,
   puedeConsultarUsuarios,
   puedeDeshabilitarUsuarios,
+  puedeGestionarEquipos,
   puedeGestionarUsuarios,
 } from './permisos'
 
@@ -16,16 +17,16 @@ describe('permisos y navegación por rol', () => {
     ])
   })
 
-  it('el Responsable ve equipos, préstamos e inventario', () => {
+  it('el Responsable ve equipos y préstamos', () => {
     expect(menuDelRol('ResponsableDeTecnologia').map((opcion) => opcion.etiqueta)).toEqual([
       'Equipos',
       'Préstamos',
-      'Inventario',
     ])
   })
 
-  it('el Colaborador ve sus préstamos y la disponibilidad', () => {
+  it('el Colaborador ve el inventario, sus préstamos y la disponibilidad', () => {
     expect(menuDelRol('Colaborador').map((opcion) => opcion.etiqueta)).toEqual([
+      'Equipos',
       'Mis préstamos',
       'Disponibilidad',
     ])
@@ -43,9 +44,17 @@ describe('permisos y navegación por rol', () => {
     expect(puedeDeshabilitarUsuarios('ResponsableDeTecnologia')).toBe(false)
   })
 
+  it('el Administrador y el Responsable gestionan equipos; el Colaborador solo consulta', () => {
+    expect(puedeGestionarEquipos('Administrador')).toBe(true)
+    expect(puedeGestionarEquipos('ResponsableDeTecnologia')).toBe(true)
+    expect(puedeGestionarEquipos('Colaborador')).toBe(false)
+  })
+
   it('cada rol tiene accesos rápidos coherentes con su menú', () => {
     expect(accesosDelRol('Administrador')).toHaveLength(3)
+    expect(accesosDelRol('ResponsableDeTecnologia')).toHaveLength(2)
     expect(accesosDelRol('Colaborador').map((acceso) => acceso.ruta)).toEqual([
+      '/equipos',
       '/mis-prestamos',
       '/disponibilidad',
     ])

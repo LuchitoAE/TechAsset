@@ -8,9 +8,9 @@ export const MENUS_POR_ROL = {
   ResponsableDeTecnologia: [
     { ruta: '/equipos', etiqueta: 'Equipos' },
     { ruta: '/prestamos', etiqueta: 'Préstamos' },
-    { ruta: '/inventario', etiqueta: 'Inventario' },
   ],
   Colaborador: [
+    { ruta: '/equipos', etiqueta: 'Equipos' },
     { ruta: '/mis-prestamos', etiqueta: 'Mis préstamos' },
     { ruta: '/disponibilidad', etiqueta: 'Disponibilidad' },
   ],
@@ -32,19 +32,25 @@ export function puedeDeshabilitarUsuarios(rol) {
   return rol === 'Administrador'
 }
 
+// RF-05, RF-06 y RF-08: el Administrador y el Responsable de Tecnología escriben; el Colaborador
+// consulta el inventario en solo lectura.
+export function puedeGestionarEquipos(rol) {
+  return rol === 'Administrador' || rol === 'ResponsableDeTecnologia'
+}
+
 // Accesos rápidos del panel de inicio, según lo que cada rol puede hacer.
 export const ACCESOS_POR_ROL = {
   Administrador: [
     { ruta: '/usuarios', titulo: 'Usuarios', detalle: 'Registrar, actualizar y deshabilitar cuentas.' },
-    { ruta: '/equipos', titulo: 'Equipos', detalle: 'Inventario tecnológico y estados.' },
+    { ruta: '/equipos', titulo: 'Equipos', detalle: 'Inventario tecnológico, altas y estados.' },
     { ruta: '/reportes', titulo: 'Reportes', detalle: 'Indicadores y movimientos.' },
   ],
   ResponsableDeTecnologia: [
     { ruta: '/equipos', titulo: 'Equipos', detalle: 'Altas, cambios y disponibilidad.' },
     { ruta: '/prestamos', titulo: 'Préstamos', detalle: 'Solicitudes, aprobaciones y devoluciones.' },
-    { ruta: '/inventario', titulo: 'Inventario', detalle: 'Consulta por estado y categoría.' },
   ],
   Colaborador: [
+    { ruta: '/equipos', titulo: 'Inventario', detalle: 'Consulte equipos por estado y categoría.' },
     { ruta: '/mis-prestamos', titulo: 'Mis préstamos', detalle: 'Sus solicitudes y su historial.' },
     { ruta: '/disponibilidad', titulo: 'Disponibilidad', detalle: 'Equipos libres para solicitar.' },
   ],

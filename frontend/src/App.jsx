@@ -3,11 +3,14 @@ import RutaPorRol from './components/RutaPorRol'
 import RutaProtegida from './components/RutaProtegida'
 import ProveedorDeSesion from './contextos/ProveedorDeSesion'
 import LayoutPrincipal from './layouts/LayoutPrincipal'
+import PaginaDetalleEquipo from './paginas/PaginaDetalleEquipo'
 import PaginaDetalleUsuario from './paginas/PaginaDetalleUsuario'
 import PaginaEnConstruccion from './paginas/PaginaEnConstruccion'
+import PaginaEquipos from './paginas/PaginaEquipos'
 import PaginaIngreso from './paginas/PaginaIngreso'
 import PaginaInicio from './paginas/PaginaInicio'
 import PaginaNoEncontrada from './paginas/PaginaNoEncontrada'
+import PaginaNuevoEquipo from './paginas/PaginaNuevoEquipo'
 import PaginaNuevoUsuario from './paginas/PaginaNuevoUsuario'
 import PaginaUsuarios from './paginas/PaginaUsuarios'
 
@@ -32,26 +35,15 @@ export default function App() {
               <Route path="usuarios/nuevo" element={<PaginaNuevoUsuario />} />
             </Route>
 
-            <Route
-              path="equipos"
-              element={
-                <PaginaEnConstruccion
-                  titulo="Equipos"
-                  descripcion="Inventario tecnológico con código patrimonial único, categoría, marca y estado."
-                  iteracion={3}
-                />
-              }
-            />
-            <Route
-              path="inventario"
-              element={
-                <PaginaEnConstruccion
-                  titulo="Inventario"
-                  descripcion="Consulta de equipos por estado, categoría y disponibilidad."
-                  iteracion={3}
-                />
-              }
-            />
+            {/* RF-07: el inventario lo consultan los tres roles; el Colaborador en solo lectura. */}
+            <Route path="equipos" element={<PaginaEquipos />} />
+            <Route path="inventario" element={<Navigate to="/equipos" replace />} />
+
+            <Route element={<RutaPorRol roles={['Administrador', 'ResponsableDeTecnologia']} />}>
+              <Route path="equipos/nuevo" element={<PaginaNuevoEquipo />} />
+              <Route path="equipos/:id" element={<PaginaDetalleEquipo />} />
+            </Route>
+
             <Route
               path="prestamos"
               element={
@@ -78,7 +70,7 @@ export default function App() {
                 <PaginaEnConstruccion
                   titulo="Disponibilidad"
                   descripcion="Equipos libres para solicitar en este momento."
-                  iteracion={3}
+                  iteracion={4}
                 />
               }
             />

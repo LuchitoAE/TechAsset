@@ -9,7 +9,7 @@ namespace TechAsset.Pruebas.WebApi;
 
 // Fabrica la API en memoria con una cadena de conexión ficticia (los endpoints probados no consultan
 // la base) y con la autenticación de prueba para poder comprobar 401 y 403.
-public sealed class FabricaDePruebas : WebApplicationFactory<Program>
+public class FabricaDePruebas : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder constructor)
     {

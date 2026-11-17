@@ -22,6 +22,52 @@ namespace TechAsset.Infrastructure.Migraciones
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TechAsset.Domain.Entidades.Equipo", b =>
+                {
+                    b.Property<Guid>("IdEquipo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_equipo");
+
+                    b.Property<string>("CategoriaEquipo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("categoria_equipo");
+
+                    b.Property<string>("EstadoEquipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("estado_equipo");
+
+                    b.Property<string>("MarcaEquipo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("marca_equipo");
+
+                    b.Property<string>("NombreEquipo")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nombre_equipo");
+
+                    b.HasKey("IdEquipo")
+                        .HasName("pk_equipos");
+
+                    b.HasIndex("CategoriaEquipo")
+                        .HasDatabaseName("ix_equipos_categoria");
+
+                    b.HasIndex("EstadoEquipo")
+                        .HasDatabaseName("ix_equipos_estado");
+
+                    b.ToTable("equipos", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_equipos_estado", "estado_equipo IN ('Disponible', 'Prestado', 'Mantenimiento', 'Baja')");
+                        });
+                });
+
             modelBuilder.Entity("TechAsset.Domain.Entidades.Usuario", b =>
                 {
                     b.Property<Guid>("IdUsuario")
@@ -84,6 +130,35 @@ namespace TechAsset.Infrastructure.Migraciones
                         {
                             t.HasCheckConstraint("ck_usuarios_rol", "rol_usuario IN ('Administrador', 'ResponsableDeTecnologia', 'Colaborador')");
                         });
+                });
+
+            modelBuilder.Entity("TechAsset.Domain.Entidades.Equipo", b =>
+                {
+                    b.OwnsOne("TechAsset.Domain.Comun.CodigoPatrimonial", "CodigoPatrimonial", b1 =>
+                        {
+                            b1.Property<Guid>("EquipoIdEquipo")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Valor")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("codigo_patrimonial_equipo");
+
+                            b1.HasKey("EquipoIdEquipo");
+
+                            b1.HasIndex("Valor")
+                                .IsUnique()
+                                .HasDatabaseName("uq_equipos_codigo_patrimonial");
+
+                            b1.ToTable("equipos");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EquipoIdEquipo");
+                        });
+
+                    b.Navigation("CodigoPatrimonial")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TechAsset.Domain.Entidades.Usuario", b =>
