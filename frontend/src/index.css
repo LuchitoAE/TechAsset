@@ -1,0 +1,78 @@
+/* Tailwind 4: una sola línea trae la base, los componentes y las utilidades. */
+@import 'tailwindcss';
+
+/* Paleta de TechAsset en un solo lugar. Los componentes usan nombres con significado (bg-superficie,
+   text-texto-suave, border-borde…) y nunca un color fijo: el modo oscuro se resuelve aquí. */
+@theme {
+  --font-sans: 'Montserrat Variable', 'Montserrat', system-ui, Arial, sans-serif;
+
+  /* Azul tecnológico de Innovatech y su acento ámbar. */
+  --color-marca-50: #eef6fb;
+  --color-marca-100: #d8eaf5;
+  --color-marca-300: #7fb6d6;
+  --color-marca-600: #0d6a96;
+  --color-marca-700: #0a5578;
+  --color-marca-800: #08425e;
+  --color-marca-900: #062c3f;
+  --color-acento: #f2a93b;
+  --color-acento-suave: #fdf1dc;
+
+  --color-fondo: #f2f6fa;
+  --color-superficie: #ffffff;
+  --color-superficie-tenue: #f7fafc;
+  --color-borde: #d9e3ee;
+  --color-borde-fuerte: #b8c9da;
+  --color-texto: #12212f;
+  --color-texto-suave: #4d6175;
+  --color-titulo: #0a2b40;
+  --color-enlace: #0d6a96;
+  --color-foco: #0d6a96;
+
+  --color-exito: #16794a;
+  --color-exito-fondo: #e7f6ee;
+  --color-aviso: #9a5b06;
+  --color-aviso-fondo: #fdf1dc;
+  --color-error: #b42318;
+  --color-error-fondo: #fdecea;
+
+  --shadow-tarjeta: 0 1px 2px rgb(15 35 52 / 0.06), 0 12px 28px -12px rgb(15 35 52 / 0.18);
+  --shadow-campo: 0 1px 2px rgb(15 35 52 / 0.08);
+}
+
+/* Modo oscuro: index.html pone data-tema según la elección guardada o el sistema operativo. */
+:root[data-tema='oscuro'] {
+  color-scheme: dark;
+  --color-fondo: #07131d;
+  --color-superficie: #102433;
+  --color-superficie-tenue: #0c1c29;
+  --color-borde: #24405a;
+  --color-borde-fuerte: #35566f;
+  --color-texto: #e7eff6;
+  --color-texto-suave: #a8bccd;
+  --color-titulo: #d8eaf5;
+  --color-enlace: #7fc4e8;
+  --color-foco: #7fc4e8;
+  --color-marca-600: #3d9bc4;
+  --color-marca-700: #6ab8d9;
+  --color-marca-800: #8fcbe4;
+  --color-marca-900: #c3e2f0;
+  --color-acento-suave: #3a2a0e;
+  --color-exito: #7fdfab;
+  --color-exito-fondo: #0f2e20;
+  --color-aviso: #f7c66b;
+  --color-aviso-fondo: #35260e;
+  --color-error: #f4a49d;
+  --color-error-fondo: #3a1715;
+  --shadow-tarjeta: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 16px 32px -18px rgb(0 0 0 / 0.8);
+}
+
+@layer base {
+  body {
+    @apply bg-fondo font-sans text-texto antialiased;
+  }
+
+  /* Un solo lugar para el foco visible de toda la aplicación (WCAG 2.2, 2.4.11). */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-foco;
+  }
+}

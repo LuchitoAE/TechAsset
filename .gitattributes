@@ -1,0 +1,11 @@
+# Texto normalizado: LF en el repositorio, sin importar el sistema de quien clona.
+* text=auto eol=lf
+
+# Binarios: Git no los convierte ni los compara línea a línea.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.docx binary
