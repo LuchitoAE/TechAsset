@@ -10,6 +10,8 @@ public sealed class ContextoDeTechAsset(DbContextOptions<ContextoDeTechAsset> op
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();
 
+    public DbSet<Equipo> Equipos => Set<Equipo>();
+
     protected override void OnModelCreating(ModelBuilder modelo)
     {
         modelo.ApplyConfigurationsFromAssembly(typeof(ContextoDeTechAsset).Assembly);

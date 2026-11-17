@@ -23,6 +23,8 @@ public static class RegistroDeServicios
 
         servicios.AddScoped<IRepositorioDeUsuarios, RepositorioDeUsuarios>();
         servicios.AddScoped<IConsultaDeUsuarios, ConsultaDeUsuarios>();
+        servicios.AddScoped<IRepositorioDeEquipos, RepositorioDeEquipos>();
+        servicios.AddScoped<IConsultaDeEquipos, ConsultaDeEquipos>();
         servicios.AddSingleton<IProtectorDeContrasenas, ProtectorPbkdf2>();
         servicios.AddSingleton<IReloj, RelojDelSistema>();
 
