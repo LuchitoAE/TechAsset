@@ -8,7 +8,7 @@ cada cambio. Se aplican a todo el código; si una regla cambia, se cambia aquí 
 
 | Elemento | Regla | Ejemplo |
 |---|---|---|
-| Atributos de las entidades | Nombre del dato + nombre de su entidad, en PascalCase y sin abreviaturas | `CodigoPatrimonialEquipo`, `FechaPrestamoPrestamo` |
+| Atributos de las entidades | Nombre del dato en PascalCase; si el dato no nombra su entidad, se agrega el nombre de la entidad, sin abreviaturas | `CodigoPatrimonialEquipo`, `FechaDevolucionPrestamo`, `CorreoUsuario` |
 | Columnas de la base | El nombre del atributo en snake_case | `codigo_patrimonial_equipo` (`HasColumnName`) |
 | Campos del JSON | El mismo nombre de la columna, en snake_case | `"codigo_patrimonial_equipo": "TK-2026-0001"` (`JsonNamingPolicy.SnakeCaseLower`) |
 | Tablas | Plural, en minúsculas | `usuarios`, `equipos`, `prestamos`, `movimientos` |
