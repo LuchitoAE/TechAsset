@@ -218,3 +218,148 @@ migrarlo; la sal va en su propia columna.
 - Casos de uso RF-05 a RF-08, filtros de inventario y consulta por estado/categoría/texto.
 - Pantallas de equipos e inventario con los mismos componentes base.
 - Reutilizar el patrón de sesión, errores y pruebas para los nuevos recursos.
+
+---
+
+## Iteración 3 — Equipos e inventario
+
+**Fecha:** 17/11/2026
+**Rama:** `feature/iteracion-3-equipos` → `develop`
+**Objetivo:** RF-05 a RF-08, RN-07, D-08 y los estados: registrar, actualizar, consultar el inventario
+con filtros y cambiar el estado de un equipo, con permisos por rol y pruebas.
+
+### Alcance
+
+- Entidad `Equipo` con código patrimonial, nombre, categoría, marca y estado; objeto de valor
+  `CodigoPatrimonial` (sin espacios, en mayúsculas y de hasta 50 caracteres) y enumeraciones
+  `CategoriaEquipo` (siete categorías de D-08) y `EstadoEquipo` (D-05).
+- Casos de uso de registrar, actualizar, listar, consultar y cambiar estado, con comandos, datos de
+  salida y errores de dominio en español.
+- `ContextoDeTechAsset`, configuración EF con `HasColumnName` en snake_case, índice único
+  `uq_equipos_codigo_patrimonial`, CHECK `ck_equipos_estado`, índices por estado y categoría, y
+  migración `CrearEquipos`.
+- Repositorio de escritura y consulta de lectura con proyección, `AsNoTracking`, filtros por texto,
+  estado, categoría y marca, conteo por estado y paginación.
+- WebApi: `EquiposControlador` con los cinco endpoints del SDD; los tres roles consultan y solo el
+  Administrador y el Responsable de Tecnología escriben.
+- SPA: listado de inventario con filtros, chips de estado con conteo, contador y paginación; alta y
+  edición con validaciones y ayudas; detalle con cambio de estado y confirmación; rutas y menú por rol.
+- Pruebas xUnit de dominio, casos de uso, permisos y filtros; pruebas Vitest de reglas y formulario.
+
+### Tareas y tiempo aproximado
+
+| Tarea | Tiempo |
+|---|---|
+| Dominio: entidad, objeto de valor, enums y reglas | 1,0 h |
+| Casos de uso, comandos, datos e interfaces | 1,0 h |
+| EF Core, configuración, repositorio, consulta y migración | 1,0 h |
+| WebApi: contratos, controlador, permisos y mensajes | 1,0 h |
+| Pruebas xUnit y ajustes | 1,0 h |
+| Frontend: api, catálogos, reglas y componentes | 1,5 h |
+| Pantallas de inventario, alta y detalle | 2,5 h |
+| Pruebas Vitest, lint y build | 0,5 h |
+| Migración, curl y verificación | 0,5 h |
+
+### Decisiones
+
+No cambió ninguna decisión del Anexo A. Se aplicaron D-05 (el estado `Prestado` lo controla el
+préstamo; no se da de baja ni se pone en mantenimiento un equipo prestado) y D-08 (siete categorías).
+La reincorporación desde `Baja` se trató como un cambio de estado más de RF-08, porque la ERS permite
+cambiar entre `Disponible`, `Mantenimiento` y `Baja`; no se creó una decisión nueva.
+
+Decisiones de implementación que no alteran el contrato:
+
+- El código patrimonial se normaliza en el objeto de valor: `  tk-2026-0001 ` y `TK-2026-0001` son el
+  mismo código, y la base también lo impide con el índice único.
+- `Prestado` no se puede asignar por RF-08. El dominio expone `MarcarComoPrestado()` y
+  `MarcarComoDisponible()` para que la iteración 4 los use desde el préstamo y la devolución; así la
+  regla queda lista sin abrir un atajo manual.
+- La consulta de inventario devuelve `conteo_por_estado` con el resto de filtros aplicados, excepto el
+  estado, para que los chips muestren cuántos equipos hay en cada situación.
+- `disponible_equipo` es un dato derivado (`estado_equipo == Disponible`); no se guarda una columna.
+
+### Artefactos
+
+- `backend/src/TechAsset.Domain/Entidades/Equipo.cs`, `Comun/CodigoPatrimonial.cs`,
+  `Comun/CamposDeEquipo.cs`, `Enumeraciones/CategoriaEquipo.cs` y `Enumeraciones/EstadoEquipo.cs`.
+- `backend/src/TechAsset.Application/CasosDeUso/` (registrar, actualizar, listar, obtener y cambiar
+  estado), `Comandos/`, `Datos/` e `Interfaces/`.
+- `backend/src/TechAsset.Infrastructure/Persistencia/Configuraciones/ConfiguracionDeEquipo.cs`,
+  `Repositorios/RepositorioDeEquipos.cs`, `Consultas/ConsultaDeEquipos.cs` y
+  `Migraciones/20261117234312_CrearEquipos.cs`.
+- `backend/src/TechAsset.WebApi/Controladores/EquiposControlador.cs`, `Contratos/`, `TechAsset.http` y
+  `Middleware/ErroresDeModelo.cs` (mensajes de enlace en español).
+- `backend/tests/TechAsset.Pruebas/` con `PruebasDeEquipos`, `PruebasDeRegistroDeEquipos`,
+  `PruebasDeEstadoDeEquipos`, `PruebasDeInventario`, `PruebasDePermisosDeEquipos` y sus dobles.
+- `frontend/src/api/equiposApi.js`, `reglas/validacionEquipos.js`, `reglas/catalogos.js`,
+  `components/equipos/` y las páginas `PaginaEquipos`, `PaginaNuevoEquipo` y `PaginaDetalleEquipo`.
+- `README.md`, este registro y la migración aplicada en la base local.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `dotnet build -warnaserror` en `backend/` | 0 errores, 0 advertencias |
+| `dotnet test` en `backend/` | 100 pruebas, 100 en verde |
+| `dotnet ef migrations has-pending-model-changes` | «No changes have been made to the model since the last migration.» |
+| Migración en PostgreSQL | `20261117234312_CrearEquipos` aplicada; tabla `equipos` con `uq_equipos_codigo_patrimonial`, `ck_equipos_estado`, `ix_equipos_estado` e `ix_equipos_categoria` |
+| `pnpm lint` | Sin avisos |
+| `pnpm test` | 42 pruebas, 42 en verde (10 archivos) |
+| `pnpm build` | 135 módulos transformados; `dist/` generado |
+| API con curl | 201 al registrar; 409 con código duplicado aunque cambien mayúsculas y espacios; 200 al listar con filtros; 200 al actualizar y cambiar estado; 409 al intentar dar de baja un equipo prestado; 403 al registrar como Colaborador; 401 sin cookie; 400 con categoría inválida y mensaje en español |
+
+Respuestas resumidas de la verificación con curl (API en `http://localhost:5321`):
+
+```text
+POST /api/equipos (Administrador)                 201  Equipo registrado. TK-2026-9001 / Disponible
+POST /api/equipos (código repetido con espacios)  409  Ya existe un equipo con ese código patrimonial.
+GET  /api/equipos?texto=latitude&estado=Disponible 200  total=1, conteo Disponible=1 (rol Colaborador)
+PUT  /api/equipos/{id} (Administrador)            200  Laptop Dell Latitude 5450 / Disponible
+PATCH /api/equipos/{id}/estado (Responsable)      200  Mantenimiento, disponible=false
+PATCH /api/equipos/{id}/estado a Baja (prestado)  409  El equipo está prestado. Registre primero la devolución…
+POST /api/equipos (Colaborador)                   403  Su rol no permite esta operación.
+GET  /api/equipos (sin cookie)                     401  Debe iniciar sesión.
+GET  /api/equipos/{id} (Colaborador)              200  TK-2026-9001 / Prestado
+POST /api/equipos con categoria_equipo=Servidor    400  errors.categoria_equipo: «La categoría debe ser …»
+```
+
+Para el caso 409 de equipo prestado se actualizó temporalmente el estado en la base (el préstamo es
+la iteración 4) y después se eliminaron los equipos de prueba; la base quedó sin equipos inventados.
+
+### Defectos encontrados y corregidos
+
+1. Las pruebas esperaban la palabra «devuelta» en el mensaje del dominio, que dice «devolución»; se
+   corrigieron las aserciones, no el mensaje.
+2. La fábrica de pruebas de equipos necesitaba `Microsoft.AspNetCore.TestHost` para
+   `ConfigureTestServices`; se agregó la directiva.
+3. Los errores de enlace del marco para una categoría o un estado inválidos llegaban en inglés y con
+   claves `$.campo`. `ErroresDeModelo` ahora normaliza la clave y traduce los campos conocidos; también
+   elimina el error redundante de `solicitud` cuando ya hay un campo concreto.
+4. `FiltrosEquipos` reexportaba una constante sin uso; se quitó para dejar el archivo limpio.
+5. La primera versión de la consulta de conteo aplicaba el filtro de estado antes del `GROUP BY`, lo
+   que dejaba los chips en cero al filtrar; se movió el conteo antes del filtro de estado.
+
+### Retrospectiva
+
+- **Bien:** el SDD y la ERS ya tenían los nombres de columnas, el catálogo, los estados y los
+  endpoints, así que el backend se armó sin renombrar el contrato; el objeto de valor del código
+  patrimonial resolvió de una vez la normalización y la comparación; el patrón de usuarios se reutilizó
+  para permisos, errores y pruebas.
+- **Difícil:** el estado `Prestado` todavía no tiene préstamo en esta iteración. Se resolvió dejando la
+  transición en el dominio (`MarcarComoPrestado`/`MarcarComoDisponible`) y bloqueando cualquier cambio
+  manual desde `Prestado`; así la iteración 4 solo conecta el caso de uso del préstamo.
+- **Aprendizaje:** los chips de estado necesitan su propio conteo antes de aplicar el filtro de estado;
+  si se calculan después, el usuario pierde la referencia de cuántos equipos hay en cada situación. Las
+  validaciones de un enum en el JSON no las escribe el dominio: hay que traducir también los errores de
+  enlace del marco.
+
+### Pendiente para la iteración 4
+
+- Entidad `Prestamo`, tabla `prestamos` y tabla `movimientos`; índice único parcial de préstamo activo
+  por equipo (RN-01) y claves foráneas.
+- Conectar `MarcarComoPrestado` y `MarcarComoDisponible` a los casos de uso de préstamo y devolución;
+  el cambio de estado seguirá bloqueado mientras haya préstamo activo.
+- Comprobar el préstamo activo en `PUT /api/equipos/{id}` antes de permitir cambiar el código (hoy se
+  usa el estado `Prestado` como señal).
+- Pantallas de préstamo, devolución, préstamos activos e historial con los mismos componentes.
+- E2E de los escenarios de la Actividad 6 y los indicadores de la iteración 5.

@@ -65,7 +65,7 @@ dotnet user-secrets set "AdministradorInicial:Contrasena" "..."
 Al arrancar, la API crea el primer Administrador solo si no existe ninguno activo. Después, las cuentas se
 crean desde la pantalla de Usuarios.
 
-## API de la iteración 2
+## API
 
 | Método y ruta | Para qué | Roles |
 |---|---|---|
@@ -78,6 +78,11 @@ crean desde la pantalla de Usuarios.
 | `POST /api/usuarios` | Registrar usuario | Administrador |
 | `PUT /api/usuarios/{id}` | Actualizar usuario y reponer contraseña | Administrador |
 | `PATCH /api/usuarios/{id}/estado` | Habilitar o deshabilitar | Administrador |
+| `GET /api/equipos` | Inventario con filtros, conteo por estado y paginación (RF-07) | Los tres roles |
+| `GET /api/equipos/{id}` | Detalle de un equipo (RF-07) | Los tres roles |
+| `POST /api/equipos` | Registrar equipo con código único (RF-05, RN-07) | Administrador y Responsable |
+| `PUT /api/equipos/{id}` | Actualizar datos del equipo (RF-06) | Administrador y Responsable |
+| `PATCH /api/equipos/{id}/estado` | Cambiar entre Disponible, Mantenimiento y Baja (RF-08) | Administrador y Responsable |
 
 Las respuestas exitosas son `{ success, message, data }`; los errores usan ProblemDetails con `success: false`,
 `message` y `errors` por campo. La sesión es una cookie `HttpOnly` y `SameSite=Strict` de 8 horas.
@@ -100,5 +105,8 @@ El detalle está en `ESTANDARES.md`.
 **Iteración 1 (17/11/2026):** análisis, ERS 0100, SDD 0100, diagramas, estándares y el esqueleto.
 **Iteración 2 (17/11/2026):** usuarios y acceso completos: RF-01 a RF-04, RN-08, RN-09 y RN-11;
 ingreso, sesión y salida con cookie; migración `CrearUsuarios`; listado, registro, edición y
-deshabilitación en la SPA; 51 pruebas de backend y 28 de frontend. Equipos, préstamos y reportes
-llegan en las iteraciones 3 a 5.
+deshabilitación en la SPA; 51 pruebas de backend y 28 de frontend.
+**Iteración 3 (17/11/2026):** equipos e inventario: RF-05 a RF-08, RN-07 y D-08; código patrimonial
+único, siete categorías, estados, filtros y conteo por estado; migración `CrearEquipos`; alta, edición
+y cambio de estado en la SPA; 100 pruebas de backend y 42 de frontend. Préstamos y reportes llegan en
+las iteraciones 4 y 5.
