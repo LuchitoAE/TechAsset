@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\TechAsset.Domain\TechAsset.Domain.csproj" />
     <ProjectReference Include="..\..\src\TechAsset.Application\TechAsset.Application.csproj" />
+    <ProjectReference Include="..\..\src\TechAsset.Infrastructure\TechAsset.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\TechAsset.WebApi\TechAsset.WebApi.csproj" />
   </ItemGroup>
 
