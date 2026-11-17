@@ -176,7 +176,7 @@ migrarlo; la sal va en su propia columna.
 | Comprobación | Resultado |
 |---|---|
 | `dotnet build -warnaserror` en `backend/` | 0 errores, 0 advertencias |
-| `dotnet test` en `backend/` | 50 pruebas, 50 en verde |
+| `dotnet test` en `backend/` | 51 pruebas, 51 en verde |
 | `dotnet ef migrations has-pending-model-changes` | Sin cambios pendientes |
 | `pnpm install --offline --frozen-lockfile` | Lockfile al día, sin descargas |
 | `pnpm lint` | Sin avisos |

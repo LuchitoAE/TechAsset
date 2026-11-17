@@ -82,6 +82,26 @@ public class PruebasDeEstadoDeUsuarios
     }
 
     [Fact]
+    public async Task ElUltimoAdministradorNoPuedeDeshabilitarSuCuentaNiConSuPropiaSesion()
+    {
+        var unicoAdministrador = FabricaDeUsuarios.Crear(
+            "admin@innovatech.pe",
+            RolUsuario.Administrador);
+
+        _repositorio.Sembrar(unicoAdministrador);
+
+        var excepcion = await Assert.ThrowsAsync<ConflictoDeNegocioExcepcion>(() =>
+            CasoDeUso().EjecutarAsync(new CambiarEstadoUsuarioComando(
+                unicoAdministrador.IdUsuario,
+                ActivoUsuario: false,
+                IdUsuarioSesion: unicoAdministrador.IdUsuario,
+                RolSesion: RolUsuario.Administrador)));
+
+        Assert.Contains("último Administrador activo", excepcion.Message);
+        Assert.True(unicoAdministrador.ActivoUsuario);
+    }
+
+    [Fact]
     public async Task ElAdministradorDeshabilitaYVuelveAHabilitarAUnColaborador()
     {
         var colaborador = FabricaDeUsuarios.Crear("colaborador@innovatech.pe");

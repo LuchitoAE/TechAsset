@@ -24,13 +24,21 @@ public sealed class CambiarEstadoUsuarioCasoDeUso(IRepositorioDeUsuarios reposit
 
         if (!comando.ActivoUsuario)
         {
+            var esUltimoAdministradorActivo = usuario.EsAdministradorActivo
+                && await repositorioDeUsuarios.ContarAdministradoresActivosAsync(cancellationToken) <= 1;
+
             if (usuario.IdUsuario == comando.IdUsuarioSesion)
             {
+                if (esUltimoAdministradorActivo)
+                {
+                    throw new ConflictoDeNegocioExcepcion(
+                        "No puede deshabilitar su cuenta: es el último Administrador activo.");
+                }
+
                 throw new ConflictoDeNegocioExcepcion("No puede deshabilitar su propia cuenta.");
             }
 
-            if (usuario.EsAdministradorActivo
-                && await repositorioDeUsuarios.ContarAdministradoresActivosAsync(cancellationToken) <= 1)
+            if (esUltimoAdministradorActivo)
             {
                 throw new ConflictoDeNegocioExcepcion(
                     "No se puede deshabilitar al último Administrador activo.");
