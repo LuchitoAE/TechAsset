@@ -56,10 +56,21 @@ export default function PaginaInicio() {
         </article>
 
         <article className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta">
-          <h2 className="text-base font-bold text-titulo">Equipos, préstamos y reportes</h2>
+          <h2 className="text-base font-bold text-titulo">Equipos e inventario</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">
-            El inventario, los préstamos con devolución y los seis indicadores del panel se integran en
-            las iteraciones 3 a 5. El menú ya está preparado para su rol.
+            Altas con código patrimonial único, corrección de datos, cambio de estado y consulta del
+            inventario con filtros por estado, categoría, marca y texto.
+          </p>
+          <p className="mt-4 rounded-lg bg-exito-fondo px-3 py-2 text-xs font-semibold text-exito">
+            Disponible desde la iteración 3
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta lg:col-span-2">
+          <h2 className="text-base font-bold text-titulo">Préstamos y reportes</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">
+            Los préstamos con devolución llegan en la iteración 4 y los seis indicadores del panel en la
+            iteración 5. El menú ya está preparado para su rol.
           </p>
           <p className="mt-4 rounded-lg bg-aviso-fondo px-3 py-2 text-xs font-semibold text-aviso">
             Próximas iteraciones
