@@ -1,11 +1,10 @@
 using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace TechAsset.Pruebas.WebApi;
 
 // Comprueba que la API arranca y que /api/salud responde con el formato acordado.
-public class PruebasDeSalud(WebApplicationFactory<Program> fabrica) : IClassFixture<WebApplicationFactory<Program>>
+public class PruebasDeSalud(FabricaDePruebas fabrica) : IClassFixture<FabricaDePruebas>
 {
     [Fact]
     public async Task LaSaludRespondeOkConElFormatoDeLaApi()
@@ -19,5 +18,15 @@ public class PruebasDeSalud(WebApplicationFactory<Program> fabrica) : IClassFixt
         Assert.True(documento.RootElement.GetProperty("success").GetBoolean());
         Assert.Equal("ok", documento.RootElement.GetProperty("data").GetProperty("estado").GetString());
         Assert.Equal("TechAsset", documento.RootElement.GetProperty("data").GetProperty("producto").GetString());
+    }
+
+    [Fact]
+    public async Task LaSaludNoExigeSesion()
+    {
+        var cliente = fabrica.CreateClient();
+
+        var respuesta = await cliente.GetAsync("/api/salud");
+
+        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
     }
 }
