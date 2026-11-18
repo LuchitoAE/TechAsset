@@ -9,6 +9,7 @@ import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import EtiquetaDeEstado from '../components/usuarios/EtiquetaDeEstado'
 import EtiquetaDeRol from '../components/usuarios/EtiquetaDeRol'
 import FormularioUsuario from '../components/usuarios/FormularioUsuario'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
 import { etiquetaDeRol } from '../reglas/catalogos'
@@ -21,12 +22,12 @@ export default function PaginaDetalleUsuario() {
   const { id } = useParams()
   const navegar = useNavigate()
   const { sesion } = useSesion()
+  const { mostrarAviso, mostrarError } = useAvisos()
   const administrador = puedeGestionarUsuarios(sesion?.rol_usuario)
 
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso, setAviso] = useState(null)
   const [confirmacionAbierta, setConfirmacionAbierta] = useState(false)
   const [cambiandoEstado, setCambiandoEstado] = useState(false)
 
@@ -59,7 +60,7 @@ export default function PaginaDetalleUsuario() {
 
       setUsuario(datos)
       formulario.establecerValores({ ...datos, contrasena: '' })
-      setAviso('Los cambios se guardaron.')
+      mostrarAviso('Los cambios se guardaron.')
     },
   })
 
@@ -95,10 +96,11 @@ export default function PaginaDetalleUsuario() {
       const datos = await cambiarEstadoUsuario(usuario.id_usuario, !usuario.activo_usuario)
       setUsuario(datos)
       formulario.establecerValores({ ...datos, contrasena: '' })
-      setAviso(datos.activo_usuario ? 'El usuario quedó habilitado.' : 'El usuario quedó deshabilitado.')
+      mostrarAviso(datos.activo_usuario ? 'El usuario quedó habilitado.' : 'El usuario quedó deshabilitado.')
       setConfirmacionAbierta(false)
     } catch (excepcion) {
       setError(excepcion.message)
+      mostrarError(excepcion.message)
       setConfirmacionAbierta(false)
     } finally {
       setCambiandoEstado(false)
@@ -138,7 +140,6 @@ export default function PaginaDetalleUsuario() {
         </div>
       </EncabezadoDePagina>
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && <AlertMessage tipo="error">{error}</AlertMessage>}
 
       {administrador ? (

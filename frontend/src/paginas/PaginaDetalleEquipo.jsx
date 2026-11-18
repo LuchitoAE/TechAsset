@@ -8,6 +8,7 @@ import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import EtiquetaDeEstadoEquipo from '../components/equipos/EtiquetaDeEstadoEquipo'
 import FormularioEquipo from '../components/equipos/FormularioEquipo'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
 import { etiquetaDeCategoria, etiquetaDeEstadoEquipo } from '../reglas/catalogos'
@@ -33,12 +34,12 @@ export default function PaginaDetalleEquipo() {
   const { id } = useParams()
   const navegar = useNavigate()
   const { sesion } = useSesion()
+  const { mostrarAviso, mostrarError } = useAvisos()
   const puedeGestionar = puedeGestionarEquipos(sesion?.rol_usuario)
 
   const [equipo, setEquipo] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso, setAviso] = useState(null)
   const [estadoObjetivo, setEstadoObjetivo] = useState(null)
   const [cambiandoEstado, setCambiandoEstado] = useState(false)
 
@@ -67,7 +68,7 @@ export default function PaginaDetalleEquipo() {
 
       setEquipo(datos)
       formulario.establecerValores(datos)
-      setAviso('Los cambios se guardaron.')
+      mostrarAviso('Los cambios se guardaron.')
     },
   })
 
@@ -109,10 +110,11 @@ export default function PaginaDetalleEquipo() {
         estado_equipo: datos.estado_equipo,
         disponible_equipo: datos.disponible_equipo,
       })
-      setAviso(`El equipo quedó en estado ${etiquetaDeEstadoEquipo(datos.estado_equipo)}.`)
+      mostrarAviso(`El equipo quedó en estado ${etiquetaDeEstadoEquipo(datos.estado_equipo)}.`)
       setEstadoObjetivo(null)
     } catch (excepcion) {
       setError(excepcion.message)
+      mostrarError(excepcion.message)
       setEstadoObjetivo(null)
     } finally {
       setCambiandoEstado(false)
@@ -161,7 +163,6 @@ export default function PaginaDetalleEquipo() {
         </div>
       </EncabezadoDePagina>
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && <AlertMessage tipo="error">{error}</AlertMessage>}
 
       {puedeGestionar ? (

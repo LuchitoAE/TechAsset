@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import PaginaInicio from './PaginaInicio'
@@ -73,6 +73,29 @@ describe('Panel de inicio', () => {
     expect(
       await screen.findByText(/El total de préstamos y el área con mayor uso son solo suyos/),
     ).toBeInTheDocument()
+  })
+
+  it('la distribución muestra las cuatro barras, incluida Baja, y cuadra con el total', async () => {
+    useSesion.mockReturnValue(sesion('Administrador'))
+    obtenerIndicadores.mockResolvedValue({ ...INDICADORES, total_equipos: 10, equipos_disponibles: 4 })
+
+    render(
+      <MemoryRouter>
+        <PaginaInicio />
+      </MemoryRouter>,
+    )
+
+    const seccion = (await screen.findByRole('heading', { name: 'Distribución del inventario' }))
+      .closest('section')
+
+    expect(within(seccion).getByText('Disponibles')).toBeInTheDocument()
+    expect(within(seccion).getByText('Prestados')).toBeInTheDocument()
+    expect(within(seccion).getByText('En mantenimiento')).toBeInTheDocument()
+    expect(within(seccion).getByText('Baja')).toBeInTheDocument()
+
+    // 4 de 10 disponibles, 2 prestados, 1 en mantenimiento y 3 de baja: suma 10.
+    expect(within(seccion).getByText('4 · 40 %')).toBeInTheDocument()
+    expect(within(seccion).getByText('3 · 30 %')).toBeInTheDocument()
   })
 
   it('ofrece reintentar cuando la consulta falla', async () => {

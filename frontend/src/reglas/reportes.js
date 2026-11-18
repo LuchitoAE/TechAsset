@@ -14,6 +14,15 @@ export const TIPOS_DE_MOVIMIENTO = [
 export const LIMITE_RANKING = 10
 export const LIMITE_RANKING_COMPLETO = 100
 
+// RF-13: las cuatro barras de la distribución. Van en el orden de los estados del equipo y cada
+// una lleva su color y su nombre, para no comunicar el estado solo con color (RNF-05).
+export const DISTRIBUCION_DEL_INVENTARIO = [
+  { clave: 'equipos_disponibles', etiqueta: 'Disponibles', clase: 'bg-exito' },
+  { clave: 'equipos_prestados', etiqueta: 'Prestados', clase: 'bg-marca-600' },
+  { clave: 'equipos_mantenimiento', etiqueta: 'En mantenimiento', clase: 'bg-aviso' },
+  { clave: 'equipos_baja', etiqueta: 'Baja', clase: 'bg-error' },
+]
+
 export function etiquetaDeTipoMovimiento(tipo) {
   return TIPOS_DE_MOVIMIENTO.find((opcion) => opcion.valor === tipo)?.etiqueta ?? tipo ?? ''
 }
@@ -48,6 +57,33 @@ export function validarRangoDeFechas(desde, hasta) {
     return { desde: 'La fecha inicial no puede ser posterior a la fecha final.' }
   }
   return {}
+}
+
+export function distribucionDelInventario(indicadores) {
+  const total = Math.max(0, Number(indicadores?.total_equipos ?? 0))
+  const disponibles = Math.max(0, Number(indicadores?.equipos_disponibles ?? 0))
+  const prestados = Math.max(0, Number(indicadores?.equipos_prestados ?? 0))
+  const mantenimiento = Math.max(0, Number(indicadores?.equipos_mantenimiento ?? 0))
+
+  // La API no expone un contador de Baja, pero el total sí la incluye. Se deriva para que las
+  // cuatro barras sumen el total y ninguna quede fuera de la distribución (RF-13).
+  const baja = Math.max(0, total - disponibles - prestados - mantenimiento)
+
+  const valores = {
+    equipos_disponibles: disponibles,
+    equipos_prestados: prestados,
+    equipos_mantenimiento: mantenimiento,
+    equipos_baja: baja,
+  }
+
+  return DISTRIBUCION_DEL_INVENTARIO.map((fila) => {
+    const valor = valores[fila.clave]
+    return {
+      ...fila,
+      valor,
+      porcentaje: total === 0 ? 0 : Math.round((valor / total) * 100),
+    }
+  })
 }
 
 // Fecha y hora de un movimiento (marca de tiempo UTC) en la zona de Lima, sin depender de la zona

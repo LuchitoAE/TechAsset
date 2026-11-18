@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useSesion } from '../contextos/contextoDeSesion'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { etiquetaDeRol } from '../reglas/catalogos'
 import { menuDelRol } from '../reglas/permisos'
+import { VERSION_DEL_PRODUCTO } from '../reglas/version'
 import BotonTema from '../components/ui/BotonTema'
 import Button from '../components/ui/Button'
 
@@ -10,6 +12,7 @@ import Button from '../components/ui/Button'
 // cada ruta se dibuja en <Outlet />.
 export default function LayoutPrincipal() {
   const { sesion, cerrarSesion } = useSesion()
+  const { mostrarAviso } = useAvisos()
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [saliendo, setSaliendo] = useState(false)
@@ -22,6 +25,7 @@ export default function LayoutPrincipal() {
     await cerrarSesion()
     setSaliendo(false)
     navegar('/ingreso', { replace: true })
+    mostrarAviso('Cerró su sesión.')
   }
 
   function cerrarMenu() {
@@ -145,7 +149,7 @@ export default function LayoutPrincipal() {
       <footer className="border-t border-borde bg-superficie">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-texto-suave sm:px-6">
           <p>Universidad Peruana Los Andes · Construcción de Software</p>
-          <p>TechAsset · versión 0.2.0 · 2026</p>
+          <p>TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026</p>
         </div>
       </footer>
     </div>

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router'
 import { registrarEquipo } from '../api/equiposApi'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import FormularioEquipo from '../components/equipos/FormularioEquipo'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useFormulario } from '../hooks/useFormulario'
 import { normalizarCodigoPatrimonial, validarEquipo } from '../reglas/validacionEquipos'
 
@@ -16,6 +17,7 @@ const VALORES_INICIALES = {
 // RF-05: registrar un equipo con código patrimonial único y estado inicial válido.
 export default function PaginaNuevoEquipo() {
   const navegar = useNavigate()
+  const { mostrarAviso } = useAvisos()
 
   const formulario = useFormulario({
     valoresIniciales: VALORES_INICIALES,
@@ -36,12 +38,10 @@ export default function PaginaNuevoEquipo() {
         estado_equipo: valores.estado_equipo,
       })
 
-      navegar('/equipos', {
-        replace: true,
-        state: {
-          aviso: `Se registró el equipo ${equipo.codigo_patrimonial_equipo} (${equipo.nombre_equipo}).`,
-        },
-      })
+      navegar('/equipos', { replace: true })
+      mostrarAviso(
+        `Se registró el equipo ${equipo.codigo_patrimonial_equipo} (${equipo.nombre_equipo}).`,
+      )
     },
   })
 

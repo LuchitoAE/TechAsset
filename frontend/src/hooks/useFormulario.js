@@ -114,6 +114,5 @@ export function useFormulario({
     salirDelCampo,
     enviar,
     establecerValores,
-    establecerMensaje: setMensaje,
   }
 }

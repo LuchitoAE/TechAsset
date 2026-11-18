@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   anchoDeBarra,
+  distribucionDelInventario,
   etiquetaDeTipoMovimiento,
   formatearFechaYHora,
   formatearPorcentaje,
@@ -47,5 +48,31 @@ describe('reglas de los reportes', () => {
     expect(texto).toContain('17/11/2026')
     expect(texto).toContain('10:00')
     expect(formatearFechaYHora(null)).toBe('—')
+  })
+
+  it('la distribución incluye la barra de Baja y suma el total de equipos', () => {
+    const filas = distribucionDelInventario({
+      total_equipos: 10,
+      equipos_disponibles: 4,
+      equipos_prestados: 3,
+      equipos_mantenimiento: 2,
+    })
+
+    expect(filas.map((fila) => fila.etiqueta)).toEqual([
+      'Disponibles',
+      'Prestados',
+      'En mantenimiento',
+      'Baja',
+    ])
+    expect(filas.map((fila) => fila.valor)).toEqual([4, 3, 2, 1])
+    expect(filas.map((fila) => fila.porcentaje)).toEqual([40, 30, 20, 10])
+    expect(filas.reduce((suma, fila) => suma + fila.valor, 0)).toBe(10)
+  })
+
+  it('no inventa equipos de baja cuando la API no trae datos', () => {
+    const filas = distribucionDelInventario()
+
+    expect(filas).toHaveLength(4)
+    expect(filas.every((fila) => fila.valor === 0 && fila.porcentaje === 0)).toBe(true)
   })
 })

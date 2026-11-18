@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link } from 'react-router'
 import { listarPrestamosActivos } from '../api/prestamosApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
@@ -13,11 +13,9 @@ const PAGINA_VACIA = { total: 0, pagina: 1, tamano: 50, prestamos: [] }
 // RF-12: préstamos activos con la fecha de devolución comprometida; los vencidos se resaltan y se
 // ofrece la devolución. Solo lo ven el Responsable de Tecnología y el Administrador.
 export default function PaginaPrestamosActivos() {
-  const ubicacion = useLocation()
   const [pagina, setPagina] = useState(PAGINA_VACIA)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso] = useState(ubicacion.state?.aviso ?? null)
   const [intento, setIntento] = useState(0)
 
   useEffect(() => {
@@ -55,7 +53,6 @@ export default function PaginaPrestamosActivos() {
         descripcion="Equipos que hoy están en manos de un colaborador. Los que ya pasaron su fecha de devolución comprometida se marcan como vencidos."
       />
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && (
         <AlertMessage tipo="error">
           {error}{' '}

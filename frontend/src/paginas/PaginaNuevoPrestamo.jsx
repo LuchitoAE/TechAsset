@@ -5,6 +5,7 @@ import { solicitarPrestamo } from '../api/prestamosApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import FormularioPrestamo from '../components/prestamos/FormularioPrestamo'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
 import { fechaDeHoyEnLima, validarSolicitudPrestamo } from '../reglas/prestamos'
@@ -16,6 +17,7 @@ import { sumarDias } from '../utils/fechas'
 export default function PaginaNuevoPrestamo() {
   const { sesion } = useSesion()
   const navegar = useNavigate()
+  const { mostrarAviso } = useAvisos()
   const [parametros] = useSearchParams()
 
   const [equipos, setEquipos] = useState([])
@@ -37,13 +39,10 @@ export default function PaginaNuevoPrestamo() {
         fecha_devolucion: valores.fecha_devolucion,
       })
 
-      navegar('/mis-prestamos', {
-        replace: true,
-        state: {
-          aviso:
-            'Solicitud enviada. El Responsable de Tecnología la revisará y el equipo se le asignará al aprobarla.',
-        },
-      })
+      navegar('/mis-prestamos', { replace: true })
+      mostrarAviso(
+        'Solicitud enviada. El Responsable de Tecnología la revisará y el equipo se le asignará al aprobarla.',
+      )
     },
   })
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link } from 'react-router'
 import { listarEquipos } from '../api/equiposApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
@@ -19,7 +19,6 @@ const PAGINA_VACIA = { total: 0, pagina: 1, tamano: 20, conteo_por_estado: [], e
 // El Colaborador lo consulta en solo lectura; la API vuelve a comprobar el rol al escribir.
 export default function PaginaEquipos() {
   const { sesion } = useSesion()
-  const ubicacion = useLocation()
   const puedeGestionar = puedeGestionarEquipos(sesion?.rol_usuario)
 
   const [filtros, setFiltros] = useState(FILTROS_VACIOS)
@@ -27,7 +26,6 @@ export default function PaginaEquipos() {
   const [pagina, setPagina] = useState(PAGINA_VACIA)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso, setAviso] = useState(ubicacion.state?.aviso ?? null)
 
   useEffect(() => {
     const control = new AbortController()
@@ -54,7 +52,6 @@ export default function PaginaEquipos() {
   }
 
   function aplicarFiltros() {
-    setAviso(null)
     setCargando(true)
     setAplicados({ ...filtros, pagina: 1 })
   }
@@ -63,7 +60,6 @@ export default function PaginaEquipos() {
     setFiltros(FILTROS_VACIOS)
     setCargando(true)
     setAplicados(FILTROS_VACIOS)
-    setAviso(null)
   }
 
   function seleccionarEstado(estado) {
@@ -71,7 +67,6 @@ export default function PaginaEquipos() {
     setFiltros(siguientes)
     setCargando(true)
     setAplicados(siguientes)
-    setAviso(null)
   }
 
   function irAPagina(numero) {
@@ -103,7 +98,6 @@ export default function PaginaEquipos() {
         }
       />
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && (
         <AlertMessage tipo="error">
           {error}{' '}

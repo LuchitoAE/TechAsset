@@ -96,6 +96,18 @@
 }
 
 /* RNF-06: si el sistema pide reducir el movimiento, las animaciones y transiciones se apagan. */
+@keyframes aparecer-aviso {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
