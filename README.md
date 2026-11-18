@@ -89,6 +89,11 @@ crean desde la pantalla de Usuarios.
 | `POST /api/prestamos` | Solicitar un préstamo (RF-09) | Colaborador |
 | `PATCH /api/prestamos/{id}/aprobacion` | Aprobar o rechazar una solicitud (RF-09) | Administrador y Responsable |
 | `PATCH /api/prestamos/{id}/devolucion` | Registrar la devolución con observaciones (RF-10) | Administrador y Responsable |
+| `GET /api/reportes/panel` | Seis indicadores del panel, con alcance por rol (RF-13) | Los tres roles |
+| `GET /api/reportes/equipos-por-estado` | Equipos por estado con filtros (RF-14) | Administrador y Responsable |
+| `GET /api/reportes/equipos-mas-utilizados` | Ranking de equipos por préstamos (RF-15) | Administrador y Responsable |
+| `GET /api/reportes/prestamos-por-area` | Préstamos por área del responsable (RF-16) | Administrador y Responsable |
+| `GET /api/reportes/movimientos` | Historial de movimientos paginado; también `/api/movimientos` (RF-17) | Administrador y Responsable |
 
 Las respuestas exitosas son `{ success, message, data }`; los errores usan ProblemDetails con `success: false`,
 `message` y `errors` por campo. La sesión es una cookie `HttpOnly` y `SameSite=Strict` de 8 horas.
@@ -119,4 +124,11 @@ y cambio de estado en la SPA; 100 pruebas de backend y 42 de frontend.
 `Prestamo` con estados Solicitado, Activo, Devuelto y Rechazado; índice único parcial del préstamo
 activo, CHECK de fechas y de observaciones, claves foráneas que impiden borrar un equipo con historial;
 migración `CrearPrestamos`; solicitud, aprobación o rechazo, devolución, activos e historial en la SPA;
-175 pruebas de backend y 68 de frontend. El dashboard y los reportes llegan en la iteración 5.
+175 pruebas de backend y 68 de frontend.
+**Iteración 5 (18/11/2026):** salidas, dashboard e interfaz: RF-13 a RF-17 y D-03; tabla `movimientos`
+que registra altas, actualizaciones, cambios de estado, solicitudes, aprobaciones, rechazos y
+devoluciones en la misma transacción; panel con los seis indicadores; equipos por estado, equipos más
+utilizados, préstamos por área e historial de movimientos con filtros y paginación; migración
+`CrearMovimientos`; modo oscuro corregido, tablas apiladas a 390 px y capturas en
+`../Evidencias/iteracion-5/`; 215 pruebas de backend y 87 de frontend. Queda para el cierre el aviso
+flotante global de RNF-04, el E2E y la publicación.
