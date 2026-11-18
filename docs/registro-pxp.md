@@ -763,7 +763,7 @@ segunda parte.
 - **Endurecimiento:** límite de cinco ingresos fallidos por minuto para la misma combinación de
   correo y dirección de origen, con respuesta 429, `Retry-After: 60` y mensaje en español. El
   ingreso correcto limpia el contador. Se revisó que los errores no devuelvan correo, documentos,
-  contraseñas ni detalles técnicos y se agregaron pruebas.
+  contraseñas ni detalles técnicos (RNF-02, RNF-19) y se agregaron pruebas.
 
 ### Tareas y tiempo aproximado
 
@@ -841,7 +841,7 @@ Decisiones de implementación que no alteran el contrato:
 | `pnpm lint` | Sin avisos |
 | `pnpm test` | 95 pruebas, 95 en verde (20 archivos) |
 | `pnpm build` | 163 módulos; 384,73 kB de JavaScript y 31,68 kB de CSS; `dist/` generado |
-| Suite E2E completa | 50 de 50 pruebas correctas (E-01 a E-15, RNF-04, RNF-19, reportes y teléfono) |
+| Suite E2E completa | 50 de 50 pruebas correctas (E-01 a E-15, RNF-04, endurecimiento del ingreso, reportes y teléfono) |
 | Limpieza de la base | 3 usuarios, 0 equipos, 0 préstamos y 0 movimientos |
 | Capturas | Revisadas: el panel muestra las cuatro barras (Baja en rojo), el aviso no tapa el contenido, los reportes y el teléfono no desbordan |
 | Secretos | `git status` sin cadenas de conexión ni contraseñas; la suite lee la cadena de user-secrets y no la imprime |
@@ -872,8 +872,8 @@ Resumen de la suite E2E (API en 5321 y SPA en 5191, Brave sin interfaz):
 ✓ E-14: dar de baja un equipo prestado responde 409 y no lo cambia
 ✓ E-13: deshabilitar usuarios sin ser Administrador responde 403
 ✓ E-15: un usuario deshabilitado recibe 401 con el mensaje general
-✓ RNF-19: seis intentos fallidos responden 429 en el sexto, con espera de un minuto
-✓ RNF-19: el mensaje del 429 está en español y no revela datos
+✓ Endurecimiento: seis intentos fallidos responden 429 en el sexto, con espera de un minuto
+✓ Endurecimiento: el mensaje del 429 está en español y no revela datos
 ✓ Reportes: la pestaña de equipos por estado carga su tabla
 ✓ Reportes: el historial de movimientos muestra los hechos de la prueba
 ✓ Teléfono: el panel no desborda a 390 px
