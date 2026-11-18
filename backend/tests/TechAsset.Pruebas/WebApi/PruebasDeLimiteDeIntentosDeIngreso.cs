@@ -3,8 +3,8 @@ using TechAsset.WebApi.Seguridad;
 
 namespace TechAsset.Pruebas.WebApi;
 
-// RNF-19: cinco fallos por minuto para el mismo correo y origen; el ingreso correcto limpia la
-// cuenta y la ventana se renueva sola.
+// Endurecimiento de RN-11: cinco fallos por minuto para el mismo correo y origen; el ingreso
+// correcto limpia la cuenta y la ventana se renueva sola.
 public class PruebasDeLimiteDeIntentosDeIngreso
 {
     private const string Correo = "ana.perez@innovatech.pe";
