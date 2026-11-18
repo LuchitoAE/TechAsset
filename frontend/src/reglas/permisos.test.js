@@ -2,17 +2,21 @@ import { describe, expect, it } from 'vitest'
 import {
   accesosDelRol,
   menuDelRol,
+  puedeConsultarPrestamosActivos,
   puedeConsultarUsuarios,
   puedeDeshabilitarUsuarios,
   puedeGestionarEquipos,
+  puedeGestionarPrestamos,
   puedeGestionarUsuarios,
+  puedeSolicitarPrestamos,
 } from './permisos'
 
 describe('permisos y navegación por rol', () => {
-  it('el Administrador ve usuarios, equipos y reportes', () => {
+  it('el Administrador ve usuarios, equipos, préstamos y reportes', () => {
     expect(menuDelRol('Administrador').map((opcion) => opcion.etiqueta)).toEqual([
       'Usuarios',
       'Equipos',
+      'Préstamos',
       'Reportes',
     ])
   })
@@ -50,8 +54,24 @@ describe('permisos y navegación por rol', () => {
     expect(puedeGestionarEquipos('Colaborador')).toBe(false)
   })
 
+  it('solo el Colaborador solicita préstamos', () => {
+    expect(puedeSolicitarPrestamos('Colaborador')).toBe(true)
+    expect(puedeSolicitarPrestamos('ResponsableDeTecnologia')).toBe(false)
+    expect(puedeSolicitarPrestamos('Administrador')).toBe(false)
+  })
+
+  it('el Responsable y el Administrador aprueban, devuelven y consultan los activos', () => {
+    expect(puedeGestionarPrestamos('Administrador')).toBe(true)
+    expect(puedeGestionarPrestamos('ResponsableDeTecnologia')).toBe(true)
+    expect(puedeGestionarPrestamos('Colaborador')).toBe(false)
+
+    expect(puedeConsultarPrestamosActivos('Administrador')).toBe(true)
+    expect(puedeConsultarPrestamosActivos('ResponsableDeTecnologia')).toBe(true)
+    expect(puedeConsultarPrestamosActivos('Colaborador')).toBe(false)
+  })
+
   it('cada rol tiene accesos rápidos coherentes con su menú', () => {
-    expect(accesosDelRol('Administrador')).toHaveLength(3)
+    expect(accesosDelRol('Administrador')).toHaveLength(4)
     expect(accesosDelRol('ResponsableDeTecnologia')).toHaveLength(2)
     expect(accesosDelRol('Colaborador').map((acceso) => acceso.ruta)).toEqual([
       '/equipos',

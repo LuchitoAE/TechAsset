@@ -3,6 +3,7 @@ export const MENUS_POR_ROL = {
   Administrador: [
     { ruta: '/usuarios', etiqueta: 'Usuarios' },
     { ruta: '/equipos', etiqueta: 'Equipos' },
+    { ruta: '/prestamos', etiqueta: 'Préstamos' },
     { ruta: '/reportes', etiqueta: 'Reportes' },
   ],
   ResponsableDeTecnologia: [
@@ -38,11 +39,27 @@ export function puedeGestionarEquipos(rol) {
   return rol === 'Administrador' || rol === 'ResponsableDeTecnologia'
 }
 
+// RF-09 y D-04: solo el Colaborador solicita préstamos; el préstamo queda a su nombre (RN-05).
+export function puedeSolicitarPrestamos(rol) {
+  return rol === 'Colaborador'
+}
+
+// RF-09, RF-10 y RF-12: el Responsable de Tecnología aprueba, rechaza y devuelve; el Administrador
+// supervisa y también puede aprobar y devolver.
+export function puedeGestionarPrestamos(rol) {
+  return rol === 'Administrador' || rol === 'ResponsableDeTecnologia'
+}
+
+export function puedeConsultarPrestamosActivos(rol) {
+  return puedeGestionarPrestamos(rol)
+}
+
 // Accesos rápidos del panel de inicio, según lo que cada rol puede hacer.
 export const ACCESOS_POR_ROL = {
   Administrador: [
     { ruta: '/usuarios', titulo: 'Usuarios', detalle: 'Registrar, actualizar y deshabilitar cuentas.' },
     { ruta: '/equipos', titulo: 'Equipos', detalle: 'Inventario tecnológico, altas y estados.' },
+    { ruta: '/prestamos', titulo: 'Préstamos', detalle: 'Solicitudes, activos e historial.' },
     { ruta: '/reportes', titulo: 'Reportes', detalle: 'Indicadores y movimientos.' },
   ],
   ResponsableDeTecnologia: [

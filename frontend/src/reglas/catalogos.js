@@ -34,6 +34,15 @@ export const ESTADOS_INICIALES_EQUIPO = ESTADOS_EQUIPO.filter(
   (estado) => estado.valor !== 'Prestado',
 )
 
+// D-05: estados de un préstamo. Solicitado espera la decisión del Responsable; Activo ocupa el
+// equipo; Devuelto y Rechazado son finales.
+export const ESTADOS_PRESTAMO = [
+  { valor: 'Solicitado', etiqueta: 'Solicitado' },
+  { valor: 'Activo', etiqueta: 'Activo' },
+  { valor: 'Devuelto', etiqueta: 'Devuelto' },
+  { valor: 'Rechazado', etiqueta: 'Rechazado' },
+]
+
 export function etiquetaDeRol(rol) {
   return ROLES.find((opcion) => opcion.valor === rol)?.etiqueta ?? rol ?? ''
 }
@@ -44,4 +53,8 @@ export function etiquetaDeCategoria(categoria) {
 
 export function etiquetaDeEstadoEquipo(estado) {
   return ESTADOS_EQUIPO.find((opcion) => opcion.valor === estado)?.etiqueta ?? estado ?? ''
+}
+
+export function etiquetaDeEstadoPrestamo(estado) {
+  return ESTADOS_PRESTAMO.find((opcion) => opcion.valor === estado)?.etiqueta ?? estado ?? ''
 }
