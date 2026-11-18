@@ -80,18 +80,7 @@ public sealed class Usuario
     {
         var errores = new Dictionary<string, string[]>();
 
-        ValidarTexto(
-            errores, CamposDeUsuario.NombresUsuario, nombresUsuario,
-            "Los nombres son obligatorios.",
-            $"Los nombres deben tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.");
-        ValidarTexto(
-            errores, CamposDeUsuario.ApellidosUsuario, apellidosUsuario,
-            "Los apellidos son obligatorios.",
-            $"Los apellidos deben tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.");
-        ValidarTexto(
-            errores, CamposDeUsuario.AreaUsuario, areaUsuario,
-            "El área es obligatoria.",
-            $"El área debe tener entre {LongitudMinimaArea} y {LongitudMaximaArea} caracteres.");
+        ValidarDatosPersona(errores, nombresUsuario, apellidosUsuario, areaUsuario);
         ValidarRol(errores, rolUsuario);
         ValidarProteccion(errores, salContrasenaUsuario, hashContrasenaUsuario);
 
@@ -123,18 +112,7 @@ public sealed class Usuario
     {
         var errores = new Dictionary<string, string[]>();
 
-        ValidarTexto(
-            errores, CamposDeUsuario.NombresUsuario, nombresUsuario,
-            "Los nombres son obligatorios.",
-            $"Los nombres deben tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.");
-        ValidarTexto(
-            errores, CamposDeUsuario.ApellidosUsuario, apellidosUsuario,
-            "Los apellidos son obligatorios.",
-            $"Los apellidos deben tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.");
-        ValidarTexto(
-            errores, CamposDeUsuario.AreaUsuario, areaUsuario,
-            "El área es obligatoria.",
-            $"El área debe tener entre {LongitudMinimaArea} y {LongitudMaximaArea} caracteres.");
+        ValidarDatosPersona(errores, nombresUsuario, apellidosUsuario, areaUsuario);
         ValidarRol(errores, rolUsuario);
 
         var reponeContrasena = !string.IsNullOrWhiteSpace(salContrasenaUsuario)
@@ -170,12 +148,38 @@ public sealed class Usuario
 
     public bool PuedeIngresar => ActivoUsuario;
 
+    // RF-01 y RF-02 comparten los mismos datos personales y los mismos mensajes.
+    private static void ValidarDatosPersona(
+        IDictionary<string, string[]> errores,
+        string? nombresUsuario,
+        string? apellidosUsuario,
+        string? areaUsuario)
+    {
+        ValidarTexto(
+            errores, CamposDeUsuario.NombresUsuario, nombresUsuario,
+            "Los nombres son obligatorios.",
+            $"Los nombres deben tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.",
+            LongitudMinimaNombre, LongitudMaximaNombre);
+        ValidarTexto(
+            errores, CamposDeUsuario.ApellidosUsuario, apellidosUsuario,
+            "Los apellidos son obligatorios.",
+            $"Los apellidos deben tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.",
+            LongitudMinimaNombre, LongitudMaximaNombre);
+        ValidarTexto(
+            errores, CamposDeUsuario.AreaUsuario, areaUsuario,
+            "El área es obligatoria.",
+            $"El área debe tener entre {LongitudMinimaArea} y {LongitudMaximaArea} caracteres.",
+            LongitudMinimaArea, LongitudMaximaArea);
+    }
+
     private static void ValidarTexto(
         IDictionary<string, string[]> errores,
         string campo,
         string? valor,
         string mensajeObligatorio,
-        string mensajeLongitud)
+        string mensajeLongitud,
+        int longitudMinima,
+        int longitudMaxima)
     {
         var texto = (valor ?? string.Empty).Trim();
 
@@ -185,7 +189,7 @@ public sealed class Usuario
             return;
         }
 
-        if (texto.Length < LongitudMinimaNombre || texto.Length > LongitudMaximaNombre)
+        if (texto.Length < longitudMinima || texto.Length > longitudMaxima)
         {
             errores[campo] = [mensajeLongitud];
         }

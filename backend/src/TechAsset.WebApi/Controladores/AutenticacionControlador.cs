@@ -20,12 +20,14 @@ public sealed class AutenticacionControlador(
     ObtenerSesionCasoDeUso obtenerSesion,
     CerrarSesionCasoDeUso cerrarSesion) : ControllerBase
 {
-    /// <summary>Ingresa con correo y contraseña (RN-11).</summary>
+    /// <summary>Ingresa con correo y contraseña (RN-11), con límite de intentos fallidos.</summary>
     [HttpPost("ingreso")]
     [AllowAnonymous]
+    [ServiceFilter(typeof(FiltroDeIntentosDeIngreso))]
     [ProducesResponseType(typeof(RespuestaExitosa<DatosDeSesion>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<RespuestaExitosa<DatosDeSesion>>> Ingresar(
         [FromBody] IniciarSesionSolicitud solicitud,
         CancellationToken cancellationToken = default)
