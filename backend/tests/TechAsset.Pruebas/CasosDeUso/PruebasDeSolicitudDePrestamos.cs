@@ -17,6 +17,7 @@ public class PruebasDeSolicitudDePrestamos
     private readonly RepositorioDeEquiposEnMemoria _equipos = new();
     private readonly RepositorioDeUsuariosEnMemoria _usuarios = new();
     private readonly RepositorioDePrestamosEnMemoria _prestamos = new();
+    private readonly RepositorioDeMovimientosEnMemoria _movimientos = new();
     private readonly RelojDePrueba _reloj = new(Hoy);
     private readonly Usuario _colaborador = FabricaDeUsuarios.Crear(
         "ana@innovatech.pe",
@@ -31,7 +32,7 @@ public class PruebasDeSolicitudDePrestamos
     }
 
     private SolicitarPrestamoCasoDeUso CasoDeUso() =>
-        new(_equipos, _usuarios, _prestamos, _reloj);
+        new(_equipos, _usuarios, _prestamos, _movimientos, _reloj);
 
     private static SolicitarPrestamoComando Comando(Equipo equipo, DateOnly? fechaDevolucion = null) => new(
         equipo.IdEquipo,
