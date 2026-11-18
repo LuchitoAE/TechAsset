@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:ruta*",
+      "destination": "https://techasset-api.onrender.com/api/:ruta*"
+    },
+    { "source": "/:ruta*", "destination": "/index.html" }
+  ]
+}

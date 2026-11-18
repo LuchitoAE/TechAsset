@@ -23,16 +23,16 @@ cada cambio. Se aplican a todo el código; si una regla cambia, se cambia aquí 
 | Enumeraciones | Singular + entidad, en PascalCase | `EstadoEquipo`, `EstadoPrestamo`, `RolUsuario`, `CategoriaEquipo` |
 | Variables y parámetros de C# | camelCase, palabras completas | `idEquipo`, `fechaDevolucion` |
 | Campos privados de C# | `_` + camelCase | `_repositorioDeEquipos` |
-| Componentes de React | PascalCase; los reutilizables con sus nombres del proyecto | `TextInput`, `TableList`, `CardIndicador` |
+| Componentes de React | PascalCase; los reutilizables con sus nombres del proyecto | `TextInput`, `ContenedorDeTabla`, `CardIndicador` |
 | Funciones, hooks y variables de JavaScript | camelCase; los hooks empiezan con `use` | `useFormulario`, `listarEquipos` |
-| Archivos | Igual que lo que exportan | `Equipo.cs`, `TableList.jsx`, `equiposApi.js` |
+| Archivos | Igual que lo que exportan | `Equipo.cs`, `ContenedorDeTabla.jsx`, `equiposApi.js` |
 
 **Idioma:** todo el código va en español —clases, carpetas, variables, mensajes e interfaz—. Se conservan en
 inglés solo:
 
 - Los **componentes reutilizables** que el equipo acordó nombrar así para reconocerlos: `TextInput`,
-  `SelectInput`, `DateInput`, `NumberInput`, `Button`, `AlertMessage`, `ModalConfirmacion`, `TableList` y
-  `CardIndicador`.
+  `SelectInput`, `DateInput`, `TextAreaInput`, `Button`, `AlertMessage`, `ModalConfirmacion`,
+  `ContenedorDeTabla` y `CardIndicador`.
 - Lo que **impone el marco de trabajo o su convención**: `Program.cs`, las clases base y lo que se hereda o se
   llama de ellas (`DbContext`, `ControllerBase`, `ModelSnapshot`), el prefijo `I` de las interfaces, el sufijo
   `Async` de los métodos asíncronos, los nombres de los proyectos (`TechAsset.Domain`, `.Application`,
