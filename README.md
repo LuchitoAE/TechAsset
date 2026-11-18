@@ -105,6 +105,15 @@ cd backend && dotnet build -warnaserror && dotnet test
 cd frontend && pnpm install && pnpm lint && pnpm test && pnpm build
 ```
 
+Las pruebas de punta a punta de los escenarios E-01 a E-15 del SDD viven en
+`../.herramientas/caso_unidad3_2/pruebas.py` (desde `Semanas/`). Arrancan la API y la SPA si no están
+en marcha, usan Brave sin interfaz, guardan capturas en `../Evidencias/iteracion-6/`, limpian sus
+datos y detienen lo que arrancaron:
+
+```bash
+python3 .herramientas/caso_unidad3_2/pruebas.py
+```
+
 ## Ramas y versiones
 
 `main` guarda lo entregado; `develop` integra el trabajo; cada requisito se desarrolla en su rama
@@ -132,3 +141,10 @@ utilizados, préstamos por área e historial de movimientos con filtros y pagina
 `CrearMovimientos`; modo oscuro corregido, tablas apiladas a 390 px y capturas en
 `../Evidencias/iteracion-5/`; 215 pruebas de backend y 87 de frontend. Queda para el cierre el aviso
 flotante global de RNF-04, el E2E y la publicación.
+**Iteración 6, primera parte (18/11/2026):** integración y endurecimiento: barra de `Baja` en la
+distribución del panel; aviso flotante global de RNF-04 con `role="status"`, cierre a los 8 s y
+botón de cerrar, conectado a las acciones principales; versión única `1.0.0` en el pie; refactor de
+formularios y validaciones; límite de cinco ingresos fallidos por minuto con 429 y mensaje en
+español; suite E2E de los escenarios E-01 a E-15 (50 comprobaciones) con capturas en
+`../Evidencias/iteracion-6/`; 225 pruebas de backend y 95 de frontend. La publicación y los
+documentos quedan para la segunda parte.
