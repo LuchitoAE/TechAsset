@@ -92,5 +92,48 @@ Content-Type: application/json
   "estado_equipo": "Mantenimiento"
 }
 
+### Historial de préstamos (todos los roles; el Colaborador ve solo los suyos)
+GET {{baseUrl}}/api/prestamos?texto=&estado=&area=&desde=&hasta=&pagina=1&tamano=20
+
+### Préstamos activos (Administrador y Responsable)
+GET {{baseUrl}}/api/prestamos/activos?texto=&area=&pagina=1&tamano=20
+
+### Detalle de un préstamo (el Colaborador solo abre los suyos)
+GET {{baseUrl}}/api/prestamos/00000000-0000-0000-0000-000000000000
+
+### Solicitar un préstamo (Colaborador). El responsable es el colaborador de la sesión.
+POST {{baseUrl}}/api/prestamos
+Content-Type: application/json
+
+{
+  "id_equipo": "00000000-0000-0000-0000-000000000000",
+  "fecha_devolucion": "2026-11-24"
+}
+
+### Aprobar una solicitud (Administrador y Responsable)
+PATCH {{baseUrl}}/api/prestamos/00000000-0000-0000-0000-000000000000/aprobacion
+Content-Type: application/json
+
+{
+  "aprobado_prestamo": true
+}
+
+### Rechazar una solicitud con su motivo (Administrador y Responsable)
+PATCH {{baseUrl}}/api/prestamos/00000000-0000-0000-0000-000000000000/aprobacion
+Content-Type: application/json
+
+{
+  "aprobado_prestamo": false,
+  "motivo_rechazo_prestamo": "El colaborador ya tiene una laptop asignada."
+}
+
+### Registrar la devolución con observaciones (Administrador y Responsable)
+PATCH {{baseUrl}}/api/prestamos/00000000-0000-0000-0000-000000000000/devolucion
+Content-Type: application/json
+
+{
+  "observacion_prestamo": "Devuelto con el cargador y sin golpes."
+}
+
 ### Salir (elimina la cookie)
 POST {{baseUrl}}/api/autenticacion/salida

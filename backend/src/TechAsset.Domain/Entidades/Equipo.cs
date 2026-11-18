@@ -53,6 +53,9 @@ public sealed class Equipo
 
     public bool EstaPrestado => EstadoEquipo == EstadoEquipo.Prestado;
 
+    // RN-02 y RN-03: solo un equipo disponible se puede prestar.
+    public bool AdmitePrestamo => EstaDisponible;
+
     // RF-05: todo equipo nace con sus datos validados. El estado inicial es Disponible, salvo que
     // se registre en Mantenimiento o Baja; nunca Prestado, porque lo asigna el préstamo.
     public static Equipo Registrar(
@@ -92,12 +95,14 @@ public sealed class Equipo
     }
 
     // RF-06: corrige el código, el nombre, la categoría y la marca. El estado no se toca aquí; se
-    // cambia con RF-08. El código no se puede mover mientras el equipo esté prestado.
+    // cambia con RF-08. El código no se puede mover mientras el equipo tenga un préstamo activo, y
+    // eso lo comprueba el caso de uso contra los préstamos, no solo el estado_equipo (iteración 4).
     public void Actualizar(
         CodigoPatrimonial codigoPatrimonial,
         string? nombreEquipo,
         CategoriaEquipo categoriaEquipo,
-        string? marcaEquipo)
+        string? marcaEquipo,
+        bool tienePrestamoActivo = false)
     {
         var errores = new Dictionary<string, string[]>();
 
@@ -118,10 +123,10 @@ public sealed class Equipo
             throw new DatosInvalidosExcepcion(errores);
         }
 
-        if (EstaPrestado && codigoPatrimonial.Valor != CodigoPatrimonial.Valor)
+        if ((EstaPrestado || tienePrestamoActivo) && codigoPatrimonial.Valor != CodigoPatrimonial.Valor)
         {
             throw new ConflictoDeNegocioExcepcion(
-                "No se puede cambiar el código patrimonial de un equipo prestado. Registre primero la devolución.");
+                "No se puede cambiar el código patrimonial de un equipo con un préstamo activo. Registre primero la devolución.");
         }
 
         CodigoPatrimonial = codigoPatrimonial;
@@ -130,9 +135,10 @@ public sealed class Equipo
         MarcaEquipo = marcaEquipo!.Trim();
     }
 
-    // RF-08: cambia entre Disponible, Mantenimiento y Baja. Un equipo prestado no se mueve a mano:
-    // primero vuelve con la devolución (D-05). Prestado nunca se asigna por esta vía.
-    public void CambiarEstado(EstadoEquipo nuevoEstado)
+    // RF-08: cambia entre Disponible, Mantenimiento y Baja. Un equipo con préstamo activo no se mueve
+    // a mano: primero vuelve con la devolución (D-05). El caso de uso comprueba el préstamo real y no
+    // solo el estado_equipo. Prestado nunca se asigna por esta vía.
+    public void CambiarEstado(EstadoEquipo nuevoEstado, bool tienePrestamoActivo = false)
     {
         if (!Enum.IsDefined(nuevoEstado))
         {
@@ -147,10 +153,10 @@ public sealed class Equipo
                 "El estado Prestado lo asigna el sistema al registrar un préstamo.");
         }
 
-        if (EstaPrestado)
+        if (EstaPrestado || tienePrestamoActivo)
         {
             throw new ConflictoDeNegocioExcepcion(
-                "El equipo está prestado. Registre primero la devolución para cambiar su estado.");
+                "El equipo tiene un préstamo activo. Registre primero la devolución para cambiar su estado.");
         }
 
         EstadoEquipo = nuevoEstado;
@@ -158,14 +164,18 @@ public sealed class Equipo
 
     // Iteración 4: el caso de uso del préstamo ocupa un equipo disponible (RN-02, RN-03). No se
     // expone por RF-08 para que el estado Prestado no se pueda asignar a mano.
-    public void MarcarComoPrestado()
+    public void ValidarPrestable()
     {
-        if (!EstaDisponible)
+        if (!AdmitePrestamo)
         {
             throw new ConflictoDeNegocioExcepcion(
-                "Solo se puede prestar un equipo disponible; no se presta en Mantenimiento ni en Baja.");
+                $"No se puede prestar el equipo: está en estado {EstadoEquipo}. Solo se presta un equipo disponible.");
         }
+    }
 
+    public void MarcarComoPrestado()
+    {
+        ValidarPrestable();
         EstadoEquipo = EstadoEquipo.Prestado;
     }
 
@@ -178,6 +188,17 @@ public sealed class Equipo
         }
 
         EstadoEquipo = EstadoEquipo.Disponible;
+    }
+
+    // RN-06: no se elimina un equipo con historial de préstamos. TechAsset no ofrece dar de baja un
+    // equipo del inventario; la regla queda en el dominio y en las claves foráneas de la base.
+    public void ValidarEliminacion(bool tieneHistorialDePrestamos)
+    {
+        if (tieneHistorialDePrestamos)
+        {
+            throw new ConflictoDeNegocioExcepcion(
+                "No se puede eliminar un equipo con historial de préstamos. Consérvelo y, si ya no se usa, cámbiele el estado a Baja.");
+        }
     }
 
     private static void ValidarTexto(
