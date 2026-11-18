@@ -28,6 +28,11 @@
   --color-enlace: #0d6a96;
   --color-foco: #0d6a96;
 
+  /* Texto sobre los botones de marca y de peligro: en oscuro los fondos son claros y el blanco
+     perdería el contraste. */
+  --color-sobre-marca: #ffffff;
+  --color-sobre-error: #ffffff;
+
   --color-exito: #16794a;
   --color-exito-fondo: #e7f6ee;
   --color-aviso: #9a5b06;
@@ -40,6 +45,14 @@
 }
 
 /* Modo oscuro: index.html pone data-tema según la elección guardada o el sistema operativo. */
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-tema='claro'] {
+  color-scheme: light;
+}
+
 :root[data-tema='oscuro'] {
   color-scheme: dark;
   --color-fondo: #07131d;
@@ -56,7 +69,12 @@
   --color-marca-700: #6ab8d9;
   --color-marca-800: #8fcbe4;
   --color-marca-900: #c3e2f0;
+  /* En oscuro, marca-50 es un fondo azul profundo: si conservara el azul claro del modo claro, el
+     texto marca-800 (también claro) quedaría casi invisible. */
+  --color-marca-50: #0f2f42;
   --color-acento-suave: #3a2a0e;
+  --color-sobre-marca: #062c3f;
+  --color-sobre-error: #3a1715;
   --color-exito: #7fdfab;
   --color-exito-fondo: #0f2e20;
   --color-aviso: #f7c66b;
@@ -74,5 +92,76 @@
   /* Un solo lugar para el foco visible de toda la aplicación (WCAG 2.2, 2.4.11). */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-foco;
+  }
+}
+
+/* RNF-06: si el sistema pide reducir el movimiento, las animaciones y transiciones se apagan. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* RNF-07 y guía responsive-table: en el teléfono las tablas de reportes se apilan como tarjetas.
+   El encabezado de columnas se oculta y cada celda muestra su etiqueta con data-etiqueta, para que
+   la relación dato-encabezado no se pierda al cambiar de formato. */
+@media (max-width: 639px) {
+  .contenedor-tabla-reporte {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .contenedor-tabla-reporte > [role='region'] {
+    overflow: visible;
+  }
+
+  .tabla-reporte,
+  .tabla-reporte tbody,
+  .tabla-reporte tr,
+  .tabla-reporte th,
+  .tabla-reporte td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabla-reporte thead {
+    display: none;
+  }
+
+  .tabla-reporte tr {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 0.875rem;
+    background: var(--color-superficie);
+    padding: 0.75rem 1rem;
+  }
+
+  .tabla-reporte th[scope='row'] {
+    border: 0;
+    padding: 0 0 0.5rem;
+  }
+
+  .tabla-reporte td {
+    max-width: none;
+    border: 0;
+    padding: 0.3rem 0;
+  }
+
+  .tabla-reporte td[data-etiqueta]::before {
+    display: block;
+    content: attr(data-etiqueta) ': ';
+    font-weight: 600;
+    color: var(--color-texto-suave);
+  }
+
+  .oculto-movil {
+    display: none !important;
   }
 }

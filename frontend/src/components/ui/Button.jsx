@@ -2,10 +2,10 @@ import { unirClases } from '../../utils/clases'
 
 const VARIANTES = {
   primario:
-    'bg-marca-700 text-white hover:bg-marca-800 focus-visible:outline-foco disabled:bg-marca-300',
+    'bg-marca-700 text-sobre-marca hover:bg-marca-800 focus-visible:outline-foco disabled:bg-marca-300',
   secundario:
     'border border-borde-fuerte bg-superficie text-texto hover:bg-superficie-tenue disabled:text-texto-suave',
-  peligro: 'bg-error text-white hover:opacity-90 focus-visible:outline-error disabled:opacity-60',
+  peligro: 'bg-error text-sobre-error hover:opacity-90 focus-visible:outline-error disabled:opacity-60',
   fantasma: 'text-marca-700 hover:bg-marca-50 disabled:text-texto-suave',
 }
 

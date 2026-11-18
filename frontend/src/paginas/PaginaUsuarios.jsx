@@ -83,7 +83,7 @@ export default function PaginaUsuarios() {
           administrador ? (
             <Link
               to="/usuarios/nuevo"
-              className="inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-marca-800"
+              className="inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca transition-colors hover:bg-marca-800"
             >
               Nuevo usuario
             </Link>

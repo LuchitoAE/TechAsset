@@ -25,14 +25,14 @@ export default function ChipsDeEstadoEquipo({ conteos = [], seleccionado, total,
             onClick={() => onSeleccionar(opcion.valor)}
             className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition-colors ${
               activo
-                ? 'border-marca-700 bg-marca-700 text-white'
+                ? 'border-marca-700 bg-marca-700 text-sobre-marca'
                 : 'border-borde bg-superficie text-texto-suave hover:border-marca-300 hover:text-texto'
             }`}
           >
             {opcion.etiqueta}
             <span
               className={`rounded-full px-1.5 py-0.5 text-[11px] ${
-                activo ? 'bg-white/20 text-white' : 'bg-superficie-tenue text-texto-suave'
+                activo ? 'bg-white/20 text-sobre-marca' : 'bg-superficie-tenue text-texto-suave'
               }`}
             >
               {opcion.total}
