@@ -68,6 +68,72 @@ namespace TechAsset.Infrastructure.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("TechAsset.Domain.Entidades.Prestamo", b =>
+                {
+                    b.Property<Guid>("IdPrestamo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_prestamo");
+
+                    b.Property<string>("EstadoPrestamo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("estado_prestamo");
+
+                    b.Property<DateOnly?>("FechaDevolucionRealPrestamo")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha_devolucion_real");
+
+                    b.Property<DateTimeOffset>("FechaSolicitudPrestamo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_solicitud_prestamo");
+
+                    b.Property<Guid>("IdEquipo")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_equipo");
+
+                    b.Property<Guid>("IdUsuario")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<string>("MotivoRechazoPrestamo")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivo_rechazo_prestamo");
+
+                    b.Property<string>("ObservacionPrestamo")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("observacion_prestamo");
+
+                    b.HasKey("IdPrestamo")
+                        .HasName("pk_prestamos");
+
+                    b.HasIndex("EstadoPrestamo")
+                        .HasDatabaseName("ix_prestamos_estado");
+
+                    b.HasIndex("IdEquipo")
+                        .IsUnique()
+                        .HasDatabaseName("uq_prestamos_equipo_activo")
+                        .HasFilter("estado_prestamo = 'Activo'");
+
+                    b.HasIndex("IdUsuario")
+                        .HasDatabaseName("ix_prestamos_usuario");
+
+                    b.HasIndex("IdEquipo", "EstadoPrestamo")
+                        .HasDatabaseName("ix_prestamos_equipo_estado");
+
+                    b.ToTable("prestamos", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_devolucion_observacion", "estado_prestamo <> 'Devuelto' OR length(btrim(observacion_prestamo)) >= 5");
+
+                            t.HasCheckConstraint("ck_prestamos_estado", "estado_prestamo IN ('Solicitado', 'Activo', 'Devuelto', 'Rechazado')");
+
+                            t.HasCheckConstraint("ck_prestamos_fechas", "fecha_devolucion > fecha_prestamo");
+                        });
+                });
+
             modelBuilder.Entity("TechAsset.Domain.Entidades.Usuario", b =>
                 {
                     b.Property<Guid>("IdUsuario")
@@ -159,6 +225,54 @@ namespace TechAsset.Infrastructure.Migraciones
 
                     b.Navigation("CodigoPatrimonial")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TechAsset.Domain.Entidades.Prestamo", b =>
+                {
+                    b.HasOne("TechAsset.Domain.Entidades.Equipo", "Equipo")
+                        .WithMany()
+                        .HasForeignKey("IdEquipo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_prestamos_equipo");
+
+                    b.HasOne("TechAsset.Domain.Entidades.Usuario", "Responsable")
+                        .WithMany()
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_prestamos_usuario");
+
+                    b.OwnsOne("TechAsset.Domain.Comun.PeriodoDePrestamo", "Periodo", b1 =>
+                        {
+                            b1.Property<Guid>("PrestamoIdPrestamo")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateOnly>("FechaDevolucionPrestamo")
+                                .HasColumnType("date")
+                                .HasColumnName("fecha_devolucion");
+
+                            b1.Property<DateOnly?>("FechaPrestamo")
+                                .HasColumnType("date")
+                                .HasColumnName("fecha_prestamo");
+
+                            b1.HasKey("PrestamoIdPrestamo");
+
+                            b1.HasIndex("FechaDevolucionPrestamo")
+                                .HasDatabaseName("ix_prestamos_fecha_devolucion");
+
+                            b1.ToTable("prestamos");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PrestamoIdPrestamo");
+                        });
+
+                    b.Navigation("Equipo");
+
+                    b.Navigation("Periodo")
+                        .IsRequired();
+
+                    b.Navigation("Responsable");
                 });
 
             modelBuilder.Entity("TechAsset.Domain.Entidades.Usuario", b =>

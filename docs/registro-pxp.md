@@ -363,3 +363,182 @@ la iteración 4) y después se eliminaron los equipos de prueba; la base quedó 
   usa el estado `Prestado` como señal).
 - Pantallas de préstamo, devolución, préstamos activos e historial con los mismos componentes.
 - E2E de los escenarios de la Actividad 6 y los indicadores de la iteración 5.
+
+---
+
+## Iteración 4 — Préstamos y devoluciones
+
+**Fecha:** 17/11/2026
+**Rama:** `feature/iteracion-4-prestamos` → `develop`
+**Objetivo:** RF-09 a RF-12 y RN-01 a RN-06 y RN-10: solicitar, aprobar o rechazar, devolver, consultar
+los préstamos activos y el historial, con las reglas del PDF y el cambio de estado del equipo en la
+misma transacción.
+
+### Alcance
+
+- Entidad `Prestamo` con equipo, responsable, periodo, estado, observación de la devolución, motivo del
+  rechazo y fecha real; enumeración `EstadoPrestamo` (`Solicitado`, `Activo`, `Devuelto`, `Rechazado`,
+  D-05) y objeto de valor `PeriodoDePrestamo` (RN-04).
+- Casos de uso de solicitar, aprobar, rechazar, devolver, listar el historial, listar los activos y
+  consultar el detalle, con comandos, datos de salida, unidad de trabajo y errores en español.
+- `ContextoDeTechAsset`, configuración EF con `HasColumnName` en snake_case, índice único parcial
+  `uq_prestamos_equipo_activo`, CHECK de estado, de fechas y de observaciones, claves foráneas con
+  `ON DELETE RESTRICT` y migración `CrearPrestamos`.
+- Repositorio de escritura con bloqueo `SELECT … FOR UPDATE`, unidad de trabajo transaccional y consulta
+  de lectura con filtros, vencimiento calculado y proyección sin cargar entidades.
+- WebApi: `PrestamosControlador` con los seis endpoints del SDD y permisos por rol; el Colaborador
+  solicita y ve solo lo suyo, el Responsable aprueba, rechaza y devuelve, el Administrador supervisa y
+  también aprueba.
+- Bloqueo de edición de equipos contra el préstamo activo **real**, no solo contra `estado_equipo`.
+- SPA: historial con filtros, solicitud, préstamos activos con vencidos resaltados, detalle con
+  aprobación, rechazo y devolución con observación obligatoria, y disponibilidad con acceso directo a la
+  solicitud; rutas y menú por rol.
+- Pruebas xUnit de dominio, casos de uso, permisos, alcance por rol y RN-06, y pruebas Vitest de reglas y
+  del formulario de solicitud.
+
+### Tareas y tiempo aproximado
+
+| Tarea | Tiempo |
+|---|---|
+| Dominio: entidad, periodo, estados y reglas | 1,0 h |
+| Casos de uso, comandos, datos e interfaces | 1,5 h |
+| EF Core, configuración, repositorio, unidad de trabajo, consulta y migración | 1,5 h |
+| WebApi: contratos, controlador, permisos y mensajes | 1,0 h |
+| Pruebas xUnit y ajustes | 1,5 h |
+| Frontend: api, reglas, componentes base y de préstamos | 1,5 h |
+| Pantallas de historial, solicitud, activos, detalle y disponibilidad | 2,5 h |
+| Pruebas Vitest, lint y build | 0,5 h |
+| Migración, flujo con curl y verificación | 0,5 h |
+
+### Decisiones
+
+No cambió ninguna decisión del Anexo A. Se aplicaron D-04 (el Colaborador solicita y el Responsable
+aprueba; la fecha de préstamo es la de la aprobación), D-05 (`estado_prestamo` y
+`fecha_devolucion_real`; el equipo pasa a `Prestado` al aprobar y vuelve a `Disponible` al devolver) y
+D-09 (el vencimiento se calcula, no se guarda).
+
+Decisiones de implementación que no alteran el contrato:
+
+- **Solo el Colaborador solicita** y el responsable es siempre el colaborador de la sesión. El cuerpo de
+  `POST /api/prestamos` no lleva `id_usuario`: así no se puede registrar un préstamo a nombre de otro y
+  RN-05 se cumple por construcción. El frontend muestra al responsable como dato fijo del formulario.
+- **`fecha_prestamo` es nula mientras el préstamo está Solicitado** y se fija el día de la aprobación
+  (D-04). El CHECK `fecha_devolucion > fecha_prestamo` se cumple con nulo y se vuelve a validar al
+  aprobar. Por eso los filtros por rango de fechas usan la fecha de préstamo y dejan fuera las
+  solicitudes pendientes, que se buscan por estado.
+- Se agregó **`motivo_rechazo_prestamo`** (5 a 500 caracteres): el SDD pide que el rechazo guarde el
+  motivo y el modelo del PDF no tenía dónde. Se agregó **`fecha_solicitud_prestamo`** para ordenar las
+  solicitudes pendientes y auditar cuándo se pidieron.
+- El **patrón State** del SDD se implementó como transiciones explícitas en `Prestamo` (Aprobar, Rechazar
+  y RegistrarDevolucion con sus guardas) y un enum para la columna y el JSON. Se prefirió una sola
+  fuente de verdad frente a una jerarquía de estados duplicada con la base; queda anotado por si la
+  iteración 6 quiere extraerlo.
+- **RN-06 sin endpoint de borrado:** TechAsset no elimina equipos. La regla vive en
+  `Equipo.ValidarEliminacion`, está probada, y la base la refuerza con `ON DELETE RESTRICT` en
+  `fk_prestamos_equipo`. Si algún día se agrega un borrado, no podrá pasar por alto el historial.
+- **Nombres JSON de las fechas:** `fecha_devolucion` y `fecha_devolucion_real` se fijan con
+  `JsonPropertyName` para que coincidan con el SDD; sin eso, la regla de nombres del proyecto generaba
+  `fecha_devolucion_prestamo` y el campo del contrato se ignoraba en silencio.
+- **`PATCH /api/prestamos/{id}/aprobacion`** recibe `aprobado_prestamo` (verdadero aprueba; falso rechaza
+  y exige `motivo_rechazo_prestamo`), de modo que un solo endpoint cubre la decisión como en el SDD.
+- El **código `PRE-AAAA-NNNN`** que menciona la vista de algoritmo del SDD no se implementó: no es un
+  requisito del PDF ni de RF-09 a RF-12 y habría exigido una secuencia en la base. Queda como pendiente
+  documentado para la iteración 6.
+
+### Artefactos
+
+- `backend/src/TechAsset.Domain/Entidades/Prestamo.cs`, `Comun/PeriodoDePrestamo.cs`,
+  `Comun/CamposDePrestamo.cs` y `Enumeraciones/EstadoPrestamo.cs`.
+- `backend/src/TechAsset.Domain/Entidades/Equipo.cs`: `ValidarPrestable`, `ValidarEliminacion` y las
+  comprobaciones de préstamo activo en `Actualizar` y `CambiarEstado`.
+- `backend/src/TechAsset.Application/CasosDeUso/` (solicitar, aprobar, rechazar, devolver, listar,
+  listar activos y obtener), `Comandos/`, `Datos/` e `Interfaces/`.
+- `backend/src/TechAsset.Infrastructure/Persistencia/Configuraciones/ConfiguracionDePrestamo.cs`,
+  `Repositorios/RepositorioDePrestamos.cs`, `Repositorios/UnidadDeTrabajo.cs`,
+  `Consultas/ConsultaDePrestamos.cs` y `Migraciones/20261118003449_CrearPrestamos.cs`.
+- `backend/src/TechAsset.WebApi/Controladores/PrestamosControlador.cs`, `Contratos/` y
+  `TechAsset.http`.
+- `backend/tests/TechAsset.Pruebas/`: `PruebasDePrestamos`, `PruebasDeSolicitudDePrestamos`,
+  `PruebasDeAprobacionYDevolucion`, `PruebasDeConsultaDePrestamos`, `PruebasDePermisosDePrestamos` y
+  los dobles `RepositorioDePrestamosEnMemoria`, `ConsultaDePrestamosDePrueba`, `RelojDePrueba`,
+  `UnidadDeTrabajoDePrueba` y `FabricaDePrestamos`.
+- `frontend/src/api/prestamosApi.js`, `reglas/prestamos.js`, `components/prestamos/`,
+  `components/ui/DateInput.jsx`, `components/ui/TextAreaInput.jsx` y las páginas `PaginaPrestamos`,
+  `PaginaNuevoPrestamo`, `PaginaPrestamosActivos`, `PaginaDetallePrestamo` y `PaginaDisponibilidad`.
+- `README.md`, la ERS y el SDD regenerados con los estados de implementación, y este registro.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `dotnet build -warnaserror` en `backend/` | 0 errores, 0 advertencias |
+| `dotnet test` en `backend/` | 175 pruebas, 175 en verde |
+| `dotnet ef migrations has-pending-model-changes` | «No changes have been made to the model since the last migration.» |
+| Migración en PostgreSQL | `20261118003449_CrearPrestamos` aplicada; tabla `prestamos` con `uq_prestamos_equipo_activo` (parcial), `ck_prestamos_estado`, `ck_prestamos_fechas`, `ck_devolucion_observacion`, `fk_prestamos_equipo`, `fk_prestamos_usuario` e índices de consulta |
+| `pnpm lint` | Sin avisos |
+| `pnpm test` | 68 pruebas, 68 en verde (12 archivos) |
+| `pnpm build` | 362,84 kB de JavaScript; `dist/` generado |
+| Flujo con curl | solicitar 201; aprobar 200 con el equipo en `Prestado`; segundo préstamo 409; devolución sin observación 400; devolución 200 con el equipo en `Disponible`; fecha no posterior 400; Colaborador aprobando 403; sin cookie 401; equipo en Mantenimiento y en Baja 409; historial con alcance por rol 200 |
+| Limpieza | El equipo y el préstamo de prueba se eliminaron; la base quedó con 0 equipos, 0 préstamos y los 3 usuarios de las iteraciones anteriores |
+
+Respuestas resumidas del flujo con curl (API en `http://localhost:5321`, hoy en Lima 2026-11-17):
+
+```text
+POST /api/equipos (Responsable)                       201  Equipo registrado. TK-2026-9101 / Disponible
+POST /api/prestamos (Colaborador)                     201  Préstamo solicitado. Solicitado / 2026-11-24 / Carlos Mendoza
+GET  /api/equipos/{id} tras la solicitud              200  Disponible (todavía no ocupa el equipo)
+PATCH /api/prestamos/{id}/aprobacion (Responsable)    200  Préstamo aprobado. Activo / fecha_prestamo 2026-11-17
+GET  /api/equipos/{id} tras la aprobación             200  Prestado
+POST /api/prestamos del mismo equipo                  409  El equipo ya tiene un préstamo activo. Elija otro equipo disponible.
+GET  /api/prestamos/activos (Responsable)             200  total=1, Activo, vencido=false
+PATCH .../devolucion sin observación                  400  errors.observacion_prestamo: «Registre las observaciones de la devolución.»
+PATCH .../devolucion con observación                  200  Devuelto / 2026-11-17 / «Devuelto con el cargador, sin golpes.»
+GET  /api/equipos/{id} tras la devolución             200  Disponible
+POST /api/prestamos con fecha_devolucion=hoy          400  errors.fecha_devolucion: «…debe ser posterior a la fecha de hoy.»
+PATCH .../aprobacion como Colaborador                 403  Su rol no permite esta operación.
+POST /api/prestamos sin cookie                        401  Debe iniciar sesión.
+POST /api/prestamos de un equipo en Mantenimiento     409  No se puede prestar el equipo: está en estado Mantenimiento…
+POST /api/prestamos de un equipo en Baja              409  No se puede prestar el equipo: está en estado Baja…
+GET  /api/prestamos (Responsable)                     200  total=1, Devuelto
+GET  /api/prestamos (Colaborador)                     200  total=1, solo «Carlos Mendoza»
+```
+
+### Defectos encontrados y corregidos
+
+1. El contrato JSON de la fecha de devolución no coincidía: la regla de nombres del proyecto generaba
+   `fecha_devolucion_prestamo`, así que un cuerpo con `fecha_devolucion` se deserializaba en nulo y la
+   solicitud llegaba sin fecha. Se fijó con `JsonPropertyName("fecha_devolucion")` en la solicitud y en
+   las respuestas, y se agregó una prueba del error 400 con el campo correcto.
+2. La prueba de historial del Colaborador daba 0 filas porque el usuario del esquema de autenticación de
+   prueba era un `Guid` nuevo en cada petición; se fijó un identificador de prueba y se siembra un
+   préstamo propio antes de cada caso.
+3. El segundo préstamo del mismo equipo respondía con el mensaje del estado (`Prestado`) y no con el de
+   RN-01. Se cambió el orden en el caso de uso: primero el préstamo activo real y después el estado.
+4. La prueba que esperaba «prestado» en el mensaje del cambio de código de un equipo prestado se actualizó
+   al mensaje nuevo, que ahora habla de «préstamo activo» porque la comprobación es contra los préstamos.
+5. `EjecutarSqlAsync` con `SELECT … FOR UPDATE` se ejecuta dentro de la transacción de la unidad de
+   trabajo; se comprobó que una aprobación sin fecha válida deja el préstamo y el equipo como estaban.
+
+### Retrospectiva
+
+- **Bien:** el SDD ya traía los estados, los endpoints, el índice parcial y las columnas, así que el
+  backend se armó sin renombrar el contrato; la unidad de trabajo de una sola operación dejó la
+  aprobación y la devolución atómicas sin ensuciar los casos de uso; reutilizar el patrón de permisos,
+  errores y pruebas de las iteraciones 2 y 3 ahorró la mitad del trabajo.
+- **Difícil:** el modelo del PDF no distingue solicitud de préstamo ni guarda la fecha real; hubo que
+  decidir dónde vive la fecha de préstamo (nula hasta la aprobación) y cómo afecta a los filtros. El
+  estado `Prestado` del equipo tiene ahora dos caminos (estado y préstamo real) y hay que comprobar
+  siempre el préstamo para no dejar equipos bloqueados o liberados de más.
+- **Aprendizaje:** las reglas que cruzan dos entidades (RN-01, RN-06) necesitan tres capas —pantalla,
+  caso de uso y base— porque cada una falla de una forma distinta; y un nombre de campo mal derivado en
+  JSON es un defecto silencioso que solo aparece al probar el flujo completo.
+
+### Pendiente para la iteración 5
+
+- Salidas de RF-13 a RF-17: panel con los seis indicadores, equipos por estado, equipos más utilizados,
+  préstamos por área y movimientos.
+- Tabla `movimientos` (D-03) y su registro en la misma transacción de cada operación, si la iteración 5
+  la necesita para RF-17; hoy la operación de préstamo no la escribe.
+- Revisión de interfaz: modo oscuro completo, 390 px, contraste y teclado en las pantallas nuevas.
+- Código `PRE-AAAA-NNNN` del SDD y posible extracción del patrón State, si el cierre lo pide.
+- E2E de los escenarios E-01 a E-15 del Anexo B del SDD.

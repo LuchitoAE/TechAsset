@@ -4,14 +4,19 @@ import RutaProtegida from './components/RutaProtegida'
 import ProveedorDeSesion from './contextos/ProveedorDeSesion'
 import LayoutPrincipal from './layouts/LayoutPrincipal'
 import PaginaDetalleEquipo from './paginas/PaginaDetalleEquipo'
+import PaginaDetallePrestamo from './paginas/PaginaDetallePrestamo'
 import PaginaDetalleUsuario from './paginas/PaginaDetalleUsuario'
+import PaginaDisponibilidad from './paginas/PaginaDisponibilidad'
 import PaginaEnConstruccion from './paginas/PaginaEnConstruccion'
 import PaginaEquipos from './paginas/PaginaEquipos'
 import PaginaIngreso from './paginas/PaginaIngreso'
 import PaginaInicio from './paginas/PaginaInicio'
 import PaginaNoEncontrada from './paginas/PaginaNoEncontrada'
 import PaginaNuevoEquipo from './paginas/PaginaNuevoEquipo'
+import PaginaNuevoPrestamo from './paginas/PaginaNuevoPrestamo'
 import PaginaNuevoUsuario from './paginas/PaginaNuevoUsuario'
+import PaginaPrestamos from './paginas/PaginaPrestamos'
+import PaginaPrestamosActivos from './paginas/PaginaPrestamosActivos'
 import PaginaUsuarios from './paginas/PaginaUsuarios'
 
 // Mapa de rutas de la SPA. Todo exige sesión salvo /ingreso; cada módulo declara los roles que
@@ -44,36 +49,21 @@ export default function App() {
               <Route path="equipos/:id" element={<PaginaDetalleEquipo />} />
             </Route>
 
-            <Route
-              path="prestamos"
-              element={
-                <PaginaEnConstruccion
-                  titulo="Préstamos"
-                  descripcion="Solicitudes, aprobaciones, devoluciones e historial de préstamos."
-                  iteracion={4}
-                />
-              }
-            />
-            <Route
-              path="mis-prestamos"
-              element={
-                <PaginaEnConstruccion
-                  titulo="Mis préstamos"
-                  descripcion="Sus solicitudes activas y el historial de equipos que usó."
-                  iteracion={4}
-                />
-              }
-            />
-            <Route
-              path="disponibilidad"
-              element={
-                <PaginaEnConstruccion
-                  titulo="Disponibilidad"
-                  descripcion="Equipos libres para solicitar en este momento."
-                  iteracion={4}
-                />
-              }
-            />
+            {/* RF-09 a RF-12: historial y activos para el Responsable y el Administrador; el
+                Colaborador ve sus préstamos y la disponibilidad. */}
+            <Route path="prestamos" element={<PaginaPrestamos />} />
+            <Route path="mis-prestamos" element={<PaginaPrestamos soloMisPrestamos />} />
+            <Route path="disponibilidad" element={<PaginaDisponibilidad />} />
+            <Route path="prestamos/:id" element={<PaginaDetallePrestamo />} />
+
+            <Route element={<RutaPorRol roles={['Administrador', 'ResponsableDeTecnologia']} />}>
+              <Route path="prestamos/activos" element={<PaginaPrestamosActivos />} />
+            </Route>
+
+            <Route element={<RutaPorRol roles={['Colaborador']} />}>
+              <Route path="prestamos/nuevo" element={<PaginaNuevoPrestamo />} />
+            </Route>
+
             <Route
               path="reportes"
               element={

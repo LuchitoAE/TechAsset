@@ -83,6 +83,12 @@ crean desde la pantalla de Usuarios.
 | `POST /api/equipos` | Registrar equipo con código único (RF-05, RN-07) | Administrador y Responsable |
 | `PUT /api/equipos/{id}` | Actualizar datos del equipo (RF-06) | Administrador y Responsable |
 | `PATCH /api/equipos/{id}/estado` | Cambiar entre Disponible, Mantenimiento y Baja (RF-08) | Administrador y Responsable |
+| `GET /api/prestamos` | Historial con filtros; el Colaborador ve solo lo suyo (RF-11) | Los tres roles |
+| `GET /api/prestamos/{id}` | Detalle de un préstamo (RF-11) | Los tres roles, con alcance por rol |
+| `GET /api/prestamos/activos` | Préstamos activos y vencidos (RF-12) | Administrador y Responsable |
+| `POST /api/prestamos` | Solicitar un préstamo (RF-09) | Colaborador |
+| `PATCH /api/prestamos/{id}/aprobacion` | Aprobar o rechazar una solicitud (RF-09) | Administrador y Responsable |
+| `PATCH /api/prestamos/{id}/devolucion` | Registrar la devolución con observaciones (RF-10) | Administrador y Responsable |
 
 Las respuestas exitosas son `{ success, message, data }`; los errores usan ProblemDetails con `success: false`,
 `message` y `errors` por campo. La sesión es una cookie `HttpOnly` y `SameSite=Strict` de 8 horas.
@@ -108,5 +114,9 @@ ingreso, sesión y salida con cookie; migración `CrearUsuarios`; listado, regis
 deshabilitación en la SPA; 51 pruebas de backend y 28 de frontend.
 **Iteración 3 (17/11/2026):** equipos e inventario: RF-05 a RF-08, RN-07 y D-08; código patrimonial
 único, siete categorías, estados, filtros y conteo por estado; migración `CrearEquipos`; alta, edición
-y cambio de estado en la SPA; 100 pruebas de backend y 42 de frontend. Préstamos y reportes llegan en
-las iteraciones 4 y 5.
+y cambio de estado en la SPA; 100 pruebas de backend y 42 de frontend.
+**Iteración 4 (17/11/2026):** préstamos y devoluciones: RF-09 a RF-12 y RN-01 a RN-06 y RN-10; entidad
+`Prestamo` con estados Solicitado, Activo, Devuelto y Rechazado; índice único parcial del préstamo
+activo, CHECK de fechas y de observaciones, claves foráneas que impiden borrar un equipo con historial;
+migración `CrearPrestamos`; solicitud, aprobación o rechazo, devolución, activos e historial en la SPA;
+175 pruebas de backend y 68 de frontend. El dashboard y los reportes llegan en la iteración 5.

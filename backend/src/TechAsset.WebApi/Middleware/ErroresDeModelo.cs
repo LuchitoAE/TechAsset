@@ -75,6 +75,21 @@ public static class ErroresDeModelo
             return "El rol debe ser Administrador, ResponsableDeTecnologia o Colaborador.";
         }
 
+        if (campo.Contains("estado_prestamo", StringComparison.Ordinal))
+        {
+            return "El estado del préstamo debe ser Solicitado, Activo, Devuelto o Rechazado.";
+        }
+
+        if (campo.Contains("fecha_devolucion", StringComparison.Ordinal))
+        {
+            return "La fecha de devolución debe tener el formato AAAA-MM-DD.";
+        }
+
+        if (campo.Contains("aprobado_prestamo", StringComparison.Ordinal))
+        {
+            return "Indique si el préstamo se aprueba o se rechaza.";
+        }
+
         if (campo == "solicitud")
         {
             return "La solicitud es obligatoria y debe ser un JSON válido.";
