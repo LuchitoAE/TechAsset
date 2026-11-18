@@ -165,4 +165,55 @@ public class PruebasDeEquipos
         equipo.CambiarEstado(EstadoEquipo.Disponible);
         Assert.Equal(EstadoEquipo.Disponible, equipo.EstadoEquipo);
     }
+
+    [Fact]
+    public void NoSeEliminaUnEquipoConHistorialDePrestamos()
+    {
+        var equipo = FabricaDeEquipos.Crear();
+
+        var excepcion = Assert.Throws<ConflictoDeNegocioExcepcion>(() =>
+            equipo.ValidarEliminacion(tieneHistorialDePrestamos: true));
+
+        Assert.Contains("historial de préstamos", excepcion.Message);
+        Assert.Equal("TK-2026-0001", equipo.CodigoPatrimonial.Valor);
+    }
+
+    [Fact]
+    public void UnEquipoSinHistorialNoTieneImpedimentoParaEliminarse()
+    {
+        var equipo = FabricaDeEquipos.Crear();
+
+        equipo.ValidarEliminacion(tieneHistorialDePrestamos: false);
+
+        Assert.Equal(EstadoEquipo.Disponible, equipo.EstadoEquipo);
+    }
+
+    [Fact]
+    public void ElPrestamoActivoBloqueaElCambioDeEstadoAunqueElEquipoDigaDisponible()
+    {
+        var equipo = FabricaDeEquipos.Crear();
+
+        var excepcion = Assert.Throws<ConflictoDeNegocioExcepcion>(() =>
+            equipo.CambiarEstado(EstadoEquipo.Mantenimiento, tienePrestamoActivo: true));
+
+        Assert.Contains("préstamo activo", excepcion.Message);
+        Assert.Equal(EstadoEquipo.Disponible, equipo.EstadoEquipo);
+    }
+
+    [Fact]
+    public void ElPrestamoActivoBloqueaElCambioDeCodigoAunqueElEquipoDigaDisponible()
+    {
+        var equipo = FabricaDeEquipos.Crear();
+
+        var excepcion = Assert.Throws<ConflictoDeNegocioExcepcion>(() =>
+            equipo.Actualizar(
+                CodigoPatrimonial.Crear("TK-2026-0099"),
+                equipo.NombreEquipo,
+                equipo.CategoriaEquipo,
+                equipo.MarcaEquipo,
+                tienePrestamoActivo: true));
+
+        Assert.Contains("préstamo activo", excepcion.Message);
+        Assert.Equal("TK-2026-0001", equipo.CodigoPatrimonial.Valor);
+    }
 }

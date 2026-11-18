@@ -19,6 +19,10 @@ public sealed class AutenticacionDePrueba(
     public const string EncabezadoDeRol = "X-Prueba-Rol";
     public const string Esquema = "Prueba";
 
+    // Identificador fijo del usuario de prueba: permite sembrar préstamos propios y ajenos sin
+    // depender de un valor aleatorio en cada petición.
+    public static readonly Guid IdUsuarioDePrueba = Guid.Parse("11111111-1111-1111-1111-111111111111");
+
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.TryGetValue(EncabezadoDeRol, out var rol)
@@ -29,7 +33,7 @@ public sealed class AutenticacionDePrueba(
 
         var identidad = new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, IdUsuarioDePrueba.ToString()),
                 new Claim(ClaimTypes.Name, "Usuario de prueba"),
                 new Claim(ClaimTypes.Role, rol.ToString())
             ],

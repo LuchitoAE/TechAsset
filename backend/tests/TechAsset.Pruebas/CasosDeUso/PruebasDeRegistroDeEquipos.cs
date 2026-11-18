@@ -12,9 +12,11 @@ public class PruebasDeRegistroDeEquipos
 {
     private readonly RepositorioDeEquiposEnMemoria _repositorio = new();
 
+    private readonly RepositorioDePrestamosEnMemoria _prestamos = new();
+
     private RegistrarEquipoCasoDeUso CasoDeUso() => new(_repositorio);
 
-    private ActualizarEquipoCasoDeUso CasoDeActualizacion() => new(_repositorio);
+    private ActualizarEquipoCasoDeUso CasoDeActualizacion() => new(_repositorio, _prestamos);
 
     [Fact]
     public async Task RegistraUnEquipoDisponibleYNormalizaElCodigo()
@@ -129,7 +131,31 @@ public class PruebasDeRegistroDeEquipos
                 equipo.CategoriaEquipo,
                 equipo.MarcaEquipo)));
 
-        Assert.Contains("prestado", excepcion.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("préstamo activo", excepcion.Message);
+    }
+
+    [Fact]
+    public async Task ElPrestamoActivoBloqueaElCambioDeCodigoAunqueElEquipoDigaDisponible()
+    {
+        var equipo = FabricaDeEquipos.Crear();
+        _repositorio.Sembrar(equipo);
+
+        var usuario = FabricaDeUsuarios.Crear("ana@innovatech.pe");
+        var hoy = new DateOnly(2026, 11, 17);
+        var prestamo = FabricaDePrestamos.Solicitar(equipo, usuario, hoy.AddDays(7), hoy);
+        prestamo.Aprobar(hoy);
+        _prestamos.Sembrar(prestamo);
+
+        var excepcion = await Assert.ThrowsAsync<ConflictoDeNegocioExcepcion>(() =>
+            CasoDeActualizacion().EjecutarAsync(new ActualizarEquipoComando(
+                equipo.IdEquipo,
+                "TK-2026-0099",
+                equipo.NombreEquipo,
+                equipo.CategoriaEquipo,
+                equipo.MarcaEquipo)));
+
+        Assert.Contains("préstamo activo", excepcion.Message);
+        Assert.Equal("TK-2026-0001", equipo.CodigoPatrimonial.Valor);
     }
 
     [Fact]
