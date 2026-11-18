@@ -62,9 +62,71 @@ namespace TechAsset.Infrastructure.Migraciones
                     b.HasIndex("EstadoEquipo")
                         .HasDatabaseName("ix_equipos_estado");
 
+                    b.HasIndex("MarcaEquipo")
+                        .HasDatabaseName("ix_equipos_marca");
+
                     b.ToTable("equipos", null, t =>
                         {
                             t.HasCheckConstraint("ck_equipos_estado", "estado_equipo IN ('Disponible', 'Prestado', 'Mantenimiento', 'Baja')");
+                        });
+                });
+
+            modelBuilder.Entity("TechAsset.Domain.Entidades.Movimiento", b =>
+                {
+                    b.Property<Guid>("IdMovimiento")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_movimiento");
+
+                    b.Property<string>("DetalleMovimiento")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("detalle_movimiento");
+
+                    b.Property<DateTimeOffset>("FechaMovimiento")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_movimiento");
+
+                    b.Property<Guid>("IdEquipo")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_equipo");
+
+                    b.Property<Guid?>("IdPrestamo")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_prestamo");
+
+                    b.Property<Guid>("IdUsuario")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<string>("TipoMovimiento")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("tipo_movimiento");
+
+                    b.HasKey("IdMovimiento")
+                        .HasName("pk_movimientos");
+
+                    b.HasIndex("FechaMovimiento")
+                        .HasDatabaseName("ix_movimientos_fecha");
+
+                    b.HasIndex("IdEquipo")
+                        .HasDatabaseName("ix_movimientos_equipo");
+
+                    b.HasIndex("IdPrestamo")
+                        .HasDatabaseName("ix_movimientos_prestamo");
+
+                    b.HasIndex("IdUsuario")
+                        .HasDatabaseName("ix_movimientos_usuario");
+
+                    b.HasIndex("TipoMovimiento")
+                        .HasDatabaseName("ix_movimientos_tipo");
+
+                    b.ToTable("movimientos", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_movimientos_tipo", "tipo_movimiento IN ('EquipoRegistrado', 'EquipoActualizado', 'EquipoEstadoCambiado', 'PrestamoSolicitado', 'PrestamoAprobado', 'PrestamoRechazado', 'PrestamoDevuelto')");
                         });
                 });
 
@@ -227,6 +289,33 @@ namespace TechAsset.Infrastructure.Migraciones
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TechAsset.Domain.Entidades.Movimiento", b =>
+                {
+                    b.HasOne("TechAsset.Domain.Entidades.Equipo", "Equipo")
+                        .WithMany()
+                        .HasForeignKey("IdEquipo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_movimientos_equipo");
+
+                    b.HasOne("TechAsset.Domain.Entidades.Prestamo", null)
+                        .WithMany()
+                        .HasForeignKey("IdPrestamo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_movimientos_prestamo");
+
+                    b.HasOne("TechAsset.Domain.Entidades.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_movimientos_usuario");
+
+                    b.Navigation("Equipo");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("TechAsset.Domain.Entidades.Prestamo", b =>
                 {
                     b.HasOne("TechAsset.Domain.Entidades.Equipo", "Equipo")
@@ -260,6 +349,9 @@ namespace TechAsset.Infrastructure.Migraciones
 
                             b1.HasIndex("FechaDevolucionPrestamo")
                                 .HasDatabaseName("ix_prestamos_fecha_devolucion");
+
+                            b1.HasIndex("FechaPrestamo")
+                                .HasDatabaseName("ix_prestamos_fecha_prestamo");
 
                             b1.ToTable("prestamos");
 

@@ -6,4 +6,5 @@ namespace TechAsset.Application.Comandos;
 public sealed record RechazarPrestamoComando(
     Guid IdPrestamo,
     string? MotivoRechazoPrestamo,
+    Guid IdUsuarioSesion,
     RolUsuario RolSesion);

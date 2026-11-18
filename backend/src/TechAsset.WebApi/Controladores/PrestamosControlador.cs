@@ -147,14 +147,21 @@ public sealed class PrestamosControlador(
         if (aprobado)
         {
             var aprobadoPrestamo = await aprobarPrestamo.EjecutarAsync(
-                new AprobarPrestamoComando(id, ClaimsDeUsuario.Rol(User)),
+                new AprobarPrestamoComando(
+                    id,
+                    ClaimsDeUsuario.IdUsuario(User),
+                    ClaimsDeUsuario.Rol(User)),
                 cancellationToken);
 
             return Ok(RespuestasDeLaApi.Exitosa(aprobadoPrestamo, "Préstamo aprobado."));
         }
 
         var rechazado = await rechazarPrestamo.EjecutarAsync(
-            new RechazarPrestamoComando(id, solicitud.MotivoRechazoPrestamo, ClaimsDeUsuario.Rol(User)),
+            new RechazarPrestamoComando(
+                id,
+                solicitud.MotivoRechazoPrestamo,
+                ClaimsDeUsuario.IdUsuario(User),
+                ClaimsDeUsuario.Rol(User)),
             cancellationToken);
 
         return Ok(RespuestasDeLaApi.Exitosa(rechazado, "Préstamo rechazado."));
@@ -177,6 +184,7 @@ public sealed class PrestamosControlador(
             new RegistrarDevolucionComando(
                 id,
                 solicitud.ObservacionPrestamo,
+                ClaimsDeUsuario.IdUsuario(User),
                 ClaimsDeUsuario.Rol(User)),
             cancellationToken);
 

@@ -1,17 +1,19 @@
 using TechAsset.Application.Comandos;
 using TechAsset.Application.Datos;
 using TechAsset.Application.Interfaces;
+using TechAsset.Domain.Entidades;
 using TechAsset.Domain.Enumeraciones;
 using TechAsset.Domain.Excepciones;
 
 namespace TechAsset.Application.CasosDeUso;
 
 // RF-10, RN-10 y D-05: el Responsable de Tecnología o el Administrador registran la devolución con
-// observaciones obligatorias. En la misma transacción el préstamo pasa a Devuelto con la fecha real
-// y el equipo vuelve a Disponible.
+// observaciones obligatorias. En la misma transacción el préstamo pasa a Devuelto con la fecha real,
+// el equipo vuelve a Disponible y la devolución deja su movimiento (RF-17).
 public sealed class RegistrarDevolucionCasoDeUso(
     IRepositorioDePrestamos repositorioDePrestamos,
     IRepositorioDeEquipos repositorioDeEquipos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj)
 {
@@ -40,6 +42,10 @@ public sealed class RegistrarDevolucionCasoDeUso(
 
                 prestamo.RegistrarDevolucion(comando.ObservacionPrestamo, hoy);
                 equipo.MarcarComoDisponible();
+
+                await repositorioDeMovimientos.AgregarAsync(
+                    Movimiento.DePrestamoDevuelto(prestamo, comando.IdUsuarioSesion, reloj.AhoraEnUtc),
+                    token);
 
                 await repositorioDePrestamos.GuardarCambiosAsync(token);
 

@@ -14,6 +14,8 @@ public sealed class ContextoDeTechAsset(DbContextOptions<ContextoDeTechAsset> op
 
     public DbSet<Prestamo> Prestamos => Set<Prestamo>();
 
+    public DbSet<Movimiento> Movimientos => Set<Movimiento>();
+
     protected override void OnModelCreating(ModelBuilder modelo)
     {
         modelo.ApplyConfigurationsFromAssembly(typeof(ContextoDeTechAsset).Assembly);

@@ -8,4 +8,5 @@ public sealed record ActualizarEquipoComando(
     string? CodigoPatrimonialEquipo,
     string? NombreEquipo,
     CategoriaEquipo CategoriaEquipo,
-    string? MarcaEquipo);
+    string? MarcaEquipo,
+    Guid IdUsuarioSesion);

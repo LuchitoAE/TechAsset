@@ -1,6 +1,7 @@
 using TechAsset.Application.Comandos;
 using TechAsset.Application.Datos;
 using TechAsset.Application.Interfaces;
+using TechAsset.Domain.Entidades;
 using TechAsset.Domain.Enumeraciones;
 using TechAsset.Domain.Excepciones;
 
@@ -8,10 +9,11 @@ namespace TechAsset.Application.CasosDeUso;
 
 // RF-09, RN-01, RN-02, RN-03 y D-05: el Responsable de Tecnología o el Administrador aprueban la
 // solicitud. En la misma transacción se vuelve a comprobar el préstamo activo, el préstamo pasa a
-// Activo con la fecha de hoy como fecha de préstamo y el equipo pasa a Prestado.
+// Activo con la fecha de hoy como fecha de préstamo, el equipo pasa a Prestado y queda el movimiento.
 public sealed class AprobarPrestamoCasoDeUso(
     IRepositorioDePrestamos repositorioDePrestamos,
     IRepositorioDeEquipos repositorioDeEquipos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj)
 {
@@ -53,6 +55,10 @@ public sealed class AprobarPrestamoCasoDeUso(
 
                 prestamo.Aprobar(hoy);
                 equipo.MarcarComoPrestado();
+
+                await repositorioDeMovimientos.AgregarAsync(
+                    Movimiento.DePrestamoAprobado(prestamo, comando.IdUsuarioSesion, reloj.AhoraEnUtc),
+                    token);
 
                 await repositorioDePrestamos.GuardarCambiosAsync(token);
 

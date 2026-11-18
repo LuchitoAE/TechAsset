@@ -76,7 +76,8 @@ public sealed class EquiposControlador(
                 solicitud.NombreEquipo,
                 categoria,
                 solicitud.MarcaEquipo,
-                solicitud.EstadoEquipo),
+                solicitud.EstadoEquipo,
+                ClaimsDeUsuario.IdUsuario(User)),
             cancellationToken);
 
         return CreatedAtAction(
@@ -108,7 +109,8 @@ public sealed class EquiposControlador(
                 solicitud.CodigoPatrimonialEquipo,
                 solicitud.NombreEquipo,
                 categoria,
-                solicitud.MarcaEquipo),
+                solicitud.MarcaEquipo,
+                ClaimsDeUsuario.IdUsuario(User)),
             cancellationToken);
 
         return Ok(RespuestasDeLaApi.Exitosa(equipo, "Equipo actualizado."));
@@ -138,6 +140,7 @@ public sealed class EquiposControlador(
             new CambiarEstadoEquipoComando(
                 id,
                 estado,
+                ClaimsDeUsuario.IdUsuario(User),
                 ClaimsDeUsuario.Rol(User)),
             cancellationToken);
 

@@ -27,6 +27,12 @@ public static class RegistroDeServicios
         servicios.AddScoped<IConsultaDeEquipos, ConsultaDeEquipos>();
         servicios.AddScoped<IRepositorioDePrestamos, RepositorioDePrestamos>();
         servicios.AddScoped<IConsultaDePrestamos, ConsultaDePrestamos>();
+        servicios.AddScoped<IRepositorioDeMovimientos, RepositorioDeMovimientos>();
+        servicios.AddScoped<IConsultaDeIndicadores, ConsultaDeIndicadores>();
+        servicios.AddScoped<IConsultaDeEquiposPorEstado, ConsultaDeEquiposPorEstado>();
+        servicios.AddScoped<IConsultaDeEquiposMasUtilizados, ConsultaDeEquiposMasUtilizados>();
+        servicios.AddScoped<IConsultaDePrestamosPorArea, ConsultaDePrestamosPorArea>();
+        servicios.AddScoped<IConsultaDeMovimientos, ConsultaDeMovimientos>();
         servicios.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
         servicios.AddSingleton<IProtectorDeContrasenas, ProtectorPbkdf2>();
         servicios.AddSingleton<IReloj, RelojDelSistema>();

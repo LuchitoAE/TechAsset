@@ -8,4 +8,5 @@ public sealed record RegistrarEquipoComando(
     string? NombreEquipo,
     CategoriaEquipo CategoriaEquipo,
     string? MarcaEquipo,
-    EstadoEquipo? EstadoEquipo);
+    EstadoEquipo? EstadoEquipo,
+    Guid IdUsuarioSesion);

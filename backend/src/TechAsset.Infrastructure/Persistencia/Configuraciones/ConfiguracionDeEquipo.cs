@@ -61,5 +61,8 @@ public sealed class ConfiguracionDeEquipo : IEntityTypeConfiguration<Equipo>
 
         constructor.HasIndex(equipo => equipo.CategoriaEquipo)
             .HasDatabaseName("ix_equipos_categoria");
+
+        constructor.HasIndex(equipo => equipo.MarcaEquipo)
+            .HasDatabaseName("ix_equipos_marca");
     }
 }
