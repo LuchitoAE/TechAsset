@@ -8,6 +8,7 @@ import TextInput from '../components/ui/TextInput'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
 import { validarIngreso } from '../reglas/validacionUsuarios'
+import { VERSION_DEL_PRODUCTO } from '../reglas/version'
 
 // Pantalla de ingreso (RN-11): correo y contraseña, un solo mensaje si no coinciden y estado de carga.
 export default function PaginaIngreso() {
@@ -163,7 +164,7 @@ export default function PaginaIngreso() {
       <footer className="border-t border-borde bg-superficie">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-texto-suave sm:px-6">
           <p>Universidad Peruana Los Andes · Construcción de Software</p>
-          <p>TechAsset · versión 0.2.0 · 2026</p>
+          <p>TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026</p>
         </div>
       </footer>
     </div>

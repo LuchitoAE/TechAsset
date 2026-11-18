@@ -8,6 +8,23 @@ namespace TechAsset.WebApi.Middleware;
 // inglés; aquí se traducen los campos conocidos y se usa un mensaje claro en español para el resto.
 public static class ErroresDeModelo
 {
+    private static readonly (string Fragmento, string Mensaje)[] MensajesConocidos =
+    [
+        ("categoria_equipo",
+            "La categoría debe ser Laptop, Computadora de escritorio, Monitor, Impresora, " +
+            "Tablet, Proyector multimedia o Equipo de red."),
+        ("estado_equipo", "El estado debe ser Disponible, Prestado, Mantenimiento o Baja."),
+        ("rol_usuario", "El rol debe ser Administrador, ResponsableDeTecnologia o Colaborador."),
+        ("estado_prestamo",
+            "El estado del préstamo debe ser Solicitado, Activo, Devuelto o Rechazado."),
+        ("tipo_movimiento",
+            "El tipo de movimiento debe ser EquipoRegistrado, EquipoActualizado, " +
+            "EquipoEstadoCambiado, PrestamoSolicitado, PrestamoAprobado, PrestamoRechazado o " +
+            "PrestamoDevuelto."),
+        ("fecha_devolucion", "La fecha de devolución debe tener el formato AAAA-MM-DD."),
+        ("aprobado_prestamo", "Indique si el préstamo se aprueba o se rechaza."),
+    ];
+
     public static IActionResult Crear(ActionContext contexto)
     {
         var errores = contexto.ModelState
@@ -59,49 +76,23 @@ public static class ErroresDeModelo
 
     private static string TraducirMensaje(string campo)
     {
-        if (campo.Contains("categoria_equipo", StringComparison.Ordinal))
+        foreach (var (fragmento, mensaje) in MensajesConocidos)
         {
-            return "La categoría debe ser Laptop, Computadora de escritorio, Monitor, Impresora, " +
-                "Tablet, Proyector multimedia o Equipo de red.";
+            if (campo.Contains(fragmento, StringComparison.Ordinal))
+            {
+                return mensaje;
+            }
         }
 
-        if (campo.Contains("estado_equipo", StringComparison.Ordinal))
+        // «tipo» es el nombre corto que usa el reporte de movimientos en la cadena de consulta.
+        if (campo == "tipo")
         {
-            return "El estado debe ser Disponible, Prestado, Mantenimiento o Baja.";
+            return MensajesConocidos
+                .First(conocido => conocido.Fragmento == "tipo_movimiento").Mensaje;
         }
 
-        if (campo.Contains("rol_usuario", StringComparison.Ordinal))
-        {
-            return "El rol debe ser Administrador, ResponsableDeTecnologia o Colaborador.";
-        }
-
-        if (campo.Contains("estado_prestamo", StringComparison.Ordinal))
-        {
-            return "El estado del préstamo debe ser Solicitado, Activo, Devuelto o Rechazado.";
-        }
-
-        if (campo.Contains("tipo_movimiento", StringComparison.Ordinal) || campo == "tipo")
-        {
-            return "El tipo de movimiento debe ser EquipoRegistrado, EquipoActualizado, " +
-                "EquipoEstadoCambiado, PrestamoSolicitado, PrestamoAprobado, PrestamoRechazado o " +
-                "PrestamoDevuelto.";
-        }
-
-        if (campo.Contains("fecha_devolucion", StringComparison.Ordinal))
-        {
-            return "La fecha de devolución debe tener el formato AAAA-MM-DD.";
-        }
-
-        if (campo.Contains("aprobado_prestamo", StringComparison.Ordinal))
-        {
-            return "Indique si el préstamo se aprueba o se rechaza.";
-        }
-
-        if (campo == "solicitud")
-        {
-            return "La solicitud es obligatoria y debe ser un JSON válido.";
-        }
-
-        return "El valor no es válido para este campo.";
+        return campo == "solicitud"
+            ? "La solicitud es obligatoria y debe ser un JSON válido."
+            : "El valor no es válido para este campo.";
     }
 }

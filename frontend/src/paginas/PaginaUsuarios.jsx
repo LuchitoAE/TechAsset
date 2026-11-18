@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link } from 'react-router'
 import { listarUsuarios } from '../api/usuariosApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
@@ -16,7 +16,6 @@ const FILTROS_VACIOS = { texto: '', rol: '', activo: '', area: '', pagina: 1, ta
 // RF-03: listado de usuarios con filtros por texto, rol, estado y área, paginado y con el estado visible.
 export default function PaginaUsuarios() {
   const { sesion } = useSesion()
-  const ubicacion = useLocation()
   const administrador = puedeGestionarUsuarios(sesion?.rol_usuario)
 
   const [filtros, setFiltros] = useState(FILTROS_VACIOS)
@@ -24,7 +23,6 @@ export default function PaginaUsuarios() {
   const [pagina, setPagina] = useState({ total: 0, pagina: 1, tamano: 20, usuarios: [] })
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso, setAviso] = useState(ubicacion.state?.aviso ?? null)
 
   useEffect(() => {
     const control = new AbortController()
@@ -51,7 +49,6 @@ export default function PaginaUsuarios() {
   }
 
   function aplicarFiltros() {
-    setAviso(null)
     setCargando(true)
     setAplicados({ ...filtros, pagina: 1 })
   }
@@ -60,7 +57,6 @@ export default function PaginaUsuarios() {
     setFiltros(FILTROS_VACIOS)
     setCargando(true)
     setAplicados(FILTROS_VACIOS)
-    setAviso(null)
   }
 
   function irAPagina(numero) {
@@ -91,7 +87,6 @@ export default function PaginaUsuarios() {
         }
       />
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && (
         <AlertMessage tipo="error">
           {error}{' '}

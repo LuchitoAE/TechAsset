@@ -73,6 +73,8 @@ builder.Services.AddAuthorization(opciones =>
         politica => politica.RequireRole(PoliticasDeAcceso.Colaborador));
 });
 
+builder.Services.AddSingleton<LimiteDeIntentosDeIngreso>();
+builder.Services.AddScoped<FiltroDeIntentosDeIngreso>();
 builder.Services.AddScoped<InicializadorDeAdministrador>();
 
 var app = builder.Build();

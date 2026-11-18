@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link } from 'react-router'
 import { listarPrestamos } from '../api/prestamosApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
@@ -26,7 +26,6 @@ const PAGINA_VACIA = { total: 0, pagina: 1, tamano: 20, prestamos: [] }
 // alcance); el Responsable y el Administrador ven todo el historial.
 export default function PaginaPrestamos({ soloMisPrestamos = false }) {
   const { sesion } = useSesion()
-  const ubicacion = useLocation()
   const gestiona = puedeGestionarPrestamos(sesion?.rol_usuario)
   const solicita = puedeSolicitarPrestamos(sesion?.rol_usuario)
 
@@ -35,7 +34,6 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
   const [pagina, setPagina] = useState(PAGINA_VACIA)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso, setAviso] = useState(ubicacion.state?.aviso ?? null)
 
   useEffect(() => {
     const control = new AbortController()
@@ -62,7 +60,6 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
   }
 
   function aplicarFiltros() {
-    setAviso(null)
     setCargando(true)
     setAplicados({ ...filtros, pagina: 1 })
   }
@@ -71,7 +68,6 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
     setFiltros(FILTROS_VACIOS)
     setCargando(true)
     setAplicados(FILTROS_VACIOS)
-    setAviso(null)
   }
 
   function irAPagina(numero) {
@@ -113,7 +109,6 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
         }
       />
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && (
         <AlertMessage tipo="error">
           {error}{' '}

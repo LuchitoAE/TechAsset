@@ -1,6 +1,7 @@
+import AccionesDeFormulario from '../ui/AccionesDeFormulario'
 import AlertMessage from '../ui/AlertMessage'
-import Button from '../ui/Button'
 import DateInput from '../ui/DateInput'
+import SeccionNumerada from '../ui/SeccionNumerada'
 import SelectInput from '../ui/SelectInput'
 import { etiquetaDeCategoria } from '../../reglas/catalogos'
 
@@ -33,27 +34,12 @@ export default function FormularioPrestamo({
     <form noValidate onSubmit={enviar} className="space-y-6">
       {mensaje && <AlertMessage tipo={mensaje.tipo}>{mensaje.texto}</AlertMessage>}
 
-      <section
-        aria-labelledby="titulo-datos-prestamo"
-        className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6"
+      <SeccionNumerada
+        id="titulo-datos-prestamo"
+        numero="1"
+        titulo="Equipo y fecha de devolución"
+        descripcion="Solo se ofrecen equipos disponibles, sin préstamo activo y fuera de Mantenimiento o Baja."
       >
-        <div className="flex items-start gap-3">
-          <span
-            aria-hidden="true"
-            className="grid size-7 shrink-0 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
-          >
-            1
-          </span>
-          <div>
-            <h2 id="titulo-datos-prestamo" className="text-base font-bold text-titulo">
-              Equipo y fecha de devolución
-            </h2>
-            <p className="mt-0.5 text-sm text-texto-suave">
-              Solo se ofrecen equipos disponibles, sin préstamo activo y fuera de Mantenimiento o Baja.
-            </p>
-          </div>
-        </div>
-
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <SelectInput
@@ -88,29 +74,14 @@ export default function FormularioPrestamo({
             required
           />
         </div>
-      </section>
+      </SeccionNumerada>
 
-      <section
-        aria-labelledby="titulo-responsable-prestamo"
-        className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6"
+      <SeccionNumerada
+        id="titulo-responsable-prestamo"
+        numero="2"
+        titulo="Responsable del préstamo"
+        descripcion="Todo préstamo registra un responsable (RN-05). Es usted, el colaborador que solicita."
       >
-        <div className="flex items-start gap-3">
-          <span
-            aria-hidden="true"
-            className="grid size-7 shrink-0 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
-          >
-            2
-          </span>
-          <div>
-            <h2 id="titulo-responsable-prestamo" className="text-base font-bold text-titulo">
-              Responsable del préstamo
-            </h2>
-            <p className="mt-0.5 text-sm text-texto-suave">
-              Todo préstamo registra un responsable (RN-05). Es usted, el colaborador que solicita.
-            </p>
-          </div>
-        </div>
-
         <dl className="mt-5 grid gap-4 rounded-lg border border-borde bg-superficie-tenue px-3 py-2.5 sm:grid-cols-2">
           <div>
             <dt className="text-xs font-semibold tracking-wide text-texto-suave uppercase">
@@ -129,28 +100,16 @@ export default function FormularioPrestamo({
             </dd>
           </div>
         </dl>
-      </section>
+      </SeccionNumerada>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-texto-suave">
-          {faltanDatos
-            ? 'Complete los campos obligatorios para enviar la solicitud.'
-            : 'Todos los datos obligatorios están completos.'}
-        </p>
-        <div className="flex flex-wrap justify-end gap-3">
-          <Button variante="secundario" onClick={onCancelar} disabled={enviando}>
-            Cancelar
-          </Button>
-          <Button
-            tipo="submit"
-            cargando={enviando}
-            textoCargando="Enviando…"
-            disabled={faltanDatos}
-          >
-            Solicitar préstamo
-          </Button>
-        </div>
-      </div>
+      <AccionesDeFormulario
+        faltanDatos={faltanDatos}
+        mensajeFaltan="Complete los campos obligatorios para enviar la solicitud."
+        enviando={enviando}
+        textoEnviar="Solicitar préstamo"
+        textoCargando="Enviando…"
+        onCancelar={onCancelar}
+      />
     </form>
   )
 }

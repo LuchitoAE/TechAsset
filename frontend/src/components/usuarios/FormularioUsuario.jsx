@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import AccionesDeFormulario from '../ui/AccionesDeFormulario'
 import AlertMessage from '../ui/AlertMessage'
-import Button from '../ui/Button'
+import SeccionNumerada from '../ui/SeccionNumerada'
 import SelectInput from '../ui/SelectInput'
 import TextInput from '../ui/TextInput'
 import { ROLES } from '../../reglas/catalogos'
@@ -25,27 +26,12 @@ export default function FormularioUsuario({
     <form noValidate onSubmit={enviar} className="space-y-6">
       {mensaje && <AlertMessage tipo={mensaje.tipo}>{mensaje.texto}</AlertMessage>}
 
-      <section
-        aria-labelledby="titulo-datos-persona"
-        className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6"
+      <SeccionNumerada
+        id="titulo-datos-persona"
+        numero="1"
+        titulo="Datos de la persona"
+        descripcion="Nombres, apellidos, correo corporativo y área. El correo será su usuario para ingresar."
       >
-        <div className="flex items-start gap-3">
-          <span
-            aria-hidden="true"
-            className="grid size-7 shrink-0 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
-          >
-            1
-          </span>
-          <div>
-            <h2 id="titulo-datos-persona" className="text-base font-bold text-titulo">
-              Datos de la persona
-            </h2>
-            <p className="mt-0.5 text-sm text-texto-suave">
-              Nombres, apellidos, correo corporativo y área. El correo será su usuario para ingresar.
-            </p>
-          </div>
-        </div>
-
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <TextInput
             label="Nombres"
@@ -95,29 +81,14 @@ export default function FormularioUsuario({
             />
           </div>
         </div>
-      </section>
+      </SeccionNumerada>
 
-      <section
-        aria-labelledby="titulo-acceso"
-        className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6"
+      <SeccionNumerada
+        id="titulo-acceso"
+        numero="2"
+        titulo="Acceso y permisos"
+        descripcion="El rol define el menú y las acciones permitidas. La API vuelve a comprobarlo en cada operación."
       >
-        <div className="flex items-start gap-3">
-          <span
-            aria-hidden="true"
-            className="grid size-7 shrink-0 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
-          >
-            2
-          </span>
-          <div>
-            <h2 id="titulo-acceso" className="text-base font-bold text-titulo">
-              Acceso y permisos
-            </h2>
-            <p className="mt-0.5 text-sm text-texto-suave">
-              El rol define el menú y las acciones permitidas. La API vuelve a comprobarlo en cada operación.
-            </p>
-          </div>
-        </div>
-
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <SelectInput
             label="Rol"
@@ -153,26 +124,15 @@ export default function FormularioUsuario({
             }
           />
         </div>
-      </section>
+      </SeccionNumerada>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-texto-suave">
-          {faltanDatos ? 'Complete los campos obligatorios para guardar.' : 'Todos los datos obligatorios están completos.'}
-        </p>
-        <div className="flex flex-wrap justify-end gap-3">
-          <Button variante="secundario" onClick={onCancelar} disabled={enviando}>
-            Cancelar
-          </Button>
-          <Button
-            tipo="submit"
-            cargando={enviando}
-            textoCargando={esNuevo ? 'Registrando…' : 'Guardando…'}
-            disabled={faltanDatos}
-          >
-            {esNuevo ? 'Registrar usuario' : 'Guardar cambios'}
-          </Button>
-        </div>
-      </div>
+      <AccionesDeFormulario
+        faltanDatos={faltanDatos}
+        enviando={enviando}
+        textoEnviar={esNuevo ? 'Registrar usuario' : 'Guardar cambios'}
+        textoCargando={esNuevo ? 'Registrando…' : 'Guardando…'}
+        onCancelar={onCancelar}
+      />
     </form>
   )
 }

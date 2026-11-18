@@ -9,7 +9,7 @@ import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { etiquetaDeRol } from '../reglas/catalogos'
 import { accesosDelRol } from '../reglas/permisos'
-import { formatearFechaYHora, resumenDeAreas } from '../reglas/reportes'
+import { distribucionDelInventario, formatearFechaYHora, resumenDeAreas } from '../reglas/reportes'
 
 // RF-13 y D-10: panel general con los seis indicadores mínimos del PDF. Los tres roles entran; el
 // Colaborador ve los contadores del inventario y solo sus préstamos, porque la API aplica el alcance.
@@ -43,15 +43,7 @@ export default function PaginaInicio() {
   }, [recarga])
 
   const total = indicadores?.total_equipos ?? 0
-  const distribucion = [
-    { etiqueta: 'Disponibles', valor: indicadores?.equipos_disponibles ?? 0, clase: 'bg-exito' },
-    { etiqueta: 'Prestados', valor: indicadores?.equipos_prestados ?? 0, clase: 'bg-marca-600' },
-    {
-      etiqueta: 'En mantenimiento',
-      valor: indicadores?.equipos_mantenimiento ?? 0,
-      clase: 'bg-aviso',
-    },
-  ]
+  const distribucion = distribucionDelInventario(indicadores)
 
   const areas = indicadores?.areas_con_mayor_uso ?? []
 
@@ -162,14 +154,12 @@ export default function PaginaInicio() {
           ) : (
             <ul className="mt-4 space-y-3">
               {distribucion.map((fila) => {
-                const porcentaje = total === 0 ? 0 : Math.round((fila.valor / total) * 100)
-
                 return (
                   <li key={fila.etiqueta}>
                     <div className="flex items-center justify-between gap-3 text-sm">
                       <span className="font-semibold text-texto">{fila.etiqueta}</span>
                       <span className="text-texto-suave">
-                        {fila.valor} · {porcentaje} %
+                        {fila.valor} · {fila.porcentaje} %
                       </span>
                     </div>
                     <div
@@ -178,7 +168,7 @@ export default function PaginaInicio() {
                     >
                       <div
                         className={`h-full rounded-full ${fila.clase}`}
-                        style={{ width: `${porcentaje}%` }}
+                        style={{ width: `${fila.porcentaje}%` }}
                       />
                     </div>
                   </li>

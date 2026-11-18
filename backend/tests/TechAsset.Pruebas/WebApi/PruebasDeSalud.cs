@@ -18,6 +18,9 @@ public class PruebasDeSalud(FabricaDePruebas fabrica) : IClassFixture<FabricaDeP
         Assert.True(documento.RootElement.GetProperty("success").GetBoolean());
         Assert.Equal("ok", documento.RootElement.GetProperty("data").GetProperty("estado").GetString());
         Assert.Equal("TechAsset", documento.RootElement.GetProperty("data").GetProperty("producto").GetString());
+        Assert.Equal(
+            TechAsset.Domain.Comun.VersionDelProducto.Valor,
+            documento.RootElement.GetProperty("data").GetProperty("version").GetString());
     }
 
     [Fact]

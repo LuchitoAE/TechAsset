@@ -728,3 +728,203 @@ GET  /api/reportes/movimientos?tipo=Nada       400  errors.tipo: «El tipo de mo
 - Copia de la versión anterior de la ERS/SDD en `Historico/` al regenerar (en esta iteración se
   regeneraron directamente; el histórico conserva la versión previa a la iteración 4).
 - Publicación (Vercel + Render + Supabase) y los diez productos de la entrega.
+
+---
+
+## Iteración 6 — Integración, endurecimiento y pruebas de punta a punta (primera parte)
+
+**Fecha:** 18/11/2026
+**Rama:** `feature/iteracion-6-endurecimiento` → `develop`
+**Objetivo:** dejar el código listo y probado de punta a punta: corregir la distribución del panel,
+completar el aviso flotante global (RNF-04), unificar la versión del pie, ejecutar los escenarios
+E-01 a E-15 del Anexo B y endurecer el ingreso. La publicación y los documentos quedan para la
+segunda parte.
+
+### Alcance
+
+- **Panel:** la distribución del inventario ahora incluye la barra de `Baja` con su color y su
+  porcentaje; las cuatro barras suman el total de equipos que ya contaba la tarjeta.
+- **RNF-04:** aviso flotante global de éxito y error, abajo a la derecha, con `role="status"`,
+  cierre automático a los 8 s y botón de cerrar con nombre accesible. Está conectado a las altas,
+  ediciones y cambios de estado de usuarios y equipos, a la solicitud, aprobación, rechazo y
+  devolución de préstamos, y al cierre de sesión. Los mensajes de error y de validación siguen en
+  línea, junto a su campo o junto al botón de enviar.
+- **Versión:** el pie muestra `TechAsset · versión 1.0.0 · 2026` desde una sola constante en el
+  frontend (`src/reglas/version.js`), coherente con `VersionDelProducto` de la API y con
+  `/api/salud`.
+- **Pruebas de punta a punta:** `Semanas/.herramientas/caso_unidad3_2/pruebas.py` arranca la API
+  (5321) y la SPA (5191) si no están en marcha, usa Brave sin interfaz mediante
+  `Semanas/.herramientas/comun/navegador.py`, recorre los escenarios E-01 a E-15, toma capturas en
+  `../Evidencias/iteracion-6/`, limpia lo que crea y detiene lo que arrancó.
+- **Refactor Clean Code:** se extrajeron `SeccionNumerada` y `AccionesDeFormulario` para los tres
+  formularios; se unificaron las validaciones repetidas de `Equipo` y `Usuario`; la traducción de
+  errores de modelo pasó de una cadena de `if` a una tabla; se eliminó la página
+  `PaginaEnConstruccion` y el retorno sin uso `establecerMensaje` del hook de formulario.
+- **Endurecimiento:** límite de cinco ingresos fallidos por minuto para la misma combinación de
+  correo y dirección de origen, con respuesta 429, `Retry-After: 60` y mensaje en español. El
+  ingreso correcto limpia el contador. Se revisó que los errores no devuelvan correo, documentos,
+  contraseñas ni detalles técnicos y se agregaron pruebas.
+
+### Tareas y tiempo aproximado
+
+| Tarea | Tiempo |
+|---|---|
+| Barra de Baja, versión única y pruebas del panel | 0,5 h |
+| Aviso flotante global, contexto y conexión con las acciones | 1,5 h |
+| Refactor de formularios, validaciones y errores de modelo | 1,0 h |
+| Límite de intentos, 429 y pruebas de errores sin datos personales | 1,0 h |
+| Suite E2E: arranque, escenarios, capturas y limpieza | 2,5 h |
+| Ajustes de la suite y revisión de capturas | 1,0 h |
+| Verificación completa y este registro | 0,5 h |
+
+### Decisiones
+
+No cambió ninguna decisión del Anexo A. Se aplicaron D-05 (el estado `Baja` cuenta en el total y
+ahora también se dibuja), D-10 (los seis indicadores se conservan) y D-17 (el alcance del panel por
+rol no cambia).
+
+Decisiones de implementación que no alteran el contrato:
+
+- **La barra de Baja se deriva del total** (`total − disponibles − prestados − mantenimiento`) en
+  lugar de agregar un campo al JSON del panel. El contrato de la API y las columnas no cambian y
+  las cuatro barras cuadran con el total, que ya incluía `Baja`.
+- **El aviso reemplaza las confirmaciones de éxito que viajaban por el estado de navegación.** Los
+  errores de formulario, los errores de campo y los avisos de alcance por rol siguen en línea: no
+  se perdió ningún mensaje, solo se movió la confirmación de éxito al aviso flotante.
+- **La región `role="status"` está siempre montada** y su contenido cambia cuando hay un aviso,
+  para que el lector de pantalla anuncie el texto sin depender de insertar la región en el mismo
+  instante. El error usa el mismo anuncio amable y su color e ícono propios; los errores de campo
+  conservan `role="alert"` en su lugar.
+- **La versión se repite en dos constantes de dos lenguajes** (`VersionDelProducto.Valor` y
+  `VERSION_DEL_PRODUCTO`) porque no hay compilación compartida; ambas quedan documentadas para
+  subirlas juntas. La prueba del pie y la de `/api/salud` las vigilan.
+- **El límite de intentos vive en memoria de la API** (singleton) y cuenta solo los rechazos por
+  credenciales, no los ingresos correctos ni los cuerpos inválidos. Al reiniciar se libera. Para
+  una sola instancia es suficiente; si se publica con varias réplicas habría que llevarlo a un
+  almacén compartido (queda como riesgo).
+- **La suite E2E usa las cuentas locales del CONTEXTO** y crea sus propios datos con prefijos
+  `TK-E2E-` y `e2e.prueba@`; no depende de datos de iteraciones anteriores y borra lo suyo al
+  empezar y al terminar.
+- **No se regeneraron la ERS ni el SDD en esta parte**, por pedido explícito de no generar
+  documentos todavía. El estado de RNF-04 y los conteos se actualizarán en la segunda parte.
+
+### Artefactos
+
+- `backend/src/TechAsset.WebApi/Seguridad/LimiteDeIntentosDeIngreso.cs` y
+  `FiltroDeIntentosDeIngreso.cs`.
+- `backend/src/TechAsset.WebApi/Respuestas/RespuestasDeError.cs` (constructor único del
+  ProblemDetails) y `Middleware/ErroresDeModelo.cs` (tabla de traducciones).
+- `backend/src/TechAsset.Domain/Entidades/Equipo.cs` y `Usuario.cs` (validaciones compartidas);
+  `Comun/VersionDelProducto.cs`.
+- `backend/tests/TechAsset.Pruebas/WebApi/PruebasDeLimiteDeIntentosDeIngreso.cs`,
+  `PruebasDeIngresoEndurecido.cs`, `PruebasDeErrores.cs`, `FabricaDePruebasDeAcceso.cs` y
+  `Dobles/RelojAvanzable.cs`.
+- `frontend/src/contextos/contextoDeAvisos.js`, `ProveedorDeAvisos.jsx` y
+  `components/ui/AvisoFlotante.jsx`.
+- `frontend/src/components/ui/SeccionNumerada.jsx` y `AccionesDeFormulario.jsx`; los tres
+  formularios adaptados.
+- `frontend/src/reglas/version.js` y `reglas/reportes.js` con `distribucionDelInventario`.
+- `frontend/src/paginas/` y `layouts/LayoutPrincipal.jsx` con el aviso conectado y sin los avisos
+  de éxito duplicados.
+- `Semanas/.herramientas/caso_unidad3_2/pruebas.py` con la suite E2E.
+- `../Evidencias/iteracion-6/` con las capturas: ingreso, ingreso con error, panel, aviso
+  flotante, inventario con filtros, solicitud, aprobación, devolución, reportes de estados y
+  movimientos, y panel en teléfono de 390 px.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `dotnet build -warnaserror` en `backend/` | 0 errores, 0 advertencias |
+| `dotnet test` en `backend/` | 225 pruebas, 225 en verde |
+| `dotnet ef migrations has-pending-model-changes` | «No changes have been made to the model since the last migration.» |
+| `pnpm lint` | Sin avisos |
+| `pnpm test` | 95 pruebas, 95 en verde (20 archivos) |
+| `pnpm build` | 163 módulos; 384,73 kB de JavaScript y 31,68 kB de CSS; `dist/` generado |
+| Suite E2E completa | 50 de 50 pruebas correctas (E-01 a E-15, RNF-04, RNF-19, reportes y teléfono) |
+| Limpieza de la base | 3 usuarios, 0 equipos, 0 préstamos y 0 movimientos |
+| Capturas | Revisadas: el panel muestra las cuatro barras (Baja en rojo), el aviso no tapa el contenido, los reportes y el teléfono no desbordan |
+| Secretos | `git status` sin cadenas de conexión ni contraseñas; la suite lee la cadena de user-secrets y no la imprime |
+
+Resumen de la suite E2E (API en 5321 y SPA en 5191, Brave sin interfaz):
+
+```text
+✓ Sin sesión, una pantalla del sistema lleva al ingreso
+✓ Ingreso: credenciales incorrectas con mensaje general, sin decir qué falló
+✓ Ingreso: el Administrador entra y su nombre aparece en la barra
+✓ Pie: la versión sale de una sola constante y dice 1.0.0
+✓ E-01 Registrar usuario: aparece en el listado
+✓ RNF-04: el éxito se anuncia en el aviso flotante role=status
+✓ RNF-04: el aviso se cierra solo a los 8 s
+✓ E-02 Registrar equipo: aparece Disponible en el inventario
+✓ E-03 Registrar préstamo: el Colaborador envía la solicitud
+✓ E-03: al aprobar, el préstamo queda Activo y el equipo Prestado
+✓ E-04 Registrar devolución: el préstamo queda Devuelto y el equipo Disponible
+✓ E-05 Consultar inventario: estado y categoría dejan solo la laptop disponible
+✓ E-06 Historial: el Colaborador ve solo sus préstamos
+✓ E-07 Dashboard: los seis indicadores coinciden con la base
+✓ E-07: la distribución incluye la barra de Baja con su porcentaje
+✓ E-08: prestar un equipo en Mantenimiento responde 409 y no lo cambia
+✓ E-09: prestar un equipo en Baja responde 409 y no lo cambia
+✓ E-10: la fecha de devolución anterior responde 400 en fecha_devolucion
+✓ E-11: devolver sin observación responde 400 y el préstamo sigue Activo
+✓ E-12: un segundo préstamo del mismo equipo responde 409
+✓ E-14: dar de baja un equipo prestado responde 409 y no lo cambia
+✓ E-13: deshabilitar usuarios sin ser Administrador responde 403
+✓ E-15: un usuario deshabilitado recibe 401 con el mensaje general
+✓ RNF-19: seis intentos fallidos responden 429 en el sexto, con espera de un minuto
+✓ RNF-19: el mensaje del 429 está en español y no revela datos
+✓ Reportes: la pestaña de equipos por estado carga su tabla
+✓ Reportes: el historial de movimientos muestra los hechos de la prueba
+✓ Teléfono: el panel no desborda a 390 px
+✓ Teléfono: la distribución sigue mostrando la barra de Baja
+✓ Limpieza: la base queda con 3 usuarios, 0 equipos, 0 préstamos y 0 movimientos
+
+50 de 50 pruebas correctas
+```
+
+### Defectos encontrados y corregidos
+
+1. La barra de `Baja` no se dibujaba aunque el total la contaba. Se agregó a partir del total y se
+   probó la suma de las cuatro barras con datos donde `Baja` no era cero.
+2. El aviso flotante se ocultaba con `empty:hidden` cuando no había mensaje; una región
+   `display:none` no se anuncia al insertar el texto. Se dejó siempre montada y sin contenido.
+3. Las pruebas de la E2E comparaban el estado del equipo con el texto exacto de la celda, que
+   incluye el ícono; se cambió a comprobar el nombre dentro del texto, no el formato.
+4. El filtro por texto de la E2E navegaba con `?texto=`, pero la pantalla de inventario guarda los
+   filtros en estado y no lee la cadena de consulta; la prueba ahora usa el formulario como el
+   usuario. (El comportamiento de la pantalla es el acordado; el defecto era de la prueba.)
+5. La comprobación de credenciales incorrectas buscaba «no existe» en toda la página y la propia
+   ayuda del ingreso dice «No existe registro propio». Se limitó la comprobación al mensaje de
+   error.
+6. Los nombres de las tarjetas del panel se leen en mayúsculas por el estilo `uppercase`; la
+   prueba comparaba contra el texto del código. Se normalizó a minúsculas en la prueba.
+7. El primer intento de la E2E era sensible al momento en que React tomaba los valores del
+   formulario de ingreso; se agregó una comprobación de que el correo, la contraseña y el botón
+   están listos antes de enviar, con reintento acotado.
+8. `ErroresDeModelo` tenía una cadena de `if` que crecía con cada enum; se reemplazó por una tabla
+   con el mismo orden y los mismos mensajes.
+
+### Retrospectiva
+
+- **Bien:** el contrato del SDD y los escenarios del Anexo B permitieron escribir la suite sin
+  decidir requisitos nuevos; el aviso global se conectó sin tocar los formularios, porque el hook
+  de formulario ya separaba los errores de campo del mensaje general; derivar `Baja` del total
+  evitó cambiar el JSON y la base.
+- **Difícil:** la prueba de punta a punta reveló diferencias entre lo que la pantalla hace y lo que
+  un lector del código supone (los filtros no viven en la URL, el estado lleva ícono). El límite de
+  intentos debía contar solo fallos y, a la vez, no meter `try/catch` en el controlador; el filtro
+  de acción resolvió las dos cosas.
+- **Aprendizaje:** una suite E2E debe comprobar la base y limpiar sus datos, no solo mirar la
+  pantalla; y toda confirmación de éxito necesita un solo camino para no duplicar mensajes.
+
+### Pendiente para la segunda parte de la iteración 6
+
+- Publicación (Vercel + Render + Supabase) si el alumno la pide, con variables de entorno y sin
+  secretos en el repositorio.
+- Regenerar la ERS y el SDD con los estados «Implementado en la iteración 6», el conteo real de
+  pruebas y las capturas; actualizar el `CONTEXTO` y el `README` final.
+- Informe técnico, presentación de sustentación y `Entrega/` con los diez productos.
+- Riesgos abiertos: el límite de intentos es por instancia; el patrón State formal y el código
+  `PRE-AAAA-NNNN` del SDD siguen anotados como no requisito; la suite E2E necesita Brave, `psql` y
+  las cuentas locales.

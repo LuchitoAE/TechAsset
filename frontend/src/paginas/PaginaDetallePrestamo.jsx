@@ -9,6 +9,7 @@ import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import TextAreaInput from '../components/ui/TextAreaInput'
 import EtiquetaDeEstadoPrestamo from '../components/prestamos/EtiquetaDeEstadoPrestamo'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import {
   puedeAprobarse,
@@ -25,12 +26,12 @@ import { formatearFecha } from '../utils/fechas'
 export default function PaginaDetallePrestamo() {
   const { id } = useParams()
   const { sesion } = useSesion()
+  const { mostrarAviso, mostrarError } = useAvisos()
   const gestiona = puedeGestionarPrestamos(sesion?.rol_usuario)
 
   const [prestamo, setPrestamo] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  const [aviso, setAviso] = useState(null)
 
   const [observacion, setObservacion] = useState('')
   const [errorObservacion, setErrorObservacion] = useState(null)
@@ -71,7 +72,6 @@ export default function PaginaDetallePrestamo() {
 
   function pedirRechazo(evento) {
     evento?.preventDefault()
-    setAviso(null)
 
     const errores = validarRechazo({ motivo_rechazo_prestamo: motivo })
     if (errores.motivo_rechazo_prestamo) {
@@ -103,7 +103,7 @@ export default function PaginaDetallePrestamo() {
       })
 
       setPrestamo(datos)
-      setAviso(
+      mostrarAviso(
         confirmacion.tipo === 'aprobar'
           ? 'Préstamo aprobado. El equipo quedó en estado Prestado.'
           : 'Solicitud rechazada. El equipo sigue disponible.',
@@ -116,6 +116,7 @@ export default function PaginaDetallePrestamo() {
         if (mensajeCampo) setErrorMotivo(mensajeCampo)
       }
       setError(excepcion.message)
+      mostrarError(excepcion.message)
       setConfirmacion(null)
     } finally {
       setProcesando(false)
@@ -124,7 +125,6 @@ export default function PaginaDetallePrestamo() {
 
   async function devolver(evento) {
     evento.preventDefault()
-    setAviso(null)
     setError(null)
 
     const errores = validarDevolucion({ observacion_prestamo: observacion })
@@ -141,13 +141,14 @@ export default function PaginaDetallePrestamo() {
       const datos = await registrarDevolucion(prestamo.id_prestamo, observacion)
       setPrestamo(datos)
       setObservacion('')
-      setAviso('Devolución registrada. El equipo volvió a estar disponible.')
+      mostrarAviso('Devolución registrada. El equipo volvió a estar disponible.')
     } catch (excepcion) {
       if (excepcion instanceof ErrorDeApi) {
         const mensajeCampo = excepcion.mensajeDeCampo('observacion_prestamo')
         if (mensajeCampo) setErrorObservacion(mensajeCampo)
       }
       setError(excepcion.message)
+      mostrarError(excepcion.message)
     } finally {
       setProcesando(false)
     }
@@ -186,7 +187,6 @@ export default function PaginaDetallePrestamo() {
         </div>
       </EncabezadoDePagina>
 
-      {aviso && <AlertMessage tipo="exito">{aviso}</AlertMessage>}
       {error && <AlertMessage tipo="error">{error}</AlertMessage>}
 
       <section className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6">

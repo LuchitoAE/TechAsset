@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router'
 import { registrarUsuario } from '../api/usuariosApi'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import FormularioUsuario from '../components/usuarios/FormularioUsuario'
+import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useFormulario } from '../hooks/useFormulario'
 import { validarUsuario } from '../reglas/validacionUsuarios'
 
@@ -17,6 +18,7 @@ const VALORES_INICIALES = {
 // RF-01: registrar un usuario activo con correo único y contraseña inicial.
 export default function PaginaNuevoUsuario() {
   const navegar = useNavigate()
+  const { mostrarAviso } = useAvisos()
 
   const formulario = useFormulario({
     valoresIniciales: VALORES_INICIALES,
@@ -31,12 +33,10 @@ export default function PaginaNuevoUsuario() {
     ],
     alEnviar: async (valores) => {
       const usuario = await registrarUsuario(valores)
-      navegar('/usuarios', {
-        replace: true,
-        state: {
-          aviso: `Se registró a ${usuario.nombres_usuario} ${usuario.apellidos_usuario}. Ya puede ingresar con su correo.`,
-        },
-      })
+      mostrarAviso(
+        `Se registró a ${usuario.nombres_usuario} ${usuario.apellidos_usuario}. Ya puede ingresar con su correo.`,
+      )
+      navegar('/usuarios', { replace: true })
     },
   })
 

@@ -67,17 +67,7 @@ public sealed class Equipo
     {
         var errores = new Dictionary<string, string[]>();
 
-        ValidarTexto(
-            errores, CamposDeEquipo.NombreEquipo, nombreEquipo,
-            "El nombre del equipo es obligatorio.",
-            $"El nombre del equipo debe tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.",
-            LongitudMinimaNombre, LongitudMaximaNombre);
-        ValidarTexto(
-            errores, CamposDeEquipo.MarcaEquipo, marcaEquipo,
-            "La marca es obligatoria.",
-            $"La marca debe tener entre {LongitudMinimaMarca} y {LongitudMaximaMarca} caracteres.",
-            LongitudMinimaMarca, LongitudMaximaMarca);
-        ValidarCategoria(errores, categoriaEquipo);
+        ValidarDatos(errores, nombreEquipo, categoriaEquipo, marcaEquipo);
         ValidarEstadoInicial(errores, estadoInicial);
 
         if (errores.Count > 0)
@@ -106,17 +96,7 @@ public sealed class Equipo
     {
         var errores = new Dictionary<string, string[]>();
 
-        ValidarTexto(
-            errores, CamposDeEquipo.NombreEquipo, nombreEquipo,
-            "El nombre del equipo es obligatorio.",
-            $"El nombre del equipo debe tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.",
-            LongitudMinimaNombre, LongitudMaximaNombre);
-        ValidarTexto(
-            errores, CamposDeEquipo.MarcaEquipo, marcaEquipo,
-            "La marca es obligatoria.",
-            $"La marca debe tener entre {LongitudMinimaMarca} y {LongitudMaximaMarca} caracteres.",
-            LongitudMinimaMarca, LongitudMaximaMarca);
-        ValidarCategoria(errores, categoriaEquipo);
+        ValidarDatos(errores, nombreEquipo, categoriaEquipo, marcaEquipo);
 
         if (errores.Count > 0)
         {
@@ -199,6 +179,26 @@ public sealed class Equipo
             throw new ConflictoDeNegocioExcepcion(
                 "No se puede eliminar un equipo con historial de préstamos. Consérvelo y, si ya no se usa, cámbiele el estado a Baja.");
         }
+    }
+
+    // RF-05 y RF-06 comparten los mismos datos editables: nombre, categoría y marca.
+    private static void ValidarDatos(
+        IDictionary<string, string[]> errores,
+        string? nombreEquipo,
+        CategoriaEquipo categoriaEquipo,
+        string? marcaEquipo)
+    {
+        ValidarTexto(
+            errores, CamposDeEquipo.NombreEquipo, nombreEquipo,
+            "El nombre del equipo es obligatorio.",
+            $"El nombre del equipo debe tener entre {LongitudMinimaNombre} y {LongitudMaximaNombre} caracteres.",
+            LongitudMinimaNombre, LongitudMaximaNombre);
+        ValidarTexto(
+            errores, CamposDeEquipo.MarcaEquipo, marcaEquipo,
+            "La marca es obligatoria.",
+            $"La marca debe tener entre {LongitudMinimaMarca} y {LongitudMaximaMarca} caracteres.",
+            LongitudMinimaMarca, LongitudMaximaMarca);
+        ValidarCategoria(errores, categoriaEquipo);
     }
 
     private static void ValidarTexto(
