@@ -928,3 +928,128 @@ Resumen de la suite E2E (API en 5321 y SPA en 5191, Brave sin interfaz):
 - Riesgos abiertos: el límite de intentos es por instancia; el patrón State formal y el código
   `PRE-AAAA-NNNN` del SDD siguen anotados como no requisito; la suite E2E necesita Brave, `psql` y
   las cuentas locales.
+
+---
+
+## Iteración 6 — Segunda parte: documentos, entrega y publicación preparada
+
+**Fecha:** 18/11/2026
+**Rama:** `feature/iteracion-6-documentos` → `develop`
+**Objetivo:** cerrar los documentos y la entrega con datos reales, preparar la sustentación y dejar la
+publicación lista sin desplegar.
+
+### Alcance
+
+- ERS 0100 y SDD 0100 regenerados con los estados de implementación al cierre de la iteración 6;
+  las versiones anteriores se guardaron en `Analisis/ERS/Historico/` y `Analisis/SDD/Historico/`.
+- Informe técnico breve en el formato del informe de ReservaUPLA: carátula, trece secciones y
+  galería apaisada, con capturas reales de `Evidencias/iteracion-5` y `iteracion-6`.
+- `Entrega/` con los diez productos del punto 12 del caso y un `00-LEEME.md` que los relaciona.
+- Presentación de sustentación de 13 diapositivas y guion de 10 a 12 minutos.
+- `docs/despliegue.md`, `backend/Dockerfile`, `backend/.dockerignore` y `frontend/vercel.json`.
+- README, estándares y este registro actualizados con la segunda parte.
+
+### Tareas y tiempo aproximado
+
+| Tarea | Tiempo |
+|---|---|
+| Revisar estados de la ERS y del SDD | 0,5 h |
+| Regenerar ERS y SDD, archivar versiones y revisar hojas | 1,0 h |
+| Informe técnico breve: contenido, formato y capturas | 2,0 h |
+| Documentos de la entrega: backend, frontend, componentes, validaciones, consultas y dashboard | 2,0 h |
+| Presentación de 13 diapositivas y guion | 1,5 h |
+| Publicación preparada: Dockerfile, vercel.json y guía | 1,0 h |
+| Verificación completa, revisión visual y este registro | 1,0 h |
+
+### Decisiones
+
+- **La versión sigue siendo 0100.** La ERS y el SDD mantienen la línea base de requisitos y diseño;
+  lo que cambió es el estado de implementación, que se anota en cada ficha y en la historia del
+  documento. Así se conservan las referencias `[2]` y `[10]` y el nombre del archivo entregable.
+- **Se documentan las migraciones reales: cuatro.** El encargo mencionaba siete; el repositorio, la
+  base y `dotnet ef migrations list` muestran cuatro (`CrearUsuarios`, `CrearEquipos`,
+  `CrearPrestamos` y `CrearMovimientos`). No se inventaron migraciones para cuadrar el número.
+- **Se corrigieron dos imprecisiones del SDD.** La tabla de componentes nombraba `NumberInput` y
+  `TableList`, que no existen; ahora lista `TextAreaInput` y `ContenedorDeTabla`. La tabla de
+  patrones presentaba un State y un Factory formales que no se implementaron; ahora dice
+  «transiciones de estado en la entidad» y aclara que el State formal quedó fuera por no ser
+  requisito. También se corrigió el código `PRE-AAAA-NNNN`: no se implementó.
+- **El informe usa una portada con una captura real** del ingreso, recortada a 16:9; no se generó una
+  ilustración artificial ni se copió la foto de ReservaUPLA.
+- **La captura del teléfono se recorta** a la parte superior para que quepa en el informe y en la
+  presentación; el original completo queda en `Evidencias/iteracion-6/`.
+- **La publicación no se ejecuta.** `frontend/vercel.json` usa
+  `https://techasset-api.onrender.com` como marcador; al crear el servicio en Render se reemplaza por
+  la URL real. No se crearon cuentas ni se subieron secretos.
+- **La API se publica con `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`** para que la cookie se marque
+  `Secure` cuando el proxy termina TLS.
+
+### Artefactos
+
+- `Semanas/.herramientas/caso_unidad3_2/informe_corto.py`, `entrega.py` y `presentacion.py`.
+- `Documentacion/Informe tecnico breve - TechAsset.docx` (8 hojas) y su copia en
+  `Entrega/09-informe/`.
+- `Entrega/00-LEEME.md`, `01-codigo/LEEME.md`, `02-base-de-datos/` (`esquema.sql`,
+  `modelo-de-datos.png` y `LEEME.md`), `03-backend/` (documento, captura de Swagger y 21 respuestas
+  JSON), `04-frontend/`, `05-componentes/`, `06-formularios/`, `07-consultas/`, `08-dashboard/` y
+  `10-sustentacion/` (`Sustentacion - TechAsset.pptx` y `guion.md`).
+- `TechAsset/docs/despliegue.md`, `TechAsset/backend/Dockerfile`,
+  `TechAsset/backend/.dockerignore` y `TechAsset/frontend/vercel.json`.
+- ERS 0100 (50 hojas), SDD 0100 (23 hojas) y las versiones «antes de la iteración 6» en los
+  históricos.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `dotnet build -warnaserror` | 0 errores, 0 advertencias |
+| `dotnet test` | 225 de 225 |
+| `dotnet ef migrations list` | 4 migraciones aplicadas |
+| `pnpm lint` | sin avisos |
+| `pnpm test` | 95 de 95 (20 archivos) |
+| `pnpm build` | 163 módulos; 384,73 kB de JS y 31,68 kB de CSS |
+| Suite E2E | 50 de 50 |
+| ERS renderizada | 50 hojas, 1 salto automático, 0 títulos sin página, 0 tablas partidas |
+| SDD renderizado | 23 hojas, 0 saltos, 0 títulos sin página, 0 tablas partidas |
+| Informe renderizado | 8 hojas A4; revisadas carátula, secciones 6–9 y galería apaisada |
+| Presentación | 13 diapositivas 16:9; renderizada a PDF y revisadas portada, flujo y cierre |
+| `Entrega/` | 10 productos y 0 rutas roscas; `00-LEEME.md` los relaciona |
+| Base local | 3 usuarios, 0 equipos, 0 préstamos, 0 movimientos |
+| Secretos | `git status` sin cadenas, contraseñas ni claves |
+
+### Defectos encontrados y corregidos
+
+1. El SDD listaba `NumberInput` y `TableList`, que nunca existieron; se reemplazaron por los
+   componentes reales.
+2. El SDD atribuía al código un patrón State y un Factory formales; se corrigió para describir las
+   transiciones en la entidad y se anotó que el State formal no es requisito.
+3. La galería del informe usaba la captura completa del teléfono (390 × 2505) y desbordaba la hoja
+   apaisada; se recortó y se limitó a cuatro capturas 4:3.
+4. La tabla de componentes del informe y el documento de entrega citaban 24 endpoints; el conteo real
+   es 25 rutas y 26 operaciones con el alias `/api/movimientos`.
+5. Las tablas del informe ignoraban el ancho de columna porque faltaba `tblLayout fixed` y el
+   `gridCol`; se corrigió en el generador.
+6. Los bloques de código se partían entre páginas; se les puso `keep_together`.
+7. La captura de Swagger requería la cookie de sesión; se tomó con `Network.setCookie` y se recortó
+   para que no ocupara seis hojas.
+
+### Retrospectiva
+
+- **Bien:** los datos reales de las pruebas y de `curl` permitieron escribir el informe y los
+  documentos sin inventar cifras; el generador del informe de ReservaUPLA se adaptó sin copiar su
+  contenido. La suite E2E y las capturas ya existían, así que el cierre fue de selección y redacción.
+- **Difícil:** el encargo y la realidad no coincidían en el número de migraciones (7 frente a 4); se
+  documentó la realidad. Las capturas de teléfono son tiras muy altas y obligan a recortar; los
+  generadores deben limitar el alto, no solo el ancho.
+- **Aprendizaje:** los documentos también se prueban: hay que renderizarlos, contar hojas, revisar
+  tablas partidas y mirar las páginas clave. Un dato falso en el SDD (un componente que no existe)
+  se detecta antes leyendo el código que confiando en el documento anterior.
+
+### Pendiente y riesgos
+
+- Desplegar de verdad en Render, Vercel y Supabase cuando el alumno lo pida; reemplazar la URL
+  marcador de `vercel.json`.
+- El límite de intentos vive en memoria de una instancia; con varias réplicas necesita un almacén
+  compartido.
+- El State formal y el código `PRE-AAAA-NNNN` siguen fuera de alcance y anotados como no requisito.
+- No hay pruebas en Windows; el servidor se verificó en Linux y el navegador en Brave.

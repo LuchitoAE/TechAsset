@@ -1,0 +1,14 @@
+bin/
+obj/
+tests/
+**/bin/
+**/obj/
+.git/
+.gitignore
+.gitattributes
+*.user
+*.suo
+.vs/
+.vscode/
+Dockerfile
+.dockerignore

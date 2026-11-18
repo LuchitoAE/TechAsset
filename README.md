@@ -114,6 +114,13 @@ datos y detienen lo que arrancaron:
 python3 .herramientas/caso_unidad3_2/pruebas.py
 ```
 
+## Publicación
+
+La publicación está preparada, **no ejecutada**: la SPA va a Vercel, la API a Render en Docker y la
+base a Supabase. El procedimiento, las variables y las comprobaciones están en
+[`docs/despliegue.md`](docs/despliegue.md); los archivos son `backend/Dockerfile`,
+`backend/.dockerignore` y `frontend/vercel.json`. No se crearon cuentas ni se subieron secretos.
+
 ## Ramas y versiones
 
 `main` guarda lo entregado; `develop` integra el trabajo; cada requisito se desarrolla en su rama
@@ -146,5 +153,9 @@ distribución del panel; aviso flotante global de RNF-04 con `role="status"`, ci
 botón de cerrar, conectado a las acciones principales; versión única `1.0.0` en el pie; refactor de
 formularios y validaciones; límite de cinco ingresos fallidos por minuto con 429 y mensaje en
 español; suite E2E de los escenarios E-01 a E-15 (50 comprobaciones) con capturas en
-`../Evidencias/iteracion-6/`; 225 pruebas de backend y 95 de frontend. La publicación y los
-documentos quedan para la segunda parte.
+`../Evidencias/iteracion-6/`; 225 pruebas de backend y 95 de frontend.
+**Iteración 6, segunda parte (18/11/2026):** cierre documental y publicación preparada: ERS (50
+hojas) y SDD (23 hojas) con los estados de implementación de la iteración 6; informe técnico breve,
+`Entrega/` con los diez productos del caso y sustentación de 13 diapositivas; `docs/despliegue.md`
+con Render + Vercel + Supabase, `backend/Dockerfile` y `frontend/vercel.json`. No se desplegó ni se
+crearon cuentas. La versión 1.0.0 queda integrada en `develop`; `main` conserva la línea base.
