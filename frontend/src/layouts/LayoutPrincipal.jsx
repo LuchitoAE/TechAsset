@@ -42,7 +42,7 @@ export default function LayoutPrincipal() {
           <Link to="/" className="flex shrink-0 items-center gap-2.5" onClick={cerrarMenu}>
             <span
               aria-hidden="true"
-              className="grid size-9 place-items-center rounded-lg bg-marca-700 text-sm font-bold text-white shadow-campo"
+              className="grid size-9 place-items-center rounded-lg bg-marca-700 text-sm font-bold text-sobre-marca shadow-campo"
             >
               TA
             </span>

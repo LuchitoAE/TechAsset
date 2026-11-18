@@ -6,4 +6,5 @@ namespace TechAsset.Application.Comandos;
 public sealed record RegistrarDevolucionComando(
     Guid IdPrestamo,
     string? ObservacionPrestamo,
+    Guid IdUsuarioSesion,
     RolUsuario RolSesion);

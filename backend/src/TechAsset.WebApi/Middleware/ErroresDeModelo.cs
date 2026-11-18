@@ -80,6 +80,13 @@ public static class ErroresDeModelo
             return "El estado del préstamo debe ser Solicitado, Activo, Devuelto o Rechazado.";
         }
 
+        if (campo.Contains("tipo_movimiento", StringComparison.Ordinal) || campo == "tipo")
+        {
+            return "El tipo de movimiento debe ser EquipoRegistrado, EquipoActualizado, " +
+                "EquipoEstadoCambiado, PrestamoSolicitado, PrestamoAprobado, PrestamoRechazado o " +
+                "PrestamoDevuelto.";
+        }
+
         if (campo.Contains("fecha_devolucion", StringComparison.Ordinal))
         {
             return "La fecha de devolución debe tener el formato AAAA-MM-DD.";

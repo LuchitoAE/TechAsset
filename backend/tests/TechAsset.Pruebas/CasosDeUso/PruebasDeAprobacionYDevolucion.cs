@@ -16,18 +16,20 @@ public class PruebasDeAprobacionYDevolucion
 
     private readonly RepositorioDeEquiposEnMemoria _equipos = new();
     private readonly RepositorioDePrestamosEnMemoria _prestamos = new();
+    private readonly RepositorioDeMovimientosEnMemoria _movimientos = new();
     private readonly UnidadDeTrabajoDePrueba _unidadDeTrabajo = new();
+    private readonly Guid _idUsuario = Guid.NewGuid();
     private readonly RelojDePrueba _reloj = new(Hoy);
     private readonly Usuario _colaborador = FabricaDeUsuarios.Crear("ana@innovatech.pe");
 
     private AprobarPrestamoCasoDeUso Aprobar() =>
-        new(_prestamos, _equipos, _unidadDeTrabajo, _reloj);
+        new(_prestamos, _equipos, _movimientos, _unidadDeTrabajo, _reloj);
 
     private RechazarPrestamoCasoDeUso Rechazar() =>
-        new(_prestamos, _unidadDeTrabajo, _reloj);
+        new(_prestamos, _movimientos, _unidadDeTrabajo, _reloj);
 
     private RegistrarDevolucionCasoDeUso Devolver() =>
-        new(_prestamos, _equipos, _unidadDeTrabajo, _reloj);
+        new(_prestamos, _equipos, _movimientos, _unidadDeTrabajo, _reloj);
 
     private (Equipo Equipo, Prestamo Prestamo) PrepararSolicitud(EstadoEquipo estado = EstadoEquipo.Disponible)
     {
@@ -46,7 +48,7 @@ public class PruebasDeAprobacionYDevolucion
         var (equipo, prestamo) = PrepararSolicitud();
 
         var detalle = await Aprobar().EjecutarAsync(
-            new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia));
+            new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia));
 
         Assert.Equal(EstadoPrestamo.Activo, detalle.EstadoPrestamo);
         Assert.Equal(Hoy, detalle.FechaPrestamo);
@@ -62,7 +64,7 @@ public class PruebasDeAprobacionYDevolucion
         var (equipo, prestamo) = PrepararSolicitud();
 
         var detalle = await Aprobar().EjecutarAsync(
-            new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.Administrador));
+            new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.Administrador));
 
         Assert.Equal(EstadoPrestamo.Activo, detalle.EstadoPrestamo);
         Assert.Equal(EstadoEquipo.Prestado, equipo.EstadoEquipo);
@@ -79,7 +81,7 @@ public class PruebasDeAprobacionYDevolucion
 
         var excepcion = await Assert.ThrowsAsync<ConflictoDeNegocioExcepcion>(() =>
             Aprobar().EjecutarAsync(
-                new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia)));
+                new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia)));
 
         Assert.Contains("préstamo activo", excepcion.Message);
         Assert.Equal(EstadoPrestamo.Solicitado, prestamo.EstadoPrestamo);
@@ -94,7 +96,7 @@ public class PruebasDeAprobacionYDevolucion
 
         var excepcion = await Assert.ThrowsAsync<ConflictoDeNegocioExcepcion>(() =>
             Aprobar().EjecutarAsync(
-                new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia)));
+                new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia)));
 
         Assert.Contains("Mantenimiento", excepcion.Message);
         Assert.Equal(EstadoEquipo.Mantenimiento, equipo.EstadoEquipo);
@@ -110,7 +112,7 @@ public class PruebasDeAprobacionYDevolucion
 
         var excepcion = await Assert.ThrowsAsync<DatosInvalidosExcepcion>(() =>
             Aprobar().EjecutarAsync(
-                new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia)));
+                new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia)));
 
         Assert.True(excepcion.Errores.ContainsKey(CamposDePrestamo.FechaDevolucionPrestamo));
         Assert.Equal(EstadoPrestamo.Solicitado, prestamo.EstadoPrestamo);
@@ -123,11 +125,15 @@ public class PruebasDeAprobacionYDevolucion
 
         await Assert.ThrowsAsync<AccesoDenegadoExcepcion>(() =>
             Aprobar().EjecutarAsync(
-                new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.Colaborador)));
+                new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.Colaborador)));
 
         await Assert.ThrowsAsync<AccesoDenegadoExcepcion>(() =>
             Rechazar().EjecutarAsync(
-                new RechazarPrestamoComando(prestamo.IdPrestamo, "No corresponde.", RolUsuario.Colaborador)));
+                new RechazarPrestamoComando(
+                    prestamo.IdPrestamo,
+                    "No corresponde.",
+                    _idUsuario,
+                    RolUsuario.Colaborador)));
 
         Assert.Equal(EstadoPrestamo.Solicitado, prestamo.EstadoPrestamo);
     }
@@ -137,14 +143,14 @@ public class PruebasDeAprobacionYDevolucion
     {
         await Assert.ThrowsAsync<RecursoNoEncontradoExcepcion>(() =>
             Aprobar().EjecutarAsync(
-                new AprobarPrestamoComando(Guid.NewGuid(), RolUsuario.ResponsableDeTecnologia)));
+                new AprobarPrestamoComando(Guid.NewGuid(), _idUsuario, RolUsuario.ResponsableDeTecnologia)));
     }
 
     [Fact]
     public async Task NoSeApruebaDosVeces()
     {
         var (_, prestamo) = PrepararSolicitud();
-        var comando = new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia);
+        var comando = new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia);
 
         await Aprobar().EjecutarAsync(comando);
 
@@ -159,6 +165,7 @@ public class PruebasDeAprobacionYDevolucion
         var detalle = await Rechazar().EjecutarAsync(new RechazarPrestamoComando(
             prestamo.IdPrestamo,
             "El colaborador ya tiene una laptop asignada.",
+            _idUsuario,
             RolUsuario.ResponsableDeTecnologia));
 
         Assert.Equal(EstadoPrestamo.Rechazado, detalle.EstadoPrestamo);
@@ -175,6 +182,7 @@ public class PruebasDeAprobacionYDevolucion
             Rechazar().EjecutarAsync(new RechazarPrestamoComando(
                 prestamo.IdPrestamo,
                 " ",
+                _idUsuario,
                 RolUsuario.ResponsableDeTecnologia)));
 
         Assert.True(excepcion.Errores.ContainsKey(CamposDePrestamo.MotivoRechazoPrestamo));
@@ -186,13 +194,14 @@ public class PruebasDeAprobacionYDevolucion
     {
         var (equipo, prestamo) = PrepararSolicitud();
         await Aprobar().EjecutarAsync(
-            new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia));
+            new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia));
 
         _reloj.Hoy = Hoy.AddDays(3);
 
         var detalle = await Devolver().EjecutarAsync(new RegistrarDevolucionComando(
             prestamo.IdPrestamo,
             "Devuelto con el cargador y la funda.",
+            _idUsuario,
             RolUsuario.ResponsableDeTecnologia));
 
         Assert.Equal(EstadoPrestamo.Devuelto, detalle.EstadoPrestamo);
@@ -207,12 +216,13 @@ public class PruebasDeAprobacionYDevolucion
     {
         var (equipo, prestamo) = PrepararSolicitud();
         await Aprobar().EjecutarAsync(
-            new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia));
+            new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia));
 
         var excepcion = await Assert.ThrowsAsync<DatosInvalidosExcepcion>(() =>
             Devolver().EjecutarAsync(new RegistrarDevolucionComando(
                 prestamo.IdPrestamo,
                 "",
+                _idUsuario,
                 RolUsuario.ResponsableDeTecnologia)));
 
         Assert.True(excepcion.Errores.ContainsKey(CamposDePrestamo.ObservacionPrestamo));
@@ -225,12 +235,13 @@ public class PruebasDeAprobacionYDevolucion
     {
         var (_, prestamo) = PrepararSolicitud();
         await Aprobar().EjecutarAsync(
-            new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia));
+            new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia));
 
         await Assert.ThrowsAsync<AccesoDenegadoExcepcion>(() =>
             Devolver().EjecutarAsync(new RegistrarDevolucionComando(
                 prestamo.IdPrestamo,
                 "Devuelto sin novedad.",
+                _idUsuario,
                 RolUsuario.Colaborador)));
 
         Assert.Equal(EstadoPrestamo.Activo, prestamo.EstadoPrestamo);
@@ -241,10 +252,11 @@ public class PruebasDeAprobacionYDevolucion
     {
         var (_, prestamo) = PrepararSolicitud();
         await Aprobar().EjecutarAsync(
-            new AprobarPrestamoComando(prestamo.IdPrestamo, RolUsuario.ResponsableDeTecnologia));
+            new AprobarPrestamoComando(prestamo.IdPrestamo, _idUsuario, RolUsuario.ResponsableDeTecnologia));
         var comando = new RegistrarDevolucionComando(
             prestamo.IdPrestamo,
             "Devuelto sin novedad.",
+            _idUsuario,
             RolUsuario.ResponsableDeTecnologia);
 
         await Devolver().EjecutarAsync(comando);
@@ -263,6 +275,7 @@ public class PruebasDeAprobacionYDevolucion
             Devolver().EjecutarAsync(new RegistrarDevolucionComando(
                 prestamo.IdPrestamo,
                 "Devuelto sin novedad.",
+                _idUsuario,
                 RolUsuario.Administrador)));
 
         Assert.Contains("activo", excepcion.Message);
@@ -275,6 +288,7 @@ public class PruebasDeAprobacionYDevolucion
             Devolver().EjecutarAsync(new RegistrarDevolucionComando(
                 Guid.NewGuid(),
                 "Devuelto sin novedad.",
+                _idUsuario,
                 RolUsuario.Administrador)));
     }
 }

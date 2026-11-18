@@ -12,7 +12,7 @@ export default function PaginaNoEncontrada() {
         </p>
         <Link
           to="/"
-          className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-white hover:bg-marca-800"
+          className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
         >
           Volver al inicio
         </Link>

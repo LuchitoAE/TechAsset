@@ -2,16 +2,19 @@ using TechAsset.Application.Comandos;
 using TechAsset.Application.Datos;
 using TechAsset.Application.Interfaces;
 using TechAsset.Domain.Comun;
+using TechAsset.Domain.Entidades;
 using TechAsset.Domain.Excepciones;
 
 namespace TechAsset.Application.CasosDeUso;
 
 // RF-06 y RN-07: corrige los datos del equipo y mantiene el código único. El estado no se cambia
 // aquí y el código no se mueve mientras el equipo tenga un préstamo activo: eso se comprueba contra
-// los préstamos y no solo contra estado_equipo (iteración 4).
+// los préstamos y no solo contra estado_equipo. La corrección deja su movimiento (RF-17).
 public sealed class ActualizarEquipoCasoDeUso(
     IRepositorioDeEquipos repositorioDeEquipos,
-    IRepositorioDePrestamos repositorioDePrestamos)
+    IRepositorioDePrestamos repositorioDePrestamos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
+    IReloj reloj)
 {
     public async Task<DatosDeEquipo> EjecutarAsync(
         ActualizarEquipoComando comando,
@@ -42,6 +45,10 @@ public sealed class ActualizarEquipoCasoDeUso(
             comando.CategoriaEquipo,
             comando.MarcaEquipo,
             tienePrestamoActivo);
+
+        await repositorioDeMovimientos.AgregarAsync(
+            Movimiento.DeEquipoActualizado(equipo, comando.IdUsuarioSesion, reloj.AhoraEnUtc),
+            cancellationToken);
 
         await repositorioDeEquipos.GuardarCambiosAsync(cancellationToken);
 

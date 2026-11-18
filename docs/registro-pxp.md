@@ -542,3 +542,189 @@ GET  /api/prestamos (Colaborador)                     200  total=1, solo «Carlo
 - Revisión de interfaz: modo oscuro completo, 390 px, contraste y teclado en las pantallas nuevas.
 - Código `PRE-AAAA-NNNN` del SDD y posible extracción del patrón State, si el cierre lo pide.
 - E2E de los escenarios E-01 a E-15 del Anexo B del SDD.
+
+---
+
+## Iteración 5 — Salidas, dashboard e interfaz
+
+**Fecha:** 18/11/2026
+**Rama:** `feature/iteracion-5-salidas` → `develop`
+**Objetivo:** RF-13 a RF-17: los seis indicadores del panel, equipos por estado, equipos más utilizados,
+préstamos por área e historial de movimientos; interfaz coherente, modo oscuro y teléfono de 390 px.
+
+### Alcance
+
+- Entidad `Movimiento` con tipo, fecha, equipo, usuario, préstamo (cuando corresponde) y detalle;
+  enumeración `TipoMovimiento` con siete tipos: alta, actualización y cambio de estado de equipos, y
+  solicitud, aprobación, rechazo y devolución de préstamos.
+- Registro automático del movimiento en la misma operación que el hecho: alta, actualización y cambio
+  de estado de equipos; solicitud, aprobación, rechazo y devolución de préstamos. El movimiento se
+  agrega al mismo contexto y se confirma con el `SaveChanges` de la operación; en aprobación y
+  devolución queda dentro de la transacción y del bloqueo `SELECT … FOR UPDATE` que ya existían.
+- Migración `20261118010811_CrearMovimientos`: tabla `movimientos`, CHECK del tipo, claves foráneas
+  `fk_movimientos_equipo`, `fk_movimientos_usuario` y `fk_movimientos_prestamo` con
+  `ON DELETE RESTRICT`, e índices por fecha, tipo, equipo, usuario y préstamo. La misma migración
+  agrega `ix_equipos_marca` e `ix_prestamos_fecha_prestamo` para los filtros de los reportes.
+- Consultas de salida separadas de los repositorios: `ConsultaDeIndicadores`,
+  `ConsultaDeEquiposPorEstado`, `ConsultaDeEquiposMasUtilizados`, `ConsultaDePrestamosPorArea` y
+  `ConsultaDeMovimientos`, todas con proyección y `AsNoTracking`.
+- Casos de uso de salida y endpoints: `GET /api/reportes/panel`,
+  `/equipos-por-estado`, `/equipos-mas-utilizados`, `/prestamos-por-area` y `/movimientos`; el
+  historial también responde en `/api/movimientos`. El panel lo consulta cualquier sesión; los
+  cuatro reportes, el Responsable de Tecnología y el Administrador. Sin cookie, 401; con rol
+  insuficiente, 403.
+- SPA: panel con los seis indicadores y una distribución simple en CSS; reportes en cuatro pestañas con
+  filtros, tablas accesibles, estados vacíos y paginación; menú por rol con Reportes para el
+  Responsable. Modo claro/oscuro, foco visible, tablas apiladas como tarjetas desde 390 px y aviso de
+  alcance para el Colaborador.
+- Pruebas xUnit de indicadores, ranking, áreas (incluido el empate), movimientos, alcance del panel y
+  permisos; pruebas Vitest de las reglas de formato y de los componentes nuevos.
+
+### Tareas y tiempo aproximado
+
+| Tarea | Tiempo |
+|---|---|
+| Dominio del movimiento, tipos y fábricas de detalle | 0,75 h |
+| Registro en los siete casos de uso y ajuste de comandos | 1,0 h |
+| Consultas de salida, reglas puras y migración | 1,5 h |
+| Controlador de reportes, permisos y errores | 0,75 h |
+| Pruebas xUnit y ajustes | 1,5 h |
+| Frontend: API, reglas, tarjetas, tablas y pestañas | 2,0 h |
+| Panel, reportes, modo oscuro y responsive | 2,0 h |
+| Pruebas Vitest, lint y build | 0,75 h |
+| Datos de prueba, curl, capturas y limpieza | 1,25 h |
+
+### Decisiones
+
+No cambió ninguna decisión del Anexo A. Se aplicaron D-03 (tabla `movimientos`), D-09 (cuentan Activos
+y Devueltos; el área es la del responsable; los empates se muestran completos) y D-10 (los seis
+indicadores del PDF no se reemplazan).
+
+Se agregó **D-17**: el panel lo consultan los tres roles. Para el Colaborador, los contadores del
+inventario son de toda la empresa (él ya consulta el inventario completo) y «Total de préstamos» y
+«Área con mayor uso» se calculan solo con sus préstamos. Los cuatro reportes quedan para el Responsable
+y el Administrador, como fija el SDD.
+
+Decisiones de implementación que no alteran el contrato:
+
+- **El movimiento referencia el préstamo cuando existe** (`id_prestamo`), además del equipo y del
+  usuario que hizo el hecho; así el historial permite seguir el rastro completo sin deducirlo. El
+  usuario del movimiento es el actor de la sesión: en la solicitud es el Colaborador; en la aprobación,
+  el rechazo y la devolución, quien decide.
+- **El total de equipos suma los cuatro estados, incluido Baja.** El PDF no pide un indicador de Bajas,
+  pero sí que el total no pierda equipos; el panel muestra los seis indicadores y la distribución
+  incluye solo Disponibles, Prestados y Mantenimiento, sin reemplazar ninguno.
+- **El ranking se limita a 10 por defecto y 100 como máximo**, con `limite` en la consulta. El orden
+  es cantidad descendente y, en empate, código patrimonial ascendente; las áreas de cada equipo se
+  muestran completas si empatan.
+- **El filtro de fechas de movimientos usa el día de America/Lima convertido a UTC** (intervalo
+  semiabierto), para que el día «hasta» entre completo. Los reportes de área usan `fecha_prestamo`,
+  igual que el historial de préstamos.
+- **Las áreas sin préstamos aparecen en cero** tomando las áreas del catálogo de usuarios; el
+  porcentaje se redondea a un decimal.
+- **No se exporta a PDF ni Excel** (D-13): las salidas se consultan dentro del sistema.
+- **Se conserva la confirmación en línea** de las pantallas anteriores; el aviso flotante global de
+  RNF-04 se completa en la iteración 6 para no rehacer los formularios dos veces.
+
+### Artefactos
+
+- `backend/src/TechAsset.Domain/Entidades/Movimiento.cs`, `Enumeraciones/TipoMovimiento.cs` y
+  `Comun/CamposDeMovimiento.cs`.
+- `backend/src/TechAsset.Application/Datos/` con los indicadores, las filas de reportes, las páginas de
+  movimientos y sus filtros; `ReglasDeReportes.cs`, `RangoDeFechas.cs`,
+  `CasosDeUso/ObtenerIndicadoresDelPanelCasoDeUso.cs` y los cuatro casos de uso de reportes;
+  `Interfaces/IConsultaDe…` e `IRepositorioDeMovimientos.cs`.
+- `backend/src/TechAsset.Infrastructure/Persistencia/Configuraciones/ConfiguracionDeMovimiento.cs`,
+  `Repositorios/RepositorioDeMovimientos.cs`, las cinco consultas nuevas en `Consultas/` y
+  `Migraciones/20261118010811_CrearMovimientos.cs`.
+- `backend/src/TechAsset.WebApi/Controladores/ReportesControlador.cs` y los comandos de equipos y
+  préstamos con el usuario de la sesión.
+- `backend/tests/TechAsset.Pruebas/`: `PruebasDeMovimientos`, `PruebasDeMovimientosDeOperaciones`,
+  `PruebasDeReportes`, `PruebasDePermisosDeReportes`, `ConsultaDeSalidasDePrueba`,
+  `RepositorioDeMovimientosEnMemoria` y `FabricaDePruebasDeReportes`.
+- `frontend/src/api/reportesApi.js`, `reglas/reportes.js`, `components/ui/CardIndicador.jsx`,
+  `components/reportes/` (contenedor de tabla, etiqueta de movimiento y los cuatro reportes),
+  `paginas/PaginaInicio.jsx` y `paginas/PaginaReportes.jsx`.
+- `frontend/src/index.css` con los tokens de modo oscuro corregidos, `prefers-reduced-motion` y las
+  tablas apiladas del teléfono; `index.html` con `color-scheme`.
+- `../Evidencias/iteracion-5/` con diez capturas: panel y reportes en escritorio, modo oscuro y
+  teléfono de 390 × 844.
+- ERS y SDD regenerados (49 y 23 hojas), `README.md` y este registro.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `dotnet build -warnaserror` en `backend/` | 0 errores, 0 advertencias |
+| `dotnet test` en `backend/` | 215 pruebas, 215 en verde |
+| `dotnet ef migrations has-pending-model-changes` | «No changes have been made to the model since the last migration.» |
+| Migración en PostgreSQL | `20261118010811_CrearMovimientos` aplicada; tabla `movimientos` con `ck_movimientos_tipo`, tres claves foráneas `RESTRICT` y cinco índices; `ix_equipos_marca` e `ix_prestamos_fecha_prestamo` |
+| `pnpm lint` | Sin avisos |
+| `pnpm test` | 87 pruebas, 87 en verde (18 archivos) |
+| `pnpm build` | 157 módulos; 385,74 kB de JavaScript y 30,73 kB de CSS; `dist/` generado |
+| Panel con curl | 6 equipos, 3 disponibles, 1 prestado, 1 en mantenimiento, 6 préstamos; áreas «Recursos Humanos» y «Soporte» empatadas y completas |
+| Reportes con curl | Equipos por estado: 3/1/1/1 y total 6; ranking: TK-9005 y TK-9006 con 2, luego TK-9001 y TK-9004 con 1; áreas: 3 y 3 (50 % cada una) más dos áreas en cero; movimientos: 25, paginados y filtrados por tipo, equipo, usuario y fechas |
+| Permisos con curl | Panel sin cookie 401; Colaborador en los cuatro reportes 403; Administrador y Responsable 200; `/api/movimientos` 200 |
+| Errores con curl | Rango invertido 400 con `errors.desde`; tipo de movimiento inválido 400 con `errors.tipo` en español |
+| Limpieza | Se borraron 25 movimientos, 7 préstamos, 6 equipos y la cuenta de prueba; la base quedó con 3 usuarios, 0 equipos, 0 préstamos y 0 movimientos |
+| Capturas | `01-panel-escritorio.png` a `10-movimientos-telefono.png`; el panel y las tablas no desbordan la página a 390 px |
+| Contraste | Tokens medidos en claro y oscuro: texto 15,06:1 y 16,14:1; texto suave 6,40:1 y 8,12:1; estados entre 4,85:1 y 9,23:1; se corrigieron `marca-50` y el texto de los botones en oscuro |
+
+Respuestas resumidas de la verificación con curl (API en `http://localhost:5321`):
+
+```text
+GET  /api/reportes/panel (Administrador)       200  total=6, disponibles=3, prestados=1, mantenimiento=1,
+                                                    préstamos=6, áreas=[Recursos Humanos, Soporte]
+GET  /api/reportes/panel (Colaborador)         200  total=6, disponibles=3, préstamos=3, área=Recursos Humanos
+GET  /api/reportes/equipos-por-estado          200  Disponible=3, Prestado=1, Mantenimiento=1, Baja=1, total=6
+GET  /api/reportes/equipos-mas-utilizados      200  TK-9005=2, TK-9006=2, TK-9001=1, TK-9004=1
+GET  /api/reportes/prestamos-por-area          200  total=6: Recursos Humanos=3 (50 %), Soporte=3 (50 %),
+                                                    Gerencia de Tecnología=0, Tecnología=0
+GET  /api/reportes/movimientos?tamano=3        200  total=25; los tres últimos son devolución, aprobación y solicitud
+GET  /api/movimientos?tipo=PrestamoDevuelto…   200  filtra por tipo, equipo y fechas
+GET  /api/reportes/panel (sin cookie)          401  Debe iniciar sesión.
+GET  /api/reportes/* (Colaborador)             403  Su rol no permite esta operación.
+GET  /api/reportes/prestamos-por-area rango    400  errors.desde: «La fecha inicial no puede ser posterior…»
+GET  /api/reportes/movimientos?tipo=Nada       400  errors.tipo: «El tipo de movimiento debe ser …»
+```
+
+### Defectos encontrados y corregidos
+
+1. En modo oscuro, `marca-50` conservaba el azul claro del modo claro y los textos `marca-800` de las
+   pestañas y etiquetas quedaban con 1,62:1. Se definió `marca-50` oscuro (#0f2f42) y el contraste subió
+   a 7,86:1.
+2. Los botones primarios usaban `text-white` sobre `marca-700`, que en oscuro es un azul claro (2,22:1).
+   Se agregaron los tokens `sobre-marca` y `sobre-error`, con texto azul profundo en modo oscuro
+   (6,58:1 y 7,8:1), y se aplicaron a botones, chips y marca.
+3. Las tablas de reportes se desplazaban en horizontal dentro de su contenedor, pero a 390 px la
+   lectura era incómoda. Se apilaron como tarjetas con `data-etiqueta` y CSS, siguiendo la guía
+   `responsive-table`; el encabezado se oculta y cada celda muestra su etiqueta.
+4. La prueba del menú del Responsable esperaba dos accesos; al agregar Reportes son tres. Se actualizó
+   la prueba, no el menú.
+5. El índice de la clave foránea `id_prestamo` salía con nombre PascalCase por convención de EF Core.
+   Se nombró `ix_movimientos_prestamo` en la configuración y se regeneró la migración.
+6. El doble de pruebas de salidas necesitó `using TechAsset.Application;` para resolver
+   `ReglasDeReportes`; se corrigió el alcance del nombre, no la regla.
+
+### Retrospectiva
+
+- **Bien:** separar las reglas puras (`ReglasDeReportes`, `IndicadoresDelPanel.Desde`, `RangoDeFechas`)
+  de las consultas de EF Core permitió probar empates, porcentajes y sumas sin base de datos; las
+  consultas quedaron cortas y con proyección. El movimiento dentro de la misma transacción no obligó a
+  reabrir los casos de uso: solo se agregó al contexto antes del `SaveChanges`.
+- **Difícil:** el alcance del panel para el Colaborador no estaba fijado por el PDF; se resolvió con
+  D-17 y se probó en la API y en el componente. El modo oscuro reveló dos problemas de contraste que
+  no se ven en claro: los tokens de fondo y el texto de los botones deben revisarse por separado.
+- **Aprendizaje:** una tabla «responsive» no es solo `overflow-x-auto`: a 390 px hay que cambiar el
+  formato. Los datos de prueba deben cubrir empates y áreas en cero, porque son los casos que el
+  usuario usa para decidir y los que un reporte suele romper.
+
+### Pendiente para la iteración 6
+
+- RNF-04: aviso flotante global de confirmación (role=`status`, cierre a los 8 s) y revisión de los
+  mensajes en línea de las pantallas anteriores.
+- E2E de los escenarios E-01 a E-15 del Anexo B, ahora con el panel y los reportes.
+- Código `PRE-AAAA-NNNN` del SDD y posible extracción del patrón State.
+- Copia de la versión anterior de la ERS/SDD en `Historico/` al regenerar (en esta iteración se
+  regeneraron directamente; el histórico conserva la versión previa a la iteración 4).
+- Publicación (Vercel + Render + Supabase) y los diez productos de la entrega.

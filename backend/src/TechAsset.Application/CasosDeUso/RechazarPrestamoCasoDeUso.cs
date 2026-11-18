@@ -1,15 +1,17 @@
 using TechAsset.Application.Comandos;
 using TechAsset.Application.Datos;
 using TechAsset.Application.Interfaces;
+using TechAsset.Domain.Entidades;
 using TechAsset.Domain.Enumeraciones;
 using TechAsset.Domain.Excepciones;
 
 namespace TechAsset.Application.CasosDeUso;
 
 // RF-09: el Responsable de Tecnología o el Administrador rechazan una solicitud con su motivo; el
-// equipo no cambia de estado y el préstamo queda Rechazado.
+// equipo no cambia de estado, el préstamo queda Rechazado y el rechazo deja su movimiento (RF-17).
 public sealed class RechazarPrestamoCasoDeUso(
     IRepositorioDePrestamos repositorioDePrestamos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
     IUnidadDeTrabajo unidadDeTrabajo,
     IReloj reloj)
 {
@@ -32,6 +34,10 @@ public sealed class RechazarPrestamoCasoDeUso(
                     ?? throw new RecursoNoEncontradoExcepcion("El préstamo no existe.");
 
                 prestamo.Rechazar(comando.MotivoRechazoPrestamo);
+
+                await repositorioDeMovimientos.AgregarAsync(
+                    Movimiento.DePrestamoRechazado(prestamo, comando.IdUsuarioSesion, reloj.AhoraEnUtc),
+                    token);
 
                 await repositorioDePrestamos.GuardarCambiosAsync(token);
 

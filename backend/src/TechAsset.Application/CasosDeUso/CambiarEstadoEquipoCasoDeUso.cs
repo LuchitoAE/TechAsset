@@ -1,6 +1,7 @@
 using TechAsset.Application.Comandos;
 using TechAsset.Application.Datos;
 using TechAsset.Application.Interfaces;
+using TechAsset.Domain.Entidades;
 using TechAsset.Domain.Enumeraciones;
 using TechAsset.Domain.Excepciones;
 
@@ -8,10 +9,13 @@ namespace TechAsset.Application.CasosDeUso;
 
 // RF-08, D-05: solo el Administrador o el Responsable de Tecnología cambian el estado entre
 // Disponible, Mantenimiento y Baja. Un equipo con préstamo activo primero debe volver con la
-// devolución; se comprueba el préstamo real y no solo el estado_equipo (iteración 4).
+// devolución; se comprueba el préstamo real y no solo el estado_equipo. El cambio deja su
+// movimiento con el estado anterior y el nuevo (RF-17).
 public sealed class CambiarEstadoEquipoCasoDeUso(
     IRepositorioDeEquipos repositorioDeEquipos,
-    IRepositorioDePrestamos repositorioDePrestamos)
+    IRepositorioDePrestamos repositorioDePrestamos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
+    IReloj reloj)
 {
     public async Task<DatosDeEquipo> EjecutarAsync(
         CambiarEstadoEquipoComando comando,
@@ -30,7 +34,18 @@ public sealed class CambiarEstadoEquipoCasoDeUso(
             comando.IdEquipo,
             cancellationToken);
 
+        var estadoAnterior = equipo.EstadoEquipo;
+
         equipo.CambiarEstado(comando.EstadoEquipo, tienePrestamoActivo);
+
+        await repositorioDeMovimientos.AgregarAsync(
+            Movimiento.DeCambioDeEstado(
+                equipo,
+                estadoAnterior,
+                comando.IdUsuarioSesion,
+                reloj.AhoraEnUtc),
+            cancellationToken);
+
         await repositorioDeEquipos.GuardarCambiosAsync(cancellationToken);
 
         return DatosDeEquipo.Desde(equipo);

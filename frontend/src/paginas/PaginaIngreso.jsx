@@ -41,7 +41,7 @@ export default function PaginaIngreso() {
           <div className="flex items-center gap-3">
             <span
               aria-hidden="true"
-              className="grid size-12 place-items-center rounded-xl bg-marca-700 text-lg font-bold text-white shadow-campo"
+              className="grid size-12 place-items-center rounded-xl bg-marca-700 text-lg font-bold text-sobre-marca shadow-campo"
             >
               TA
             </span>
@@ -87,7 +87,7 @@ export default function PaginaIngreso() {
           <div className="flex items-center gap-2.5 lg:hidden">
             <span
               aria-hidden="true"
-              className="grid size-10 place-items-center rounded-lg bg-marca-700 text-sm font-bold text-white"
+              className="grid size-10 place-items-center rounded-lg bg-marca-700 text-sm font-bold text-sobre-marca"
             >
               TA
             </span>

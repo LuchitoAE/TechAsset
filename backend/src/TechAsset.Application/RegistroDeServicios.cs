@@ -33,6 +33,12 @@ public static class RegistroDeServicios
         servicios.AddScoped<ListarPrestamosActivosCasoDeUso>();
         servicios.AddScoped<ObtenerPrestamoCasoDeUso>();
 
+        servicios.AddScoped<ObtenerIndicadoresDelPanelCasoDeUso>();
+        servicios.AddScoped<ConsultarEquiposPorEstadoCasoDeUso>();
+        servicios.AddScoped<ConsultarEquiposMasUtilizadosCasoDeUso>();
+        servicios.AddScoped<ConsultarPrestamosPorAreaCasoDeUso>();
+        servicios.AddScoped<ConsultarMovimientosCasoDeUso>();
+
         return servicios;
     }
 }

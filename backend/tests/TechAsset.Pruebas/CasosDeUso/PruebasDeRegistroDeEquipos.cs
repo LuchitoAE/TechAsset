@@ -13,10 +13,14 @@ public class PruebasDeRegistroDeEquipos
     private readonly RepositorioDeEquiposEnMemoria _repositorio = new();
 
     private readonly RepositorioDePrestamosEnMemoria _prestamos = new();
+    private readonly RepositorioDeMovimientosEnMemoria _movimientos = new();
+    private readonly RelojDePrueba _reloj = new(new DateOnly(2026, 11, 17));
+    private readonly Guid _idUsuario = Guid.NewGuid();
 
-    private RegistrarEquipoCasoDeUso CasoDeUso() => new(_repositorio);
+    private RegistrarEquipoCasoDeUso CasoDeUso() => new(_repositorio, _movimientos, _reloj);
 
-    private ActualizarEquipoCasoDeUso CasoDeActualizacion() => new(_repositorio, _prestamos);
+    private ActualizarEquipoCasoDeUso CasoDeActualizacion() =>
+        new(_repositorio, _prestamos, _movimientos, _reloj);
 
     [Fact]
     public async Task RegistraUnEquipoDisponibleYNormalizaElCodigo()
@@ -26,7 +30,8 @@ public class PruebasDeRegistroDeEquipos
             "Laptop Dell Latitude",
             CategoriaEquipo.Laptop,
             "Dell",
-            EstadoEquipo: null));
+            EstadoEquipo: null,
+            _idUsuario));
 
         Assert.Equal("TK-2026-0001", equipo.CodigoPatrimonialEquipo);
         Assert.Equal(EstadoEquipo.Disponible, equipo.EstadoEquipo);
@@ -45,7 +50,8 @@ public class PruebasDeRegistroDeEquipos
                 "Otra laptop",
                 CategoriaEquipo.Laptop,
                 "HP",
-                EstadoEquipo: null)));
+                EstadoEquipo: null,
+            _idUsuario)));
 
         Assert.Contains("código patrimonial", excepcion.Message);
         Assert.Single(_repositorio.Equipos);
@@ -60,7 +66,8 @@ public class PruebasDeRegistroDeEquipos
                 "Equipo raro",
                 (CategoriaEquipo)42,
                 "Genérica",
-                EstadoEquipo: null)));
+                EstadoEquipo: null,
+            _idUsuario)));
 
         Assert.True(excepcion.Errores.ContainsKey(CamposDeEquipo.CategoriaEquipo));
         Assert.Empty(_repositorio.Equipos);
@@ -75,7 +82,8 @@ public class PruebasDeRegistroDeEquipos
                 "Laptop Dell",
                 CategoriaEquipo.Laptop,
                 "Dell",
-                EstadoEquipo.Prestado)));
+                EstadoEquipo.Prestado,
+            _idUsuario)));
 
         Assert.True(excepcion.Errores.ContainsKey(CamposDeEquipo.EstadoEquipo));
     }
@@ -91,7 +99,8 @@ public class PruebasDeRegistroDeEquipos
             "TK-2026-0100",
             "Proyector Epson",
             CategoriaEquipo.ProyectorMultimedia,
-            "Epson"));
+            "Epson",
+            _idUsuario));
 
         Assert.Equal("TK-2026-0100", actualizado.CodigoPatrimonialEquipo);
         Assert.Equal("Proyector Epson", actualizado.NombreEquipo);
@@ -112,7 +121,8 @@ public class PruebasDeRegistroDeEquipos
                 " tk-2026-0001 ",
                 segundo.NombreEquipo,
                 segundo.CategoriaEquipo,
-                segundo.MarcaEquipo)));
+                segundo.MarcaEquipo,
+            _idUsuario)));
 
         Assert.Equal("TK-2026-0002", segundo.CodigoPatrimonial.Valor);
     }
@@ -129,7 +139,8 @@ public class PruebasDeRegistroDeEquipos
                 "TK-2026-0099",
                 equipo.NombreEquipo,
                 equipo.CategoriaEquipo,
-                equipo.MarcaEquipo)));
+                equipo.MarcaEquipo,
+            _idUsuario)));
 
         Assert.Contains("préstamo activo", excepcion.Message);
     }
@@ -152,7 +163,8 @@ public class PruebasDeRegistroDeEquipos
                 "TK-2026-0099",
                 equipo.NombreEquipo,
                 equipo.CategoriaEquipo,
-                equipo.MarcaEquipo)));
+                equipo.MarcaEquipo,
+            _idUsuario)));
 
         Assert.Contains("préstamo activo", excepcion.Message);
         Assert.Equal("TK-2026-0001", equipo.CodigoPatrimonial.Valor);
@@ -167,6 +179,7 @@ public class PruebasDeRegistroDeEquipos
                 CodigoPatrimonial.Crear("TK-2026-0001").Valor,
                 "Laptop",
                 CategoriaEquipo.Laptop,
-                "Dell")));
+                "Dell",
+            _idUsuario)));
     }
 }

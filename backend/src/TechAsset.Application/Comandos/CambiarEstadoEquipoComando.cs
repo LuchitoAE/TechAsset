@@ -7,4 +7,5 @@ namespace TechAsset.Application.Comandos;
 public sealed record CambiarEstadoEquipoComando(
     Guid IdEquipo,
     EstadoEquipo EstadoEquipo,
+    Guid IdUsuarioSesion,
     RolUsuario RolSesion);

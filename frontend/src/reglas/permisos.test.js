@@ -3,6 +3,7 @@ import {
   accesosDelRol,
   menuDelRol,
   puedeConsultarPrestamosActivos,
+  puedeConsultarReportes,
   puedeConsultarUsuarios,
   puedeDeshabilitarUsuarios,
   puedeGestionarEquipos,
@@ -21,10 +22,11 @@ describe('permisos y navegación por rol', () => {
     ])
   })
 
-  it('el Responsable ve equipos y préstamos', () => {
+  it('el Responsable ve equipos, préstamos y reportes', () => {
     expect(menuDelRol('ResponsableDeTecnologia').map((opcion) => opcion.etiqueta)).toEqual([
       'Equipos',
       'Préstamos',
+      'Reportes',
     ])
   })
 
@@ -72,12 +74,20 @@ describe('permisos y navegación por rol', () => {
 
   it('cada rol tiene accesos rápidos coherentes con su menú', () => {
     expect(accesosDelRol('Administrador')).toHaveLength(4)
-    expect(accesosDelRol('ResponsableDeTecnologia')).toHaveLength(2)
+    expect(accesosDelRol('ResponsableDeTecnologia')).toHaveLength(3)
     expect(accesosDelRol('Colaborador').map((acceso) => acceso.ruta)).toEqual([
       '/equipos',
       '/mis-prestamos',
       '/disponibilidad',
     ])
     expect(accesosDelRol('RolInexistente')).toEqual([])
+  })
+})
+
+describe('reportes por rol', () => {
+  it('solo el Administrador y el Responsable consultan los reportes', () => {
+    expect(puedeConsultarReportes('Administrador')).toBe(true)
+    expect(puedeConsultarReportes('ResponsableDeTecnologia')).toBe(true)
+    expect(puedeConsultarReportes('Colaborador')).toBe(false)
   })
 })

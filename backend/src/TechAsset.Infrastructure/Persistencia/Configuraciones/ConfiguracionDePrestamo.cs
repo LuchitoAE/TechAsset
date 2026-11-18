@@ -49,6 +49,9 @@ public sealed class ConfiguracionDePrestamo : IEntityTypeConfiguration<Prestamo>
             periodo.Property(valor => valor.FechaPrestamo)
                 .HasColumnName("fecha_prestamo");
 
+            periodo.HasIndex(valor => valor.FechaPrestamo)
+                .HasDatabaseName("ix_prestamos_fecha_prestamo");
+
             periodo.Property(valor => valor.FechaDevolucionPrestamo)
                 .HasColumnName("fecha_devolucion")
                 .IsRequired();

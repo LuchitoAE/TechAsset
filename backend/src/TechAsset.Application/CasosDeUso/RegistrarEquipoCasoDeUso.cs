@@ -8,8 +8,12 @@ using TechAsset.Domain.Excepciones;
 
 namespace TechAsset.Application.CasosDeUso;
 
-// RF-05 y RN-07: registra un equipo con código patrimonial único y estado inicial válido.
-public sealed class RegistrarEquipoCasoDeUso(IRepositorioDeEquipos repositorioDeEquipos)
+// RF-05 y RN-07: registra un equipo con código patrimonial único y estado inicial válido. El alta
+// deja su movimiento en la misma confirmación (RF-17, D-03).
+public sealed class RegistrarEquipoCasoDeUso(
+    IRepositorioDeEquipos repositorioDeEquipos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
+    IReloj reloj)
 {
     public async Task<DatosDeEquipo> EjecutarAsync(
         RegistrarEquipoComando comando,
@@ -35,6 +39,11 @@ public sealed class RegistrarEquipoCasoDeUso(IRepositorioDeEquipos repositorioDe
             comando.EstadoEquipo ?? EstadoEquipo.Disponible);
 
         await repositorioDeEquipos.AgregarAsync(equipo, cancellationToken);
+
+        await repositorioDeMovimientos.AgregarAsync(
+            Movimiento.DeEquipoRegistrado(equipo, comando.IdUsuarioSesion, reloj.AhoraEnUtc),
+            cancellationToken);
+
         await repositorioDeEquipos.GuardarCambiosAsync(cancellationToken);
 
         return DatosDeEquipo.Desde(equipo);

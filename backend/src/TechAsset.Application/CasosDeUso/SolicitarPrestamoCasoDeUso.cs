@@ -10,10 +10,12 @@ namespace TechAsset.Application.CasosDeUso;
 
 // RF-09, RN-01 a RN-05 y D-04: el Colaborador solicita un equipo disponible para una fecha
 // posterior a hoy; el préstamo queda Solicitado a su nombre hasta que el Responsable lo apruebe.
+// La solicitud deja su movimiento (RF-17).
 public sealed class SolicitarPrestamoCasoDeUso(
     IRepositorioDeEquipos repositorioDeEquipos,
     IRepositorioDeUsuarios repositorioDeUsuarios,
     IRepositorioDePrestamos repositorioDePrestamos,
+    IRepositorioDeMovimientos repositorioDeMovimientos,
     IReloj reloj)
 {
     public async Task<DetalleDePrestamo> EjecutarAsync(
@@ -67,6 +69,11 @@ public sealed class SolicitarPrestamoCasoDeUso(
             reloj.AhoraEnUtc);
 
         await repositorioDePrestamos.AgregarAsync(prestamo, cancellationToken);
+
+        await repositorioDeMovimientos.AgregarAsync(
+            Movimiento.DePrestamoSolicitado(prestamo, reloj.AhoraEnUtc),
+            cancellationToken);
+
         await repositorioDePrestamos.GuardarCambiosAsync(cancellationToken);
 
         return DetalleDePrestamo.Desde(prestamo, hoy);

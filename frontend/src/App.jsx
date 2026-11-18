@@ -7,7 +7,6 @@ import PaginaDetalleEquipo from './paginas/PaginaDetalleEquipo'
 import PaginaDetallePrestamo from './paginas/PaginaDetallePrestamo'
 import PaginaDetalleUsuario from './paginas/PaginaDetalleUsuario'
 import PaginaDisponibilidad from './paginas/PaginaDisponibilidad'
-import PaginaEnConstruccion from './paginas/PaginaEnConstruccion'
 import PaginaEquipos from './paginas/PaginaEquipos'
 import PaginaIngreso from './paginas/PaginaIngreso'
 import PaginaInicio from './paginas/PaginaInicio'
@@ -17,6 +16,7 @@ import PaginaNuevoPrestamo from './paginas/PaginaNuevoPrestamo'
 import PaginaNuevoUsuario from './paginas/PaginaNuevoUsuario'
 import PaginaPrestamos from './paginas/PaginaPrestamos'
 import PaginaPrestamosActivos from './paginas/PaginaPrestamosActivos'
+import PaginaReportes from './paginas/PaginaReportes'
 import PaginaUsuarios from './paginas/PaginaUsuarios'
 
 // Mapa de rutas de la SPA. Todo exige sesión salvo /ingreso; cada módulo declara los roles que
@@ -64,16 +64,9 @@ export default function App() {
               <Route path="prestamos/nuevo" element={<PaginaNuevoPrestamo />} />
             </Route>
 
-            <Route
-              path="reportes"
-              element={
-                <PaginaEnConstruccion
-                  titulo="Reportes"
-                  descripcion="Indicadores del panel, equipos por estado, más utilizados, préstamos por área y movimientos."
-                  iteracion={5}
-                />
-              }
-            />
+            <Route element={<RutaPorRol roles={['Administrador', 'ResponsableDeTecnologia']} />}>
+              <Route path="reportes" element={<PaginaReportes />} />
+            </Route>
 
             <Route path="*" element={<PaginaNoEncontrada />} />
           </Route>

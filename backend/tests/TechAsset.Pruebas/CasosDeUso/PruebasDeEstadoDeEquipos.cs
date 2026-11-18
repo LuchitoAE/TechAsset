@@ -13,8 +13,12 @@ public class PruebasDeEstadoDeEquipos
     private readonly RepositorioDeEquiposEnMemoria _repositorio = new();
 
     private readonly RepositorioDePrestamosEnMemoria _prestamos = new();
+    private readonly RepositorioDeMovimientosEnMemoria _movimientos = new();
+    private readonly RelojDePrueba _reloj = new(new DateOnly(2026, 11, 17));
+    private readonly Guid _idUsuario = Guid.NewGuid();
 
-    private CambiarEstadoEquipoCasoDeUso CasoDeUso() => new(_repositorio, _prestamos);
+    private CambiarEstadoEquipoCasoDeUso CasoDeUso() =>
+        new(_repositorio, _prestamos, _movimientos, _reloj);
 
     [Fact]
     public async Task UnColaboradorNoPuedeCambiarElEstado()
@@ -26,6 +30,7 @@ public class PruebasDeEstadoDeEquipos
             new CambiarEstadoEquipoComando(
                 equipo.IdEquipo,
                 EstadoEquipo.Mantenimiento,
+                _idUsuario,
                 RolUsuario.Colaborador)));
 
         Assert.Equal(EstadoEquipo.Disponible, equipo.EstadoEquipo);
@@ -40,6 +45,7 @@ public class PruebasDeEstadoDeEquipos
         var enMantenimiento = await CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
             equipo.IdEquipo,
             EstadoEquipo.Mantenimiento,
+            _idUsuario,
             RolUsuario.ResponsableDeTecnologia));
 
         Assert.Equal(EstadoEquipo.Mantenimiento, enMantenimiento.EstadoEquipo);
@@ -48,6 +54,7 @@ public class PruebasDeEstadoDeEquipos
         var deBaja = await CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
             equipo.IdEquipo,
             EstadoEquipo.Baja,
+            _idUsuario,
             RolUsuario.Administrador));
 
         Assert.Equal(EstadoEquipo.Baja, deBaja.EstadoEquipo);
@@ -63,6 +70,7 @@ public class PruebasDeEstadoDeEquipos
             CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
                 equipo.IdEquipo,
                 EstadoEquipo.Baja,
+                _idUsuario,
                 RolUsuario.Administrador)));
 
         Assert.Contains("devolución", excepcion.Message, StringComparison.OrdinalIgnoreCase);
@@ -79,6 +87,7 @@ public class PruebasDeEstadoDeEquipos
             CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
                 equipo.IdEquipo,
                 EstadoEquipo.Mantenimiento,
+                _idUsuario,
                 RolUsuario.ResponsableDeTecnologia)));
 
         Assert.Equal(EstadoEquipo.Prestado, equipo.EstadoEquipo);
@@ -94,6 +103,7 @@ public class PruebasDeEstadoDeEquipos
             CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
                 equipo.IdEquipo,
                 EstadoEquipo.Prestado,
+                _idUsuario,
                 RolUsuario.Administrador)));
 
         Assert.Equal(EstadoEquipo.Disponible, equipo.EstadoEquipo);
@@ -106,6 +116,7 @@ public class PruebasDeEstadoDeEquipos
             CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
                 Guid.NewGuid(),
                 EstadoEquipo.Mantenimiento,
+                _idUsuario,
                 RolUsuario.Administrador)));
     }
 
@@ -125,6 +136,7 @@ public class PruebasDeEstadoDeEquipos
             CasoDeUso().EjecutarAsync(new CambiarEstadoEquipoComando(
                 equipo.IdEquipo,
                 EstadoEquipo.Baja,
+                _idUsuario,
                 RolUsuario.Administrador)));
 
         Assert.Contains("préstamo activo", excepcion.Message);

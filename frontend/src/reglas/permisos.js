@@ -9,6 +9,7 @@ export const MENUS_POR_ROL = {
   ResponsableDeTecnologia: [
     { ruta: '/equipos', etiqueta: 'Equipos' },
     { ruta: '/prestamos', etiqueta: 'Préstamos' },
+    { ruta: '/reportes', etiqueta: 'Reportes' },
   ],
   Colaborador: [
     { ruta: '/equipos', etiqueta: 'Equipos' },
@@ -54,6 +55,12 @@ export function puedeConsultarPrestamosActivos(rol) {
   return puedeGestionarPrestamos(rol)
 }
 
+// RF-14 a RF-17: los cuatro reportes son del Responsable y del Administrador; el panel (RF-13) lo
+// consultan los tres roles con el alcance de su sesión.
+export function puedeConsultarReportes(rol) {
+  return rol === 'Administrador' || rol === 'ResponsableDeTecnologia'
+}
+
 // Accesos rápidos del panel de inicio, según lo que cada rol puede hacer.
 export const ACCESOS_POR_ROL = {
   Administrador: [
@@ -65,6 +72,7 @@ export const ACCESOS_POR_ROL = {
   ResponsableDeTecnologia: [
     { ruta: '/equipos', titulo: 'Equipos', detalle: 'Altas, cambios y disponibilidad.' },
     { ruta: '/prestamos', titulo: 'Préstamos', detalle: 'Solicitudes, aprobaciones y devoluciones.' },
+    { ruta: '/reportes', titulo: 'Reportes', detalle: 'Equipos, áreas y movimientos.' },
   ],
   Colaborador: [
     { ruta: '/equipos', titulo: 'Inventario', detalle: 'Consulte equipos por estado y categoría.' },

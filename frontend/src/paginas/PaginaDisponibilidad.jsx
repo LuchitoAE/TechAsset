@@ -71,7 +71,7 @@ export default function PaginaDisponibilidad() {
               <div className="mt-4">
                 <Link
                   to={`/prestamos/nuevo?equipo=${equipo.id_equipo}`}
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-marca-800"
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca transition-colors hover:bg-marca-800"
                 >
                   Solicitar este equipo
                 </Link>
