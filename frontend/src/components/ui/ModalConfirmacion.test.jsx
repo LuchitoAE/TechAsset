@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import ModalConfirmacion from './ModalConfirmacion'
@@ -40,5 +40,26 @@ describe('ModalConfirmacion', () => {
 
     await usuario.keyboard('{Escape}')
     expect(alCancelar).toHaveBeenCalled()
+  })
+
+  it('abre el diálogo y deja el foco en la acción segura', async () => {
+    render(
+      <ModalConfirmacion
+        abierto
+        titulo="Dar de baja el equipo"
+        mensaje="El equipo dejará de estar disponible."
+        textoConfirmar="Dar de baja"
+        peligro
+        onConfirmar={vi.fn()}
+        onCancelar={vi.fn()}
+      />,
+    )
+
+    const dialogo = screen.getByRole('dialog')
+    expect(dialogo).toHaveAttribute('open')
+    expect(dialogo).toHaveAccessibleName('Dar de baja el equipo')
+    expect(dialogo).toHaveAccessibleDescription('El equipo dejará de estar disponible.')
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Cancelar' })).toHaveFocus())
   })
 })

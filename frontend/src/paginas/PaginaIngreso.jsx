@@ -4,22 +4,27 @@ import { ingresar } from '../api/autenticacionApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import BotonTema from '../components/ui/BotonTema'
 import Button from '../components/ui/Button'
+import ResumenDeErrores from '../components/ui/ResumenDeErrores'
 import TextInput from '../components/ui/TextInput'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
+import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { validarIngreso } from '../reglas/validacionUsuarios'
 import { VERSION_DEL_PRODUCTO } from '../reglas/version'
+import { useTituloDePagina } from '../utils/titulo'
 
 // Pantalla de ingreso (RN-11): correo y contraseña, un solo mensaje si no coinciden y estado de carga.
 export default function PaginaIngreso() {
   const { sesion, iniciarSesion } = useSesion()
   const ubicacion = useLocation()
   const [verContrasena, setVerContrasena] = useState(false)
+  useTituloDePagina('Ingresar')
 
   const formulario = useFormulario({
     valoresIniciales: { correo_usuario: '', contrasena: '' },
     validar: validarIngreso,
     camposObligatorios: ['correo_usuario', 'contrasena'],
+    etiquetas: ETIQUETAS_DE_CAMPO,
     alEnviar: async (valores) => {
       const datos = await ingresar(valores)
       iniciarSesion(datos)
@@ -102,10 +107,22 @@ export default function PaginaIngreso() {
             Use el correo y la contraseña que le entregó el Administrador.
           </p>
 
-          <form noValidate onSubmit={formulario.enviar} className="mt-6 space-y-4">
+          <form noValidate onSubmit={formulario.enviar} className="mt-6 space-y-4" aria-label="Ingreso a TechAsset">
+            <p className="sr-only" aria-live="polite">
+              {formulario.anuncio}
+            </p>
+
             {formulario.mensaje && (
               <AlertMessage tipo={formulario.mensaje.tipo}>{formulario.mensaje.texto}</AlertMessage>
             )}
+
+            {formulario.intentoEnviado && (
+              <ResumenDeErrores errores={formulario.resumenErrores} />
+            )}
+
+            <p className="text-xs text-texto-suave">
+              Los campos con <span aria-hidden="true">*</span> son obligatorios.
+            </p>
 
             <TextInput
               label="Correo corporativo"
@@ -113,6 +130,9 @@ export default function PaginaIngreso() {
               type="email"
               inputMode="email"
               autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={formulario.valores.correo_usuario}
               onChange={formulario.cambiar}
               onBlur={formulario.salirDelCampo}
@@ -148,7 +168,6 @@ export default function PaginaIngreso() {
               className="w-full"
               cargando={formulario.enviando}
               textoCargando="Ingresando…"
-              disabled={formulario.faltanDatos}
             >
               Ingresar
             </Button>

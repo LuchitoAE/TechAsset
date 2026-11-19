@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { listarEquiposPorEstado } from '../../api/reportesApi'
 import AlertMessage from '../ui/AlertMessage'
 import Button from '../ui/Button'
@@ -59,48 +60,50 @@ export default function ReporteEquiposPorEstado() {
 
   return (
     <div className="space-y-5">
-      <form
-        onSubmit={(evento) => {
-          evento.preventDefault()
-          filtrar()
-        }}
-        className="rounded-2xl border border-borde bg-superficie p-4 shadow-tarjeta sm:p-5"
-      >
-        <div className="grid gap-4 md:grid-cols-3">
-          <TextInput
-            label="Buscar"
-            name="texto"
-            value={filtros.texto}
-            onChange={cambiar}
-            placeholder="Código, equipo o marca"
-            autoComplete="off"
-          />
-          <SelectInput
-            label="Categoría"
-            name="categoria"
-            value={filtros.categoria}
-            onChange={cambiar}
-            opciones={CATEGORIAS_EQUIPO}
-            placeholder="Todas las categorías"
-          />
-          <TextInput
-            label="Marca"
-            name="marca"
-            value={filtros.marca}
-            onChange={cambiar}
-            placeholder="Todas las marcas"
-            autoComplete="off"
-          />
-        </div>
-        <div className="mt-4 flex flex-wrap justify-end gap-3">
-          <Button variante="fantasma" onClick={limpiar} disabled={cargando}>
-            Limpiar filtros
-          </Button>
-          <Button tipo="submit" cargando={cargando} textoCargando="Buscando…">
-            Filtrar
-          </Button>
-        </div>
-      </form>
+      <search aria-label="Filtros de equipos por estado" className="block">
+        <form
+          onSubmit={(evento) => {
+            evento.preventDefault()
+            filtrar()
+          }}
+          className="rounded-2xl border border-borde bg-superficie p-4 shadow-tarjeta sm:p-5"
+        >
+          <div className="grid gap-4 md:grid-cols-3">
+            <TextInput
+              label="Buscar"
+              name="texto"
+              value={filtros.texto}
+              onChange={cambiar}
+              placeholder="Código, equipo o marca"
+              autoComplete="off"
+            />
+            <SelectInput
+              label="Categoría"
+              name="categoria"
+              value={filtros.categoria}
+              onChange={cambiar}
+              opciones={CATEGORIAS_EQUIPO}
+              placeholder="Todas las categorías"
+            />
+            <TextInput
+              label="Marca"
+              name="marca"
+              value={filtros.marca}
+              onChange={cambiar}
+              placeholder="Todas las marcas"
+              autoComplete="off"
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap justify-end gap-3">
+            <Button variante="fantasma" onClick={limpiar} disabled={cargando}>
+              Limpiar filtros
+            </Button>
+            <Button tipo="submit" cargando={cargando} textoCargando="Buscando…">
+              Filtrar
+            </Button>
+          </div>
+        </form>
+      </search>
 
       {error && (
         <AlertMessage tipo="error">
@@ -119,20 +122,37 @@ export default function ReporteEquiposPorEstado() {
       )}
 
       {cargando ? (
-        <Cargando texto="Contando los equipos por estado…" />
+        <div aria-busy="true">
+          <Cargando texto="Contando los equipos por estado…" />
+        </div>
       ) : reporte.total === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
-          <p className="text-base font-semibold text-titulo">No hay equipos con esos filtros.</p>
-          <p className="mt-1 text-sm text-texto-suave">
-            Cambie el texto, la categoría o la marca, o limpie los filtros para ver todo el inventario.
+          <p className="text-base font-semibold text-titulo">
+            {aplicados.texto || aplicados.categoria || aplicados.marca
+              ? 'No hay equipos con esos filtros.'
+              : 'Todavía no hay equipos registrados.'}
           </p>
-          <Button variante="secundario" className="mt-4" onClick={limpiar}>
-            Limpiar filtros
-          </Button>
+          <p className="mt-1 text-sm text-texto-suave">
+            {aplicados.texto || aplicados.categoria || aplicados.marca
+              ? 'Cambie el texto, la categoría o la marca, o limpie los filtros para ver todo el inventario.'
+              : 'Cuando se registre el primer equipo, aparecerá en este reporte con su estado.'}
+          </p>
+          {aplicados.texto || aplicados.categoria || aplicados.marca ? (
+            <Button variante="secundario" className="mt-4" onClick={limpiar}>
+              Limpiar filtros
+            </Button>
+          ) : (
+            <Link
+              to="/equipos/nuevo"
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
+            >
+              Registrar el primer equipo
+            </Link>
+          )}
         </div>
       ) : (
         <>
-          <p className="text-sm text-texto-suave">
+          <p role="status" aria-live="polite" className="text-sm text-texto-suave">
             {reporte.total} {reporte.total === 1 ? 'equipo' : 'equipos'} en total. La suma de los cuatro
             estados coincide con este total.
           </p>

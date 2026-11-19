@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import ReporteEquiposPorEstado from './ReporteEquiposPorEstado'
 
@@ -37,7 +38,11 @@ describe('ReporteEquiposPorEstado', () => {
       ],
     })
 
-    render(<ReporteEquiposPorEstado />)
+    render(
+      <MemoryRouter>
+        <ReporteEquiposPorEstado />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText(/2 equipos en total/)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Disponible' })).toBeInTheDocument()
@@ -52,8 +57,13 @@ describe('ReporteEquiposPorEstado', () => {
   it('avisa cuando los filtros no encuentran equipos', async () => {
     listarEquiposPorEstado.mockResolvedValue({ total: 0, estados: [] })
 
-    render(<ReporteEquiposPorEstado />)
+    render(
+      <MemoryRouter>
+        <ReporteEquiposPorEstado />
+      </MemoryRouter>,
+    )
 
-    expect(await screen.findByText('No hay equipos con esos filtros.')).toBeInTheDocument()
+    expect(await screen.findByText('Todavía no hay equipos registrados.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Registrar el primer equipo' })).toBeInTheDocument()
   })
 })

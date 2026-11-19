@@ -6,6 +6,7 @@ import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import TextAreaInput from '../components/ui/TextAreaInput'
 import EtiquetaDeEstadoPrestamo from '../components/prestamos/EtiquetaDeEstadoPrestamo'
@@ -171,9 +172,13 @@ export default function PaginaDetallePrestamo() {
 
   return (
     <div className="space-y-6">
-      <Link to="/prestamos" className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700">
-        <span aria-hidden="true">←</span> Volver a préstamos
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Préstamos', ruta: '/prestamos' },
+          { etiqueta: prestamo.nombre_equipo },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo={prestamo.nombre_equipo}
@@ -265,7 +270,10 @@ export default function PaginaDetallePrestamo() {
             </Button>
           </div>
 
-          <form onSubmit={pedirRechazo} noValidate className="mt-6 space-y-4">
+          <form onSubmit={pedirRechazo} noValidate className="mt-6 space-y-4" aria-label="Rechazar la solicitud">
+            <p className="sr-only" aria-live="polite">
+              {errorMotivo ?? ''}
+            </p>
             <TextAreaInput
               label="Motivo del rechazo"
               name="motivo_rechazo_prestamo"
@@ -274,6 +282,7 @@ export default function PaginaDetallePrestamo() {
               error={errorMotivo}
               ayuda="Entre 5 y 500 caracteres. El colaborador verá este motivo en su historial."
               filas={3}
+              requerido
             />
             <div className="flex justify-end">
               <Button variante="peligro" tipo="submit" disabled={procesando}>
@@ -297,7 +306,10 @@ export default function PaginaDetallePrestamo() {
             equipo (RN-10). El equipo quedará disponible para un nuevo préstamo.
           </p>
 
-          <form onSubmit={devolver} noValidate className="mt-5 space-y-4">
+          <form onSubmit={devolver} noValidate className="mt-5 space-y-4" aria-label="Registrar devolución">
+            <p className="sr-only" aria-live="polite">
+              {errorObservacion ?? ''}
+            </p>
             <TextAreaInput
               label="Observaciones de la devolución"
               name="observacion_prestamo"

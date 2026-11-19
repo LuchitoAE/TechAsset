@@ -1,8 +1,10 @@
 import CampoBase from './CampoBase'
+import { idsDeDescripcion } from '../../utils/descripcion'
 import { unirClases } from '../../utils/clases'
 
 // Texto largo con etiqueta, ayuda y error. Se usa en las observaciones de la devolución (RN-10) y en
-// el motivo del rechazo.
+// el motivo del rechazo. La ayuda se mantiene visible cuando hay un error, porque explica el rango
+// válido y no debe desaparecer justo cuando hace falta.
 export default function TextAreaInput({
   id,
   name,
@@ -15,7 +17,7 @@ export default function TextAreaInput({
   ...propiedades
 }) {
   const idCampo = id ?? name
-  const descrito = error ? `${idCampo}-error` : ayuda ? `${idCampo}-ayuda` : undefined
+  const descrito = idsDeDescripcion(idCampo, ayuda, error).join(' ') || undefined
 
   return (
     <CampoBase id={idCampo} etiqueta={label} requerido={requerido} ayuda={ayuda} error={error}>
@@ -25,7 +27,7 @@ export default function TextAreaInput({
         name={name}
         rows={filas}
         required={requerido}
-        aria-invalid={error ? 'true' : undefined}
+        aria-invalid={error ? 'true' : 'false'}
         aria-describedby={descrito}
         className={unirClases(
           'w-full rounded-lg border bg-superficie px-3 py-2.5 text-sm text-texto shadow-campo transition-colors',

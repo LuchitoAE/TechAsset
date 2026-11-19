@@ -1053,3 +1053,128 @@ publicación lista sin desplegar.
   compartido.
 - El State formal y el código `PRE-AAAA-NNNN` siguen fuera de alcance y anotados como no requisito.
 - No hay pruebas en Windows; el servidor se verificó en Linux y el navegador en Brave.
+
+## Iteración 7 — Pasada completa de DCU, patrones de interfaz y accesibilidad
+
+**Fecha:** 19/11/2026
+**Rama:** `feature/iteracion-7-ux` → `develop`
+**Objetivo:** aplicar de forma sistemática el diseño centrado en el usuario sobre la interfaz ya construida, sin
+cambiar requisitos, reglas de negocio ni textos de negocio. La iteración 5 solo había usado tres guías
+(`responsive-table`, `dark-mode` y `color`); esta pasada recorre todas las pantallas y usa la skill
+`modern-web-guidance` como fuente de patrones.
+
+### Alcance
+
+- Auditoría heurística de ingreso, panel, usuarios, equipos, préstamos (solicitud, activos y detalle), reportes y
+  páginas de error.
+- Formularios con validación después de la interacción, obligatorios con feedback tras el intento, resumen
+  accesible, foco en el primer error, `aria-invalid`/`aria-describedby` sincronizados y autocompletado.
+- Diálogo de confirmación con el elemento nativo `<dialog>` y `showModal()`.
+- Tablas con `caption`, `scope`, encabezado fijo, ordenación accesible donde el conjunto está completo y estados
+  vacíos con acción.
+- Estados de carga, vacío y error anunciados; aviso flotante con cola, pausa y límite.
+- Tema del sistema, claro y oscuro; navegación con enlace de salto, migas de pan, foco visible y objetivos
+  táctiles; fechas civiles en America/Lima.
+- Pruebas de componente y de punta a punta; capturas antes/después.
+
+### Hallazgos por pantalla
+
+| Pantalla | Hallazgo (heurística) | Corrección |
+|---|---|---|
+| Ingreso | El botón se deshabilitaba con campos vacíos, así que no se podía provocar el feedback de obligatorios (prevención de errores, ayuda); no había resumen ni autocompletado completo (reconocer antes que recordar). | Botón siempre activo hasta que hay un envío; al intentar entrar se marca lo que falta, se enfoca el primer error y se anuncia el resumen. `autocomplete`, `autocapitalize` y `spellcheck` en el correo. |
+| Panel | La carga no se anunciaba como región ocupada y el vacío de inventario no ofrecía acción (visibilidad del estado, flexibilidad). | `aria-busy` en el bloque de indicadores y enlace «Registrar el primer equipo» cuando no hay equipos y el rol puede hacerlo. Título de página «Panel». |
+| Usuarios | La tabla no tenía estados vacíos distintos de «sin filtros»; el conteo no se anunciaba; los enlaces de acción tenían un objetivo táctil pequeño (consistencia, accesibilidad). | Estado vacío con «Registrar el primer usuario», conteo con `role=status`, enlaces de 44 px, `aria-busy` y migas de pan en alta y detalle. |
+| Equipos | Igual que usuarios; el inventario vacío no distinguía «sin datos» de «sin resultados» (reconocer antes que recordar). | Estado vacío con «Registrar el primer equipo», conteo anunciado, acciones de 44 px y chips de estado de 44 px. |
+| Solicitud de préstamo | La fecha no se explicaba como fecha civil y el selector no tenía un estado de error tras interacción (prevención de errores, ayuda). | Fecha con `min` calculado en America/Lima, validación al salir del campo, resumen accesible, reintento de la consulta de disponibilidad y migas de pan. |
+| Préstamos activos y detalle | El rechazo y la devolución no anunciaban sus errores; el botón de confirmar era un `div` con rol, sin foco atrapado ni retorno (recuperación de errores, accesibilidad). | `aria-live` en los formularios cortos, `aria-required` visual, diálogo nativo con foco en Cancelar, Escape y retorno de foco. |
+| Reportes | Las tablas no se podían ordenar y el encabezado fijo no tenía un contenedor con alto máximo; los filtros no eran una región de búsqueda (flexibilidad, accesibilidad). | `<search>` en los filtros, ordenación con `aria-sort` y anuncio en «Préstamos por área» y «Más utilizados», contenedor con `max-height` y encabezado fijo, estados vacíos con acción. |
+| Páginas de error | La 404 y el aviso de rol se dibujaban con un `<main>` dentro del `<main>` del layout; la 404 no tenía salida clara (consistencia, recuperación). | Se cambiaron a `<section>` con un solo `h1`, enlace al inicio y título de documento. |
+| Todas | El aviso flotante reemplazaba el anterior; no se podía pausar; el botón de tema solo alternaba claro/oscuro; no había migas ni título por pantalla (visibilidad, control del usuario, accesibilidad). | Cola de hasta tres avisos con pausa al pasar el puntero o enfocar, cierre accesible, tema sistema/claro/oscuro persistido, migas de pan, `<title>` por pantalla, enlace «Ir al contenido» con foco y fechas es-PE. |
+
+### Guía aplicada → cambio
+
+| Guía de `modern-web-guidance` | Cambio en TechAsset |
+|---|---|
+| `forms` | `<form>` con nombre accesible, `<search>` en los filtros, botón de envío sin deshabilitar por datos faltantes, `autocomplete` en ingreso y alta de usuario, textos de ayuda persistentes y `required` nativo. |
+| `validate-input-after-interaction` | `useFormulario` no valida al cargar; al escribir solo limpia el error del campo; al salir valida si hubo edición o valor; al enviar valida todo. |
+| `required-field-feedback` | Aviso «Los campos con * son obligatorios» y errores de obligatorios solo después de salir del campo editado o intentar enviar. |
+| `accessible-error-announcement` | `aria-invalid` siempre presente (`false`/`true`), `aria-describedby` con ayuda y error a la vez, resumen `role=alert`, aviso `aria-live` y foco en el primer error. |
+| `accessibility` | Un solo `main`, enlace de salto, `caption`/`scope` en tablas, títulos de página, nombres accesibles, foco visible, objetivos táctiles de 44 px y `lang="es"`. |
+| `dialog` | `ModalConfirmacion` usa `<dialog>` nativo con `showModal()`, `aria-labelledby`, foco inicial en la acción segura, Escape, `::backdrop` y retorno de foco; en jsdom se usa el atributo `open`. |
+| `responsive-table` | Tablas de reportes con contenedor `role=region` enfocable, encabezado fijo, alto máximo y apilado en el teléfono con etiquetas `data-etiqueta`. |
+| `sortable-table` | Botón dentro del `<th>`, `aria-sort` solo en la columna activa, orden por texto/número con `Intl.Collator`, anuncio único en `role=status` y orden limitado a los reportes que traen todos sus datos. |
+| `dark-mode` | `color-scheme` en `:root`, `meta[name=color-scheme]`, tokens para los dos modos y `::backdrop` oscuro. |
+| `dark-mode-toggle` | `BotonTema` alterna sistema → oscuro → claro, guarda solo los modos explícitos, sigue el cambio del sistema y anuncia el estado en su nombre accesible. |
+| `persistent-toast-notifications` | `ProveedorDeAvisos` mantiene una cola de hasta tres avisos, pausa el cierre con puntero o foco, tiene cierre con nombre y región `aria-label="Notificaciones"`. |
+| `form-factor-adaptation` | Objetivos de 44 px en pantallas táctiles, controles que no se solapan, `text-wrap` en títulos y párrafos, tablas y tarjetas sin desbordar a 390 px. |
+| `content-first-noise-reduction` | Se quitaron los enlaces «Volver» duplicados en favor de migas de pan; los avisos no empujan el contenido; los estados vacíos explican y ofrecen una acción. |
+| `capture-location-agnostic-data` | Las fechas de negocio se tratan como fechas civiles (`AAAA-MM-DD`) y se formatean sin pasar por la zona del navegador; las marcas de tiempo se muestran en `America/Lima` con `Intl.DateTimeFormat('es-PE')`. |
+| `color` | Tokens de contraste revisados en tema claro y oscuro; los estados siguen usando color, ícono y texto. |
+
+### Artefactos
+
+- `frontend/src/hooks/useFormulario.js`, `components/ui/CampoBase.jsx`, `TextInput`, `SelectInput`, `DateInput`,
+  `TextAreaInput`, `AccionesDeFormulario`, `ResumenDeErrores`, `ModalConfirmacion`, `AvisoFlotante`, `BotonTema`,
+  `MigasDePan`, `EncabezadoDePagina`, `ContenedorDeTabla`.
+- `frontend/src/contextos/ProveedorDeAvisos.jsx`, `frontend/src/reglas/campos.js`, `frontend/src/reglas/reportes.js`,
+  `frontend/src/utils/descripcion.js`, `frontend/src/utils/titulo.js`.
+- Páginas de ingreso, inicio, usuarios, equipos, préstamos, reportes y error; `LayoutPrincipal` y `RutaPorRol`.
+- Pruebas nuevas o actualizadas en `useFormulario`, `Campos`, `ModalConfirmacion`, `ProveedorDeAvisos`, `BotonTema`,
+  `MigasDePan`, `fechas` y `reportes`; pruebas de formularios ajustadas al envío sin bloqueo.
+- `Semanas/.herramientas/caso_unidad3_2/pruebas.py`: los selectores del aviso se acotan a `#notificaciones` y el
+  diálogo a `dialog[open]`, porque ahora conviven con regiones `role=status` y con el `<dialog>` nativo.
+- `Semanas/.herramientas/caso_unidad3_2/sdd.py` y SDD 0100 regenerado (24 hojas); la versión anterior quedó en
+  `Analisis/SDD/Historico/SDD TechAsset - 0100 antes de la iteracion 7.docx`.
+- Capturas `Evidencias/iteracion-7/antes/` (7) y `Evidencias/iteracion-7/despues/` (8).
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `dotnet build -warnaserror` | 0 errores, 0 advertencias |
+| `dotnet test` | 225 de 225 |
+| `pnpm lint` | sin avisos |
+| `pnpm test` | 114 de 114 (23 archivos) |
+| `pnpm build` | 168 módulos; 400,01 kB de JS y 32,73 kB de CSS |
+| Suite E2E | 50 de 50 |
+| SDD renderizado | 24 hojas, 0 saltos, 0 títulos sin página |
+| Base local | 3 usuarios, 0 equipos, 0 préstamos, 0 movimientos |
+| Capturas | ingreso, panel, formulario con errores, diálogo, móvil y modo oscuro revisadas |
+
+### Defectos encontrados y corregidos
+
+1. El botón de enviar se deshabilitaba con datos faltantes, de modo que el feedback de obligatorios nunca aparecía
+   al pulsar Guardar; se cambió por validación al enviar y foco en el primer error.
+2. El error de un campo reemplazaba a su texto de ayuda y `aria-describedby` apuntaba solo a uno de los dos; ahora
+   se muestran y se enlazan ambos.
+3. El diálogo de confirmación era un `div` con `role="dialog"`: no atrapaba el foco ni lo devolvía. Se reemplazó por
+   `<dialog>` nativo y se conservó un camino operable para jsdom.
+4. El aviso flotante reemplazaba el mensaje anterior y no se podía pausar; ahora hay cola, pausa y límite.
+5. La página 404 y el aviso de rol anidaban un `<main>` dentro del `<main>` del layout; se corrigió el landmark.
+6. El tema solo alternaba claro/oscuro y no permitía volver al sistema; ahora hay tres estados y persistencia.
+7. La tabla de reportes declaraba un encabezado fijo dentro de un contenedor sin alto máximo; se le dio altura y
+   desplazamiento propios sin mover la página.
+8. El conteo de resultados con `role=status` competía con el aviso flotante; las pruebas E2E se acotaron por ID en
+   lugar de por rol genérico.
+
+### Retrospectiva
+
+- **Bien:** la skill permitió convertir una revisión difusa en cambios verificables; las guías de formularios y de
+  diálogo resolvieron dos defectos reales de accesibilidad. Las 50 pruebas E2E siguieron pasando tras ajustar solo
+  los selectores que ahora son más específicos.
+- **Difícil:** jsdom no implementa `showModal()`, así que el diálogo necesita un camino alternativo para las pruebas
+  sin renunciar al elemento nativo en el navegador. Ordenar tablas paginadas por la API sería engañoso; por eso la
+  ordenación se limitó a los reportes con el conjunto completo.
+- **Aprendizaje:** deshabilitar el botón de guardar «para prevenir errores» impide que la persona aprenda qué falta;
+  es mejor aceptar el intento, marcar los campos y llevar el foco. También conviene que los estados de resultado no
+  usen roles genéricos que compitan con las notificaciones globales.
+
+### Pendiente y riesgos
+
+- La revisión con lector de pantalla real (NVDA/VoiceOver) y con usuarios sigue pendiente; las pruebas automáticas
+  no sustituyen esa validación.
+- La ordenación de las listas paginadas (usuarios, equipos, préstamos, movimientos) requeriría ordenar en la API;
+  hoy solo se ordenan los reportes que traen todos sus datos.
+- El límite de avisos y el de intentos de ingreso viven en memoria de una instancia; con varias réplicas necesitan
+  un almacén compartido.
+- Publicar en Vercel/Render/Supabase sigue siendo opcional y no se ejecutó.

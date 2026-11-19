@@ -97,7 +97,7 @@ export default function PaginaReportes() {
                 tabIndex={seleccionado ? 0 : -1}
                 onClick={() => setActivo(reporte.id)}
                 onKeyDown={(evento) => alPresionarTecla(evento, indice)}
-                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                className={`inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${
                   seleccionado
                     ? 'bg-marca-50 text-marca-800'
                     : 'text-texto-suave hover:bg-superficie-tenue hover:text-texto'

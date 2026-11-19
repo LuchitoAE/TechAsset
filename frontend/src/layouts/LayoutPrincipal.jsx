@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useAvisos } from '../contextos/contextoDeAvisos'
@@ -19,6 +19,22 @@ export default function LayoutPrincipal() {
 
   const menu = menuDelRol(sesion?.rol_usuario)
   const inicial = sesion?.nombres_usuario?.charAt(0)?.toUpperCase() ?? 'T'
+
+  // Escape cierra el menú del teléfono y devuelve el foco al botón que lo abrió.
+  const botonDelMenu = useRef(null)
+
+  useEffect(() => {
+    if (!menuAbierto) return undefined
+
+    function alPresionarTecla(evento) {
+      if (evento.key !== 'Escape') return
+      setMenuAbierto(false)
+      botonDelMenu.current?.focus()
+    }
+
+    document.addEventListener('keydown', alPresionarTecla)
+    return () => document.removeEventListener('keydown', alPresionarTecla)
+  }, [menuAbierto])
 
   async function salirDeLaSesion() {
     setSaliendo(true)
@@ -62,7 +78,7 @@ export default function LayoutPrincipal() {
                 key={opcion.ruta}
                 to={opcion.ruta}
                 className={({ isActive }) =>
-                  `rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                  `inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${
                     isActive
                       ? 'bg-marca-50 text-marca-800'
                       : 'text-texto-suave hover:bg-superficie-tenue hover:text-texto'
@@ -94,8 +110,9 @@ export default function LayoutPrincipal() {
           </div>
 
           <button
+            ref={botonDelMenu}
             type="button"
-            className="ml-auto inline-flex h-10 items-center gap-2 rounded-lg border border-borde px-3 text-sm font-semibold text-texto md:hidden"
+            className="ml-auto inline-flex h-11 items-center gap-2 rounded-lg border border-borde px-3 text-sm font-semibold text-texto md:hidden"
             aria-expanded={menuAbierto}
             aria-controls="menu-movil"
             onClick={() => setMenuAbierto((abierto) => !abierto)}
@@ -114,7 +131,7 @@ export default function LayoutPrincipal() {
                   to={opcion.ruta}
                   onClick={cerrarMenu}
                   className={({ isActive }) =>
-                    `rounded-lg px-3 py-2.5 text-sm font-semibold ${
+                    `inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold ${
                       isActive ? 'bg-marca-50 text-marca-800' : 'text-texto-suave'
                     }`
                   }
@@ -142,7 +159,11 @@ export default function LayoutPrincipal() {
         )}
       </header>
 
-      <main id="contenido-principal" className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <main
+        id="contenido-principal"
+        tabIndex={-1}
+        className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 focus:outline-none sm:px-6 sm:py-8"
+      >
         <Outlet />
       </main>
 

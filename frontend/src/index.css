@@ -87,11 +87,58 @@
 @layer base {
   body {
     @apply bg-fondo font-sans text-texto antialiased;
+    overflow-wrap: break-word;
   }
 
   /* Un solo lugar para el foco visible de toda la aplicación (WCAG 2.2, 2.4.11). */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-foco;
+  }
+
+  /* El foco del enlace «Ir al contenido» y de los destinos de los resúmenes de errores no debe
+     quedar oculto bajo la cabecera fija. */
+  :target {
+    scroll-margin-top: 5.5rem;
+  }
+
+  /* Títulos cortos y párrafos con mejor reparto de líneas; no se aplica a todo el documento. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  /* <dialog> nativo: el navegador lo centra y aplica ::backdrop. Solo se ajusta el fondo y el
+     desplazamiento para que la rueda no mueva la página de atrás (guía dialog). */
+  dialog {
+    margin: auto;
+    max-width: min(32rem, calc(100% - 2rem));
+    border: 0;
+    padding: 0;
+    color: var(--color-texto);
+    background: transparent;
+  }
+
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.55);
+    overscroll-behavior: contain;
+  }
+
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+
+  /* En pantallas táctiles los controles principales no bajan de 44 px (WCAG 2.5.5). */
+  @media (pointer: coarse) {
+    :where(button, [role='button'], nav a, select, input:not([type='checkbox'], [type='radio']), textarea) {
+      min-block-size: 44px;
+    }
   }
 }
 

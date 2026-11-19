@@ -77,6 +77,9 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
 
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / (pagina.tamano || 20)))
   const titulo = soloMisPrestamos ? 'Mis préstamos' : 'Préstamos'
+  const hayFiltros = ['texto', 'estado', 'area', 'desde', 'hasta'].some(
+    (campo) => String(aplicados[campo] ?? '').trim() !== '',
+  )
 
   return (
     <div className="space-y-6">
@@ -135,18 +138,35 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
       />
 
       {cargando ? (
-        <Cargando texto="Consultando los préstamos…" />
+        <div aria-busy="true">
+          <Cargando texto="Consultando los préstamos…" />
+        </div>
       ) : pagina.prestamos.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
-          <p className="text-base font-semibold text-titulo">No hay préstamos con esos filtros.</p>
-          <p className="mt-1 text-sm text-texto-suave">
-            {solicita
-              ? 'Solicite un equipo disponible o cambie los filtros para ver su historial.'
-              : 'Cambie el texto, el estado o las fechas, o limpie los filtros para ver todo el historial.'}
+          <p className="text-base font-semibold text-titulo">
+            {hayFiltros ? 'No hay préstamos con esos filtros.' : 'Todavía no hay préstamos registrados.'}
           </p>
-          <Button variante="secundario" className="mt-4" onClick={limpiarFiltros}>
-            Limpiar filtros
-          </Button>
+          <p className="mt-1 text-sm text-texto-suave">
+            {hayFiltros
+              ? solicita
+                ? 'Solicite un equipo disponible o cambie los filtros para ver su historial.'
+                : 'Cambie el texto, el estado o las fechas, o limpie los filtros para ver todo el historial.'
+              : solicita
+                ? 'Cuando solicite un equipo, el préstamo aparecerá aquí con su estado.'
+                : 'Cuando se solicite y apruebe un préstamo, aparecerá en este historial.'}
+          </p>
+          {hayFiltros ? (
+            <Button variante="secundario" className="mt-4" onClick={limpiarFiltros}>
+              Limpiar filtros
+            </Button>
+          ) : solicita ? (
+            <Link
+              to="/disponibilidad"
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
+            >
+              Ver equipos disponibles
+            </Link>
+          ) : null}
         </div>
       ) : (
         <>
@@ -205,7 +225,7 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
                     <td className="px-4 py-3 text-right">
                       <Link
                         to={`/prestamos/${prestamo.id_prestamo}`}
-                        className="rounded px-2 py-1 text-sm font-semibold text-marca-700 hover:bg-marca-50"
+                        className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
                       >
                         Ver
                       </Link>
@@ -242,7 +262,7 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
                   <div className="mt-3 text-right">
                     <Link
                       to={`/prestamos/${prestamo.id_prestamo}`}
-                      className="text-sm font-semibold text-marca-700"
+                      className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
                     >
                       Ver
                     </Link>
@@ -253,7 +273,7 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-texto-suave">
-            <p>
+            <p role="status" aria-live="polite">
               {pagina.total} {pagina.total === 1 ? 'préstamo' : 'préstamos'} · página {pagina.pagina}{' '}
               de {totalPaginas}
             </p>

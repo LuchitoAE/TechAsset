@@ -65,6 +65,9 @@ export default function PaginaUsuarios() {
   }
 
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / (pagina.tamano || 20)))
+  const hayFiltros = ['texto', 'rol', 'activo', 'area'].some(
+    (campo) => String(aplicados[campo] ?? '').trim() !== '',
+  )
 
   return (
     <div className="space-y-6">
@@ -112,16 +115,31 @@ export default function PaginaUsuarios() {
       />
 
       {cargando ? (
-        <Cargando texto="Consultando usuarios…" />
+        <div aria-busy="true">
+          <Cargando texto="Consultando usuarios…" />
+        </div>
       ) : pagina.usuarios.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
-          <p className="text-base font-semibold text-titulo">No hay usuarios con esos filtros.</p>
-          <p className="mt-1 text-sm text-texto-suave">
-            Cambie el texto o el estado, o limpie los filtros para ver toda la lista.
+          <p className="text-base font-semibold text-titulo">
+            {hayFiltros ? 'No hay usuarios con esos filtros.' : 'Todavía no hay usuarios registrados.'}
           </p>
-          <Button variante="secundario" className="mt-4" onClick={limpiarFiltros}>
-            Limpiar filtros
-          </Button>
+          <p className="mt-1 text-sm text-texto-suave">
+            {hayFiltros
+              ? 'Cambie el texto o el estado, o limpie los filtros para ver toda la lista.'
+              : 'Registre la primera cuenta para que la persona pueda ingresar a TechAsset.'}
+          </p>
+          {hayFiltros ? (
+            <Button variante="secundario" className="mt-4" onClick={limpiarFiltros}>
+              Limpiar filtros
+            </Button>
+          ) : administrador ? (
+            <Link
+              to="/usuarios/nuevo"
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
+            >
+              Registrar el primer usuario
+            </Link>
+          ) : null}
         </div>
       ) : (
         <>
@@ -167,7 +185,7 @@ export default function PaginaUsuarios() {
                     <td className="px-4 py-3 text-right">
                       <Link
                         to={`/usuarios/${usuario.id_usuario}`}
-                        className="rounded px-2 py-1 text-sm font-semibold text-marca-700 hover:bg-marca-50"
+                        className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
                       >
                         {administrador ? 'Editar' : 'Ver detalle'}
                       </Link>
@@ -194,7 +212,7 @@ export default function PaginaUsuarios() {
                     <EtiquetaDeRol rol={usuario.rol_usuario} />
                     <Link
                       to={`/usuarios/${usuario.id_usuario}`}
-                      className="text-sm font-semibold text-marca-700"
+                      className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
                     >
                       {administrador ? 'Editar' : 'Ver detalle'}
                     </Link>
@@ -205,7 +223,7 @@ export default function PaginaUsuarios() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-texto-suave">
-            <p>
+            <p role="status" aria-live="polite">
               {pagina.total} {pagina.total === 1 ? 'usuario' : 'usuarios'} · página {pagina.pagina} de{' '}
               {totalPaginas}
             </p>

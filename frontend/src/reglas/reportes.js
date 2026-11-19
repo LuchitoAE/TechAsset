@@ -86,8 +86,53 @@ export function distribucionDelInventario(indicadores) {
   })
 }
 
-// Fecha y hora de un movimiento (marca de tiempo UTC) en la zona de Lima, sin depender de la zona
-// del navegador.
+// Ordenación de las tablas de reportes que ya tienen todos sus datos en memoria. Compara números
+// como números y texto con Intl.Collator en español, con orden numérico para los códigos. No ordena
+// arreglos que vienen paginados por la API: allí solo se ordena la página visible y sería engañoso.
+const COLADOR = new Intl.Collator('es', { numeric: true, sensitivity: 'base' })
+
+export function ordenarFilas(filas, { clave, direccion = 'ascendente', tipo = 'texto' } = {}) {
+  if (!Array.isArray(filas) || !clave) return Array.isArray(filas) ? [...filas] : []
+
+  const factor = direccion === 'descendente' ? -1 : 1
+
+  return [...filas].sort((filaA, filaB) => {
+    const valorA = filaA?.[clave]
+    const valorB = filaB?.[clave]
+
+    if (tipo === 'numero') {
+      const numeroA = Number(valorA)
+      const numeroB = Number(valorB)
+      return factor * ((Number.isFinite(numeroA) ? numeroA : 0) - (Number.isFinite(numeroB) ? numeroB : 0))
+    }
+
+    return factor * COLADOR.compare(String(valorA ?? ''), String(valorB ?? ''))
+  })
+}
+
+// Cambia la columna ordenada. La primera pulsación de una columna nueva ordena de forma ascendente;
+// si ya estaba activa, invierte la dirección.
+export function siguienteOrden(ordenActual, columna) {
+  if (!columna?.clave) return ordenActual
+  if (ordenActual?.clave === columna.clave) {
+    return {
+      ...ordenActual,
+      direccion: ordenActual.direccion === 'ascendente' ? 'descendente' : 'ascendente',
+    }
+  }
+
+  return { clave: columna.clave, direccion: 'ascendente', tipo: columna.tipo ?? 'texto' }
+}
+
+// Texto que se anuncia al ordenar, una sola vez, desde la región role="status" de la tabla.
+export function anuncioDeOrden(orden, columnas = []) {
+  if (!orden?.clave) return ''
+  const columna = columnas.find((item) => item.clave === orden.clave)
+  if (!columna) return ''
+  const sentido = orden.direccion === 'descendente' ? 'descendente' : 'ascendente'
+  return `Tabla ordenada por ${columna.etiqueta}, en orden ${sentido}.`
+}
+
 export function formatearFechaYHora(fecha) {
   if (!fecha) return '—'
 

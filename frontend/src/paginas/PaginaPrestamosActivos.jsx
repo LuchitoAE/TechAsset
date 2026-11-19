@@ -5,6 +5,7 @@ import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import EtiquetaDeEstadoPrestamo from '../components/prestamos/EtiquetaDeEstadoPrestamo'
 import { formatearFecha } from '../utils/fechas'
 
@@ -41,12 +42,13 @@ export default function PaginaPrestamosActivos() {
 
   return (
     <div className="space-y-6">
-      <Link
-        to="/prestamos"
-        className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700"
-      >
-        <span aria-hidden="true">←</span> Volver al historial
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Préstamos', ruta: '/prestamos' },
+          { etiqueta: 'Préstamos activos' },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo="Préstamos activos"
@@ -69,7 +71,9 @@ export default function PaginaPrestamosActivos() {
       )}
 
       {cargando ? (
-        <Cargando texto="Consultando los préstamos activos…" />
+        <div aria-busy="true">
+          <Cargando texto="Consultando los préstamos activos…" />
+        </div>
       ) : pagina.prestamos.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
           <p className="text-base font-semibold text-titulo">No hay préstamos activos.</p>
@@ -77,6 +81,12 @@ export default function PaginaPrestamosActivos() {
             Cuando se apruebe una solicitud, el préstamo aparecerá aquí hasta que se registre la
             devolución.
           </p>
+          <Link
+            to="/prestamos"
+            className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg border border-borde-fuerte bg-superficie px-4 text-sm font-semibold text-texto hover:bg-superficie-tenue"
+          >
+            Ver todo el historial
+          </Link>
         </div>
       ) : (
         <>
@@ -142,7 +152,7 @@ export default function PaginaPrestamosActivos() {
                     <td className="px-4 py-3 text-right">
                       <Link
                         to={`/prestamos/${prestamo.id_prestamo}`}
-                        className="rounded px-2 py-1 text-sm font-semibold text-marca-700 hover:bg-marca-50"
+                        className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
                       >
                         Registrar devolución
                       </Link>
@@ -179,7 +189,7 @@ export default function PaginaPrestamosActivos() {
                   <div className="mt-3 text-right">
                     <Link
                       to={`/prestamos/${prestamo.id_prestamo}`}
-                      className="text-sm font-semibold text-marca-700"
+                      className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
                     >
                       Registrar devolución
                     </Link>

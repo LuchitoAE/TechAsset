@@ -27,11 +27,31 @@ function props(extra = {}) {
 }
 
 describe('FormularioUsuario', () => {
-  it('deshabilita Guardar mientras faltan datos obligatorios', () => {
+  it('mantiene Guardar activo y pide completar los obligatorios sin bloquear el envío', () => {
     render(<FormularioUsuario {...props()} />)
 
-    expect(screen.getByRole('button', { name: 'Registrar usuario' })).toBeDisabled()
-    expect(screen.getByText('Complete los campos obligatorios para guardar.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Registrar usuario' })).toBeEnabled()
+    expect(screen.getByText('Aún faltan campos obligatorios; se marcarán al guardar.')).toBeInTheDocument()
+  })
+
+  it('muestra el resumen accesible después de intentar enviar', () => {
+    render(
+      <FormularioUsuario
+        {...props({
+          intentoEnviado: true,
+          errores: { correo_usuario: 'El correo es obligatorio.' },
+          resumenErrores: [
+            { campo: 'correo_usuario', etiqueta: 'Correo corporativo', mensaje: 'El correo es obligatorio.' },
+          ],
+        })}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Revise 1 campo antes de continuar.')
+    expect(screen.getByRole('link', { name: /Correo corporativo/ })).toHaveAttribute(
+      'href',
+      '#correo_usuario',
+    )
   })
 
   it('agrupa los campos y permite mostrar la contraseña', async () => {

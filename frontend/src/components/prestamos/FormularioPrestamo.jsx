@@ -1,6 +1,7 @@
 import AccionesDeFormulario from '../ui/AccionesDeFormulario'
 import AlertMessage from '../ui/AlertMessage'
 import DateInput from '../ui/DateInput'
+import ResumenDeErrores from '../ui/ResumenDeErrores'
 import SeccionNumerada from '../ui/SeccionNumerada'
 import SelectInput from '../ui/SelectInput'
 import { etiquetaDeCategoria } from '../../reglas/catalogos'
@@ -14,6 +15,9 @@ export default function FormularioPrestamo({
   mensaje,
   enviando,
   faltanDatos,
+  intentoEnviado = false,
+  anuncio = '',
+  resumenErrores = [],
   cambiar,
   salirDelCampo,
   enviar,
@@ -31,8 +35,23 @@ export default function FormularioPrestamo({
   }))
 
   return (
-    <form noValidate onSubmit={enviar} className="space-y-6">
+    <form
+      noValidate
+      onSubmit={enviar}
+      className="space-y-6"
+      aria-label="Formulario de solicitud de préstamo"
+    >
+      <p className="sr-only" aria-live="polite">
+        {anuncio}
+      </p>
+
       {mensaje && <AlertMessage tipo={mensaje.tipo}>{mensaje.texto}</AlertMessage>}
+
+      {intentoEnviado && <ResumenDeErrores errores={resumenErrores} />}
+
+      <p className="text-xs text-texto-suave">
+        Los campos con <span aria-hidden="true">*</span> son obligatorios.
+      </p>
 
       <SeccionNumerada
         id="titulo-datos-prestamo"
@@ -104,7 +123,7 @@ export default function FormularioPrestamo({
 
       <AccionesDeFormulario
         faltanDatos={faltanDatos}
-        mensajeFaltan="Complete los campos obligatorios para enviar la solicitud."
+        mensajeFaltan="Aún faltan campos obligatorios; se marcarán al enviar la solicitud."
         enviando={enviando}
         textoEnviar="Solicitar préstamo"
         textoCargando="Enviando…"

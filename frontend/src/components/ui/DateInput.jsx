@@ -1,8 +1,10 @@
 import CampoBase from './CampoBase'
+import { idsDeDescripcion } from '../../utils/descripcion'
 import { unirClases } from '../../utils/clases'
 
 // Fecha con calendario nativo, etiqueta, ayuda y error en una línea. Se usa en los formularios de
-// préstamo (fecha de devolución comprometida).
+// préstamo (fecha de devolución comprometida) y en los filtros por rango. La fecha se interpreta
+// como fecha civil (sin zona horaria) y se muestra en formato es-PE.
 export default function DateInput({
   id,
   name,
@@ -14,7 +16,7 @@ export default function DateInput({
   ...propiedades
 }) {
   const idCampo = id ?? name
-  const descrito = error ? `${idCampo}-error` : ayuda ? `${idCampo}-ayuda` : undefined
+  const descrito = idsDeDescripcion(idCampo, ayuda, error).join(' ') || undefined
 
   return (
     <CampoBase id={idCampo} etiqueta={label} requerido={requerido} ayuda={ayuda} error={error}>
@@ -24,7 +26,7 @@ export default function DateInput({
         id={idCampo}
         name={name}
         required={requerido}
-        aria-invalid={error ? 'true' : undefined}
+        aria-invalid={error ? 'true' : 'false'}
         aria-describedby={descrito}
         className={unirClases(
           'h-11 w-full rounded-lg border bg-superficie px-3 text-sm text-texto shadow-campo transition-colors',
