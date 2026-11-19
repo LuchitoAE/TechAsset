@@ -179,6 +179,7 @@
 
   .contenedor-tabla-reporte > [role='region'] {
     overflow: visible;
+    max-height: none;
   }
 
   .tabla-reporte,
