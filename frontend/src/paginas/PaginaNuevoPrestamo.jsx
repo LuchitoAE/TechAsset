@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { listarEquipos } from '../api/equiposApi'
 import { solicitarPrestamo } from '../api/prestamosApi'
 import AlertMessage from '../components/ui/AlertMessage'
+import Button from '../components/ui/Button'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import FormularioPrestamo from '../components/prestamos/FormularioPrestamo'
 import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
+import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { fechaDeHoyEnLima, validarSolicitudPrestamo } from '../reglas/prestamos'
 import { sumarDias } from '../utils/fechas'
 
@@ -23,6 +26,7 @@ export default function PaginaNuevoPrestamo() {
   const [equipos, setEquipos] = useState([])
   const [cargandoEquipos, setCargandoEquipos] = useState(true)
   const [errorEquipos, setErrorEquipos] = useState(null)
+  const [intento, setIntento] = useState(0)
 
   const hoy = fechaDeHoyEnLima()
 
@@ -33,6 +37,7 @@ export default function PaginaNuevoPrestamo() {
     },
     validar: (valores) => validarSolicitudPrestamo(valores, { hoy }),
     camposObligatorios: ['id_equipo', 'fecha_devolucion'],
+    etiquetas: ETIQUETAS_DE_CAMPO,
     alEnviar: async (valores) => {
       await solicitarPrestamo({
         id_equipo: valores.id_equipo,
@@ -63,7 +68,7 @@ export default function PaginaNuevoPrestamo() {
       })
 
     return () => control.abort()
-  }, [])
+  }, [intento])
 
   const responsable = sesion
     ? {
@@ -74,12 +79,13 @@ export default function PaginaNuevoPrestamo() {
 
   return (
     <div className="space-y-6">
-      <Link
-        to="/mis-prestamos"
-        className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700"
-      >
-        <span aria-hidden="true">←</span> Volver a mis préstamos
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Mis préstamos', ruta: '/mis-prestamos' },
+          { etiqueta: 'Solicitar préstamo' },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo="Solicitar préstamo"
@@ -88,7 +94,16 @@ export default function PaginaNuevoPrestamo() {
 
       {errorEquipos && (
         <AlertMessage tipo="error">
-          No se pudo consultar la disponibilidad: {errorEquipos}
+          No se pudo consultar la disponibilidad: {errorEquipos}{' '}
+          <Button
+            variante="fantasma"
+            onClick={() => {
+              setCargandoEquipos(true)
+              setIntento((actual) => actual + 1)
+            }}
+          >
+            Reintentar
+          </Button>
         </AlertMessage>
       )}
 
@@ -98,6 +113,9 @@ export default function PaginaNuevoPrestamo() {
         mensaje={formulario.mensaje}
         enviando={formulario.enviando}
         faltanDatos={formulario.faltanDatos}
+        intentoEnviado={formulario.intentoEnviado}
+        anuncio={formulario.anuncio}
+        resumenErrores={formulario.resumenErrores}
         cambiar={formulario.cambiar}
         salirDelCampo={formulario.salirDelCampo}
         enviar={formulario.enviar}

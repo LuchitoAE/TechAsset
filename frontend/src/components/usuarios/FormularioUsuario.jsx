@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import AccionesDeFormulario from '../ui/AccionesDeFormulario'
 import AlertMessage from '../ui/AlertMessage'
+import ResumenDeErrores from '../ui/ResumenDeErrores'
 import SeccionNumerada from '../ui/SeccionNumerada'
 import SelectInput from '../ui/SelectInput'
 import TextInput from '../ui/TextInput'
 import { ROLES } from '../../reglas/catalogos'
 
 // Formulario de registro y edición (RF-01, RF-02). Agrupa los campos en dos tarjetas numeradas,
-// muestra el error junto a su campo y deshabilita Guardar mientras falte un dato obligatorio.
+// muestra el error junto a su campo y, al intentar guardar, un resumen que lleva al primer error.
 export default function FormularioUsuario({
   esNuevo = true,
   valores,
@@ -15,6 +16,9 @@ export default function FormularioUsuario({
   mensaje,
   enviando,
   faltanDatos,
+  intentoEnviado = false,
+  anuncio = '',
+  resumenErrores = [],
   cambiar,
   salirDelCampo,
   enviar,
@@ -23,8 +27,18 @@ export default function FormularioUsuario({
   const [verContrasena, setVerContrasena] = useState(false)
 
   return (
-    <form noValidate onSubmit={enviar} className="space-y-6">
+    <form noValidate onSubmit={enviar} className="space-y-6" aria-label="Formulario de usuario">
+      <p className="sr-only" aria-live="polite">
+        {anuncio}
+      </p>
+
       {mensaje && <AlertMessage tipo={mensaje.tipo}>{mensaje.texto}</AlertMessage>}
+
+      {intentoEnviado && <ResumenDeErrores errores={resumenErrores} />}
+
+      <p className="text-xs text-texto-suave">
+        Los campos con <span aria-hidden="true">*</span> son obligatorios.
+      </p>
 
       <SeccionNumerada
         id="titulo-datos-persona"
@@ -65,6 +79,9 @@ export default function FormularioUsuario({
               error={errores.correo_usuario}
               ayuda="Debe ser único en TechAsset. Ejemplo: nombre.apellido@innovatech.pe"
               autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
             />
           </div>
@@ -77,6 +94,7 @@ export default function FormularioUsuario({
               onBlur={salirDelCampo}
               error={errores.area_usuario}
               ayuda="Área de Innovatech a la que pertenece la persona."
+              autoComplete="organization"
               required
             />
           </div>

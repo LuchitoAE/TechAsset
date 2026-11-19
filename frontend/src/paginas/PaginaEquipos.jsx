@@ -76,6 +76,9 @@ export default function PaginaEquipos() {
 
   const totalGeneral = pagina.conteo_por_estado.reduce((suma, conteo) => suma + conteo.total, 0)
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / (pagina.tamano || 20)))
+  const hayFiltros = ['texto', 'estado', 'categoria', 'marca'].some(
+    (campo) => String(aplicados[campo] ?? '').trim() !== '',
+  )
 
   return (
     <div className="space-y-6">
@@ -130,16 +133,31 @@ export default function PaginaEquipos() {
       />
 
       {cargando ? (
-        <Cargando texto="Consultando el inventario…" />
+        <div aria-busy="true">
+          <Cargando texto="Consultando el inventario…" />
+        </div>
       ) : pagina.equipos.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
-          <p className="text-base font-semibold text-titulo">No hay equipos con esos filtros.</p>
-          <p className="mt-1 text-sm text-texto-suave">
-            Cambie el texto, el estado o la categoría, o limpie los filtros para ver todo el inventario.
+          <p className="text-base font-semibold text-titulo">
+            {hayFiltros ? 'No hay equipos con esos filtros.' : 'El inventario está vacío.'}
           </p>
-          <Button variante="secundario" className="mt-4" onClick={limpiarFiltros}>
-            Limpiar filtros
-          </Button>
+          <p className="mt-1 text-sm text-texto-suave">
+            {hayFiltros
+              ? 'Cambie el texto, el estado o la categoría, o limpie los filtros para ver todo el inventario.'
+              : 'Registre el primer equipo con el código de su etiqueta para empezar a controlar los préstamos.'}
+          </p>
+          {hayFiltros ? (
+            <Button variante="secundario" className="mt-4" onClick={limpiarFiltros}>
+              Limpiar filtros
+            </Button>
+          ) : puedeGestionar ? (
+            <Link
+              to="/equipos/nuevo"
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
+            >
+              Registrar el primer equipo
+            </Link>
+          ) : null}
         </div>
       ) : (
         <>
@@ -186,7 +204,7 @@ export default function PaginaEquipos() {
                       {puedeGestionar ? (
                         <Link
                           to={`/equipos/${equipo.id_equipo}`}
-                          className="rounded px-2 py-1 text-sm font-semibold text-marca-700 hover:bg-marca-50"
+                          className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
                         >
                           Editar
                         </Link>
@@ -216,7 +234,10 @@ export default function PaginaEquipos() {
                   </div>
                   {puedeGestionar && (
                     <div className="mt-3 text-right">
-                      <Link to={`/equipos/${equipo.id_equipo}`} className="text-sm font-semibold text-marca-700">
+                      <Link
+                        to={`/equipos/${equipo.id_equipo}`}
+                        className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
+                      >
                         Editar
                       </Link>
                     </div>
@@ -227,7 +248,7 @@ export default function PaginaEquipos() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-texto-suave">
-            <p>
+            <p role="status" aria-live="polite">
               {pagina.total} {pagina.total === 1 ? 'equipo' : 'equipos'} · página {pagina.pagina} de{' '}
               {totalPaginas}
             </p>

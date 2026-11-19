@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   anchoDeBarra,
+  anuncioDeOrden,
   distribucionDelInventario,
   etiquetaDeTipoMovimiento,
   formatearFechaYHora,
   formatearPorcentaje,
+  ordenarFilas,
   resumenDeAreas,
+  siguienteOrden,
   validarRangoDeFechas,
 } from './reportes'
 
@@ -74,5 +77,47 @@ describe('reglas de los reportes', () => {
 
     expect(filas).toHaveLength(4)
     expect(filas.every((fila) => fila.valor === 0 && fila.porcentaje === 0)).toBe(true)
+  })
+
+  it('ordena texto en español y números como números sin mutar el arreglo original', () => {
+    const filas = [
+      { area: 'Soporte', total: 2 },
+      { area: 'Administración', total: 10 },
+      { area: 'contabilidad', total: 1 },
+    ]
+
+    expect(ordenarFilas(filas, { clave: 'area' }).map((fila) => fila.area)).toEqual([
+      'Administración',
+      'contabilidad',
+      'Soporte',
+    ])
+    expect(ordenarFilas(filas, { clave: 'total', tipo: 'numero' }).map((fila) => fila.total)).toEqual([
+      1, 2, 10,
+    ])
+    expect(
+      ordenarFilas(filas, { clave: 'total', tipo: 'numero', direccion: 'descendente' }).map(
+        (fila) => fila.total,
+      ),
+    ).toEqual([10, 2, 1])
+    expect(filas.map((fila) => fila.total)).toEqual([2, 10, 1])
+  })
+
+  it('cambia la columna ordenada y alterna la dirección al repetirla', () => {
+    const columnas = [
+      { etiqueta: 'Área', clave: 'area', tipo: 'texto' },
+      { etiqueta: 'Préstamos', clave: 'total', tipo: 'numero' },
+    ]
+
+    const primera = siguienteOrden(undefined, columnas[0])
+    expect(primera).toEqual({ clave: 'area', direccion: 'ascendente', tipo: 'texto' })
+
+    const repetida = siguienteOrden(primera, columnas[0])
+    expect(repetida.direccion).toBe('descendente')
+
+    const otra = siguienteOrden(repetida, columnas[1])
+    expect(otra).toEqual({ clave: 'total', direccion: 'ascendente', tipo: 'numero' })
+    expect(anuncioDeOrden(otra, columnas)).toBe(
+      'Tabla ordenada por Préstamos, en orden ascendente.',
+    )
   })
 })

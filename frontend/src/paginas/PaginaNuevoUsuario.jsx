@@ -1,9 +1,11 @@
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { registrarUsuario } from '../api/usuariosApi'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import FormularioUsuario from '../components/usuarios/FormularioUsuario'
 import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useFormulario } from '../hooks/useFormulario'
+import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { validarUsuario } from '../reglas/validacionUsuarios'
 
 const VALORES_INICIALES = {
@@ -31,6 +33,7 @@ export default function PaginaNuevoUsuario() {
       'rol_usuario',
       'contrasena',
     ],
+    etiquetas: ETIQUETAS_DE_CAMPO,
     alEnviar: async (valores) => {
       const usuario = await registrarUsuario(valores)
       mostrarAviso(
@@ -42,9 +45,13 @@ export default function PaginaNuevoUsuario() {
 
   return (
     <div className="space-y-6">
-      <Link to="/usuarios" className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700">
-        <span aria-hidden="true">←</span> Volver a usuarios
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Usuarios', ruta: '/usuarios' },
+          { etiqueta: 'Nuevo usuario' },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo="Nuevo usuario"
@@ -58,6 +65,9 @@ export default function PaginaNuevoUsuario() {
         mensaje={formulario.mensaje}
         enviando={formulario.enviando}
         faltanDatos={formulario.faltanDatos}
+        intentoEnviado={formulario.intentoEnviado}
+        anuncio={formulario.anuncio}
+        resumenErrores={formulario.resumenErrores}
         cambiar={formulario.cambiar}
         salirDelCampo={formulario.salirDelCampo}
         enviar={formulario.enviar}

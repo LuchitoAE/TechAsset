@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { listarPrestamosPorArea } from '../../api/reportesApi'
 import AlertMessage from '../ui/AlertMessage'
 import Button from '../ui/Button'
@@ -8,14 +8,23 @@ import ContenedorDeTabla from './ContenedorDeTabla'
 import {
   anchoDeBarra,
   formatearPorcentaje,
+  ordenarFilas,
+  siguienteOrden,
   validarRangoDeFechas,
 } from '../../reglas/reportes'
 
 const FILTROS_VACIOS = { desde: '', hasta: '' }
 const REPORTE_VACIO = { total_prestamos: 0, areas: [] }
 
+const COLUMNAS = [
+  { etiqueta: 'Área', clave: 'area_responsable', tipo: 'texto' },
+  { etiqueta: 'Préstamos', clave: 'total_prestamos', tipo: 'numero' },
+  { etiqueta: 'Porcentaje', clave: 'porcentaje_prestamos', tipo: 'numero' },
+]
+
 // RF-16: préstamos por área del responsable en un periodo. Las áreas sin préstamos aparecen en cero
-// y el porcentaje se calcula sobre el total del periodo (D-09). La API comprueba el rol.
+// y el porcentaje se calcula sobre el total del periodo (D-09). La API comprueba el rol. La tabla se
+// puede ordenar por área, cantidad o porcentaje porque el reporte trae todas las áreas de una vez.
 export default function ReportePrestamosPorArea() {
   const [filtros, setFiltros] = useState(FILTROS_VACIOS)
   const [aplicados, setAplicados] = useState(FILTROS_VACIOS)
@@ -23,6 +32,11 @@ export default function ReportePrestamosPorArea() {
   const [reporte, setReporte] = useState(REPORTE_VACIO)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [orden, setOrden] = useState({
+    clave: 'total_prestamos',
+    direccion: 'descendente',
+    tipo: 'numero',
+  })
 
   useEffect(() => {
     const control = new AbortController()
@@ -42,6 +56,8 @@ export default function ReportePrestamosPorArea() {
 
     return () => control.abort()
   }, [aplicados])
+
+  const areas = useMemo(() => ordenarFilas(reporte.areas ?? [], orden), [orden, reporte.areas])
 
   function cambiar(evento) {
     const { name, value } = evento.target
@@ -68,38 +84,40 @@ export default function ReportePrestamosPorArea() {
 
   return (
     <div className="space-y-5">
-      <form
-        onSubmit={(evento) => {
-          evento.preventDefault()
-          filtrar()
-        }}
-        className="rounded-2xl border border-borde bg-superficie p-4 shadow-tarjeta sm:p-5"
-      >
-        <div className="grid gap-4 md:grid-cols-2">
-          <DateInput
-            label="Préstamos desde"
-            name="desde"
-            value={filtros.desde}
-            onChange={cambiar}
-            error={errores.desde}
-          />
-          <DateInput
-            label="Préstamos hasta"
-            name="hasta"
-            value={filtros.hasta}
-            onChange={cambiar}
-            ayuda="Sin fechas se cuenta todo el historial."
-          />
-        </div>
-        <div className="mt-4 flex flex-wrap justify-end gap-3">
-          <Button variante="fantasma" onClick={limpiar} disabled={cargando}>
-            Limpiar filtros
-          </Button>
-          <Button tipo="submit" cargando={cargando} textoCargando="Calculando…">
-            Filtrar
-          </Button>
-        </div>
-      </form>
+      <search aria-label="Filtros de préstamos por área" className="block">
+        <form
+          onSubmit={(evento) => {
+            evento.preventDefault()
+            filtrar()
+          }}
+          className="rounded-2xl border border-borde bg-superficie p-4 shadow-tarjeta sm:p-5"
+        >
+            <div className="grid gap-4 md:grid-cols-2">
+              <DateInput
+                label="Préstamos desde"
+                name="desde"
+                value={filtros.desde}
+                onChange={cambiar}
+                error={errores.desde}
+              />
+              <DateInput
+                label="Préstamos hasta"
+                name="hasta"
+                value={filtros.hasta}
+                onChange={cambiar}
+                ayuda="Sin fechas se cuenta todo el historial."
+              />
+            </div>
+            <div className="mt-4 flex flex-wrap justify-end gap-3">
+              <Button variante="fantasma" onClick={limpiar} disabled={cargando}>
+                Limpiar filtros
+              </Button>
+              <Button tipo="submit" cargando={cargando} textoCargando="Calculando…">
+                Filtrar
+              </Button>
+            </div>
+        </form>
+      </search>
 
       {error && (
         <AlertMessage tipo="error">
@@ -118,14 +136,20 @@ export default function ReportePrestamosPorArea() {
       )}
 
       {cargando ? (
-        <Cargando texto="Contando los préstamos por área…" />
+        <div aria-busy="true">
+          <Cargando texto="Contando los préstamos por área…" />
+        </div>
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-texto-suave">
               Cuentan los préstamos activos y devueltos; los rechazados y las solicitudes pendientes no.
             </p>
-            <p className="rounded-full bg-superficie-tenue px-3 py-1 text-sm font-semibold text-texto">
+            <p
+              role="status"
+              aria-live="polite"
+              className="rounded-full bg-superficie-tenue px-3 py-1 text-sm font-semibold text-texto"
+            >
               Total del periodo: {reporte.total_prestamos}
             </p>
           </div>
@@ -140,10 +164,12 @@ export default function ReportePrestamosPorArea() {
           <ContenedorDeTabla
             id="tabla-prestamos-por-area"
             titulo="Préstamos por área del responsable en el periodo consultado"
-            columnas={['Área', 'Préstamos', 'Porcentaje']}
-            nota="El porcentaje se calcula sobre el total del periodo consultado."
+            columnas={COLUMNAS}
+            nota="El porcentaje se calcula sobre el total del periodo consultado. Pulse el encabezado de una columna para ordenar."
+            orden={orden}
+            onOrdenar={(columna) => setOrden((actual) => siguienteOrden(actual, columna))}
           >
-            {reporte.areas.map((fila) => (
+            {areas.map((fila) => (
               <tr key={fila.area_responsable} className="hover:bg-superficie-tenue">
                 <th scope="row" className="px-4 py-3 text-sm font-semibold text-texto">
                   {fila.area_responsable}

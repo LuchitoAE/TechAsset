@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router'
 import { listarEquiposMasUtilizados } from '../../api/reportesApi'
 import AlertMessage from '../ui/AlertMessage'
 import Button from '../ui/Button'
@@ -8,11 +9,22 @@ import { etiquetaDeCategoria } from '../../reglas/catalogos'
 import {
   LIMITE_RANKING,
   LIMITE_RANKING_COMPLETO,
+  ordenarFilas,
   resumenDeAreas,
+  siguienteOrden,
 } from '../../reglas/reportes'
 
+const COLUMNAS = [
+  { etiqueta: '#' },
+  { etiqueta: 'Equipo', clave: 'codigo_patrimonial_equipo', tipo: 'texto' },
+  { etiqueta: 'Categoría', clave: 'categoria_equipo', tipo: 'texto' },
+  { etiqueta: 'Préstamos', clave: 'total_prestamos', tipo: 'numero' },
+  { etiqueta: 'Áreas con más uso' },
+]
+
 // RF-15: ranking de equipos por cantidad de préstamos contados (Activos y Devueltos). Muestra los
-// diez primeros y permite ver hasta cien; el desempate por código lo resuelve la API (D-09).
+// diez primeros y permite ver hasta cien; el desempate por código lo resuelve la API (D-09). La
+// tabla se puede reordenar por código, categoría o cantidad, con aria-sort en la columna activa.
 export default function ReporteEquiposMasUtilizados() {
   const [completo, setCompleto] = useState(false)
   const [limite, setLimite] = useState(LIMITE_RANKING)
@@ -20,6 +32,11 @@ export default function ReporteEquiposMasUtilizados() {
   const [ranking, setRanking] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [orden, setOrden] = useState({
+    clave: 'total_prestamos',
+    direccion: 'descendente',
+    tipo: 'numero',
+  })
 
   useEffect(() => {
     const control = new AbortController()
@@ -40,6 +57,8 @@ export default function ReporteEquiposMasUtilizados() {
     return () => control.abort()
   }, [limite, recarga])
 
+  const filas = useMemo(() => ordenarFilas(ranking, orden), [orden, ranking])
+
   function alternarCompleto() {
     const siguiente = !completo
     setCompleto(siguiente)
@@ -49,7 +68,11 @@ export default function ReporteEquiposMasUtilizados() {
   }
 
   if (cargando) {
-    return <Cargando texto="Calculando los equipos más utilizados…" />
+    return (
+      <div aria-busy="true">
+        <Cargando texto="Calculando los equipos más utilizados…" />
+      </div>
+    )
   }
 
   if (error) {
@@ -77,6 +100,12 @@ export default function ReporteEquiposMasUtilizados() {
         <p className="mt-1 text-sm text-texto-suave">
           Cuando se apruebe o se devuelva un préstamo, el equipo aparecerá en este ranking.
         </p>
+        <Link
+          to="/prestamos"
+          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg border border-borde-fuerte bg-superficie px-4 text-sm font-semibold text-texto hover:bg-superficie-tenue"
+        >
+          Ver el historial de préstamos
+        </Link>
       </div>
     )
   }
@@ -96,9 +125,11 @@ export default function ReporteEquiposMasUtilizados() {
       <ContenedorDeTabla
         id="tabla-equipos-mas-utilizados"
         titulo="Equipos más utilizados con su cantidad de préstamos y las áreas que más los usaron"
-        columnas={['#', 'Equipo', 'Categoría', 'Préstamos', 'Áreas con más uso']}
+        columnas={COLUMNAS}
+        orden={orden}
+        onOrdenar={(columna) => setOrden((actual) => siguienteOrden(actual, columna))}
       >
-        {ranking.map((equipo, indice) => (
+        {filas.map((equipo, indice) => (
           <tr key={equipo.id_equipo} className="hover:bg-superficie-tenue">
             <td className="oculto-movil px-4 py-3 text-sm font-semibold text-texto-suave">
               {indice + 1}

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import ProveedorDeAvisos from './ProveedorDeAvisos'
@@ -70,5 +70,61 @@ describe('Aviso flotante global (RNF-04)', () => {
   it('la región role=status existe aunque no haya aviso', () => {
     montar()
     expect(screen.getByRole('status')).toBeEmptyDOMElement()
+  })
+
+  it('admite varios avisos y retira el más antiguo al pasar de tres', () => {
+    vi.useFakeTimers()
+    try {
+      montar()
+      const boton = screen.getByRole('button', { name: 'Mostrar aviso' })
+
+      fireEvent.click(boton)
+      fireEvent.click(boton)
+      fireEvent.click(boton)
+      fireEvent.click(boton)
+
+      expect(screen.getAllByRole('button', { name: 'Cerrar el aviso' })).toHaveLength(3)
+      expect(screen.getAllByText('Los cambios se guardaron.')).toHaveLength(3)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('pausa el cierre mientras el puntero está sobre el aviso y lo reanuda al salir', () => {
+    vi.useFakeTimers()
+    try {
+      montar()
+      fireEvent.click(screen.getByRole('button', { name: 'Mostrar aviso' }))
+      const texto = screen.getByText('Los cambios se guardaron.')
+
+      fireEvent.mouseEnter(texto)
+      act(() => vi.advanceTimersByTime(9000))
+      expect(screen.getByText('Los cambios se guardaron.')).toBeInTheDocument()
+
+      fireEvent.mouseLeave(texto)
+      act(() => vi.advanceTimersByTime(7999))
+      expect(screen.getByText('Los cambios se guardaron.')).toBeInTheDocument()
+
+      act(() => vi.advanceTimersByTime(1))
+      expect(screen.queryByText('Los cambios se guardaron.')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('al cerrar un aviso con el foco, el foco pasa al siguiente', async () => {
+    const usuario = userEvent.setup()
+    montar()
+
+    const mostrar = screen.getByRole('button', { name: 'Mostrar aviso' })
+    await usuario.click(mostrar)
+    await usuario.click(mostrar)
+
+    const cerrar = screen.getAllByRole('button', { name: 'Cerrar el aviso' })
+    await usuario.click(cerrar[0])
+
+    await within(screen.getByRole('status')).findByText('Los cambios se guardaron.')
+    const restante = screen.getByRole('button', { name: 'Cerrar el aviso' })
+    await waitFor(() => expect(restante).toHaveFocus())
   })
 })

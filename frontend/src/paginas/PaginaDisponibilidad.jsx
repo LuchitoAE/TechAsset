@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { listarEquipos } from '../api/equiposApi'
 import AlertMessage from '../components/ui/AlertMessage'
+import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import { etiquetaDeCategoria } from '../reglas/catalogos'
@@ -12,6 +13,7 @@ export default function PaginaDisponibilidad() {
   const [equipos, setEquipos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [intento, setIntento] = useState(0)
 
   useEffect(() => {
     const control = new AbortController()
@@ -30,7 +32,7 @@ export default function PaginaDisponibilidad() {
       })
 
     return () => control.abort()
-  }, [])
+  }, [intento])
 
   return (
     <div className="space-y-6">
@@ -39,10 +41,25 @@ export default function PaginaDisponibilidad() {
         descripcion="Equipos libres para solicitar en este momento. Un equipo con préstamo activo no aparece en esta lista."
       />
 
-      {error && <AlertMessage tipo="error">{error}</AlertMessage>}
+      {error && (
+        <AlertMessage tipo="error">
+          {error}{' '}
+          <Button
+            variante="fantasma"
+            onClick={() => {
+              setCargando(true)
+              setIntento((actual) => actual + 1)
+            }}
+          >
+            Reintentar
+          </Button>
+        </AlertMessage>
+      )}
 
       {cargando ? (
-        <Cargando texto="Consultando los equipos disponibles…" />
+        <div aria-busy="true">
+          <Cargando texto="Consultando los equipos disponibles…" />
+        </div>
       ) : equipos.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
           <p className="text-base font-semibold text-titulo">
@@ -51,9 +68,15 @@ export default function PaginaDisponibilidad() {
           <p className="mt-1 text-sm text-texto-suave">
             Cuando se registre una devolución o se libere un equipo de mantenimiento, aparecerá aquí.
           </p>
+          <Link
+            to="/equipos"
+            className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg border border-borde-fuerte bg-superficie px-4 text-sm font-semibold text-texto hover:bg-superficie-tenue"
+          >
+            Consultar todo el inventario
+          </Link>
         </div>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="false">
           {equipos.map((equipo) => (
             <li
               key={equipo.id_equipo}
@@ -71,7 +94,7 @@ export default function PaginaDisponibilidad() {
               <div className="mt-4">
                 <Link
                   to={`/prestamos/nuevo?equipo=${equipo.id_equipo}`}
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca transition-colors hover:bg-marca-800"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca transition-colors hover:bg-marca-800"
                 >
                   Solicitar este equipo
                 </Link>

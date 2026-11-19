@@ -1,5 +1,6 @@
 import AccionesDeFormulario from '../ui/AccionesDeFormulario'
 import AlertMessage from '../ui/AlertMessage'
+import ResumenDeErrores from '../ui/ResumenDeErrores'
 import SeccionNumerada from '../ui/SeccionNumerada'
 import SelectInput from '../ui/SelectInput'
 import TextInput from '../ui/TextInput'
@@ -14,14 +15,27 @@ export default function FormularioEquipo({
   mensaje,
   enviando,
   faltanDatos,
+  intentoEnviado = false,
+  anuncio = '',
+  resumenErrores = [],
   cambiar,
   salirDelCampo,
   enviar,
   onCancelar,
 }) {
   return (
-    <form noValidate onSubmit={enviar} className="space-y-6">
+    <form noValidate onSubmit={enviar} className="space-y-6" aria-label="Formulario de equipo">
+      <p className="sr-only" aria-live="polite">
+        {anuncio}
+      </p>
+
       {mensaje && <AlertMessage tipo={mensaje.tipo}>{mensaje.texto}</AlertMessage>}
+
+      {intentoEnviado && <ResumenDeErrores errores={resumenErrores} />}
+
+      <p className="text-xs text-texto-suave">
+        Los campos con <span aria-hidden="true">*</span> son obligatorios.
+      </p>
 
       <SeccionNumerada
         id="titulo-identificacion-equipo"
@@ -40,7 +54,8 @@ export default function FormularioEquipo({
               error={errores.codigo_patrimonial_equipo}
               ayuda="Por ejemplo, TK-2026-0001. Se guarda en mayúsculas y no puede repetirse (RN-07)."
               autoComplete="off"
-              spellCheck="false"
+              autoCapitalize="characters"
+              spellCheck={false}
               required
             />
           </div>

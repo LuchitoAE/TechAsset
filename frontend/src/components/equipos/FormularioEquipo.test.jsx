@@ -26,11 +26,28 @@ function props(extra = {}) {
 }
 
 describe('FormularioEquipo', () => {
-  it('deshabilita Guardar mientras faltan datos obligatorios', () => {
+  it('mantiene Guardar activo y pide completar los obligatorios sin bloquear el envío', () => {
     render(<FormularioEquipo {...props()} />)
 
-    expect(screen.getByRole('button', { name: 'Registrar equipo' })).toBeDisabled()
-    expect(screen.getByText('Complete los campos obligatorios para guardar.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Registrar equipo' })).toBeEnabled()
+    expect(screen.getByText('Aún faltan campos obligatorios; se marcarán al guardar.')).toBeInTheDocument()
+  })
+
+  it('muestra el resumen accesible después de intentar enviar', () => {
+    render(
+      <FormularioEquipo
+        {...props({
+          intentoEnviado: true,
+          errores: { marca_equipo: 'La marca es obligatoria.' },
+          resumenErrores: [
+            { campo: 'marca_equipo', etiqueta: 'Marca', mensaje: 'La marca es obligatoria.' },
+          ],
+        })}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Revise 1 campo antes de continuar.')
+    expect(screen.getByRole('link', { name: /Marca/ })).toHaveAttribute('href', '#marca_equipo')
   })
 
   it('agrupa identificación y clasificación, y permite escribir', async () => {

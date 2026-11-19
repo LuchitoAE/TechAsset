@@ -1,7 +1,9 @@
 import CampoBase from './CampoBase'
+import { idsDeDescripcion } from '../../utils/descripcion'
 import { unirClases } from '../../utils/clases'
 
-// Lista de opciones con etiqueta y error. Se usa en rol, estado y filtros.
+// Lista de opciones con etiqueta y error. Se usa en rol, estado y filtros. aria-invalid siempre
+// presente y ayuda y error enlazados a la vez con aria-describedby.
 export default function SelectInput({
   id,
   name,
@@ -15,7 +17,7 @@ export default function SelectInput({
   ...propiedades
 }) {
   const idCampo = id ?? name
-  const descrito = error ? `${idCampo}-error` : ayuda ? `${idCampo}-ayuda` : undefined
+  const descrito = idsDeDescripcion(idCampo, ayuda, error).join(' ') || undefined
 
   return (
     <CampoBase id={idCampo} etiqueta={label} requerido={requerido} ayuda={ayuda} error={error}>
@@ -24,7 +26,7 @@ export default function SelectInput({
         id={idCampo}
         name={name}
         required={requerido}
-        aria-invalid={error ? 'true' : undefined}
+        aria-invalid={error ? 'true' : 'false'}
         aria-describedby={descrito}
         className={unirClases(
           'h-11 w-full rounded-lg border bg-superficie px-3 text-sm text-texto shadow-campo transition-colors',

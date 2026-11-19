@@ -1,9 +1,11 @@
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { registrarEquipo } from '../api/equiposApi'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import FormularioEquipo from '../components/equipos/FormularioEquipo'
 import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useFormulario } from '../hooks/useFormulario'
+import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { normalizarCodigoPatrimonial, validarEquipo } from '../reglas/validacionEquipos'
 
 const VALORES_INICIALES = {
@@ -29,6 +31,7 @@ export default function PaginaNuevoEquipo() {
       'marca_equipo',
       'estado_equipo',
     ],
+    etiquetas: ETIQUETAS_DE_CAMPO,
     alEnviar: async (valores) => {
       const equipo = await registrarEquipo({
         codigo_patrimonial_equipo: normalizarCodigoPatrimonial(valores.codigo_patrimonial_equipo),
@@ -47,9 +50,13 @@ export default function PaginaNuevoEquipo() {
 
   return (
     <div className="space-y-6">
-      <Link to="/equipos" className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700">
-        <span aria-hidden="true">←</span> Volver al inventario
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Equipos', ruta: '/equipos' },
+          { etiqueta: 'Nuevo equipo' },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo="Nuevo equipo"
@@ -63,6 +70,9 @@ export default function PaginaNuevoEquipo() {
         mensaje={formulario.mensaje}
         enviando={formulario.enviando}
         faltanDatos={formulario.faltanDatos}
+        intentoEnviado={formulario.intentoEnviado}
+        anuncio={formulario.anuncio}
+        resumenErrores={formulario.resumenErrores}
         cambiar={formulario.cambiar}
         salirDelCampo={formulario.salirDelCampo}
         enviar={formulario.enviar}

@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { useFormulario } from './useFormulario'
 
 const validar = (valores) => (valores.nombre ? {} : { nombre: 'El nombre es obligatorio.' })
-
 describe('useFormulario', () => {
   it('no envía si hay errores y enfoca el primer campo con error', async () => {
     const alEnviar = vi.fn()
@@ -87,5 +86,83 @@ describe('useFormulario', () => {
       tipo: 'error',
       texto: 'Ya existe un usuario con ese correo.',
     })
+  })
+
+  it('no muestra errores al cargar ni al salir de un obligatorio vacío sin editarlo', () => {
+    const { result } = renderHook(() =>
+      useFormulario({
+        valoresIniciales: { nombre: '' },
+        validar,
+        alEnviar: vi.fn(),
+        camposObligatorios: ['nombre'],
+      }),
+    )
+
+    expect(result.current.errores).toEqual({})
+    expect(result.current.intentoEnviado).toBe(false)
+
+    act(() => {
+      result.current.salirDelCampo({ target: { name: 'nombre' } })
+    })
+
+    expect(result.current.errores).toEqual({})
+  })
+
+  it('valida al salir después de escribir y retira el error al corregir', () => {
+    const validarLargo = (valores) =>
+      String(valores.nombre ?? '').trim().length >= 3
+        ? {}
+        : { nombre: 'El nombre debe tener al menos 3 caracteres.' }
+
+    const { result } = renderHook(() =>
+      useFormulario({
+        valoresIniciales: { nombre: '' },
+        validar: validarLargo,
+        alEnviar: vi.fn(),
+      }),
+    )
+
+    act(() => {
+      result.current.cambiar({ target: { name: 'nombre', type: 'text', value: 'A' } })
+    })
+    act(() => {
+      result.current.salirDelCampo({ target: { name: 'nombre' } })
+    })
+
+    expect(result.current.errores.nombre).toBe('El nombre debe tener al menos 3 caracteres.')
+
+    act(() => {
+      result.current.cambiar({ target: { name: 'nombre', type: 'text', value: 'Ana' } })
+    })
+
+    expect(result.current.errores.nombre).toBeUndefined()
+  })
+
+  it('al enviar muestra el resumen, marca el intento y enfoca el primer campo con error', async () => {
+    const campo = document.createElement('input')
+    campo.id = 'nombre'
+    document.body.append(campo)
+
+    const { result } = renderHook(() =>
+      useFormulario({
+        valoresIniciales: { nombre: '' },
+        validar,
+        alEnviar: vi.fn(),
+        camposObligatorios: ['nombre'],
+        etiquetas: { nombre: 'Nombre completo' },
+      }),
+    )
+
+    await act(async () => {
+      await result.current.enviar()
+    })
+
+    expect(result.current.intentoEnviado).toBe(true)
+    expect(result.current.resumenErrores).toEqual([
+      { campo: 'nombre', etiqueta: 'Nombre completo', mensaje: 'El nombre es obligatorio.' },
+    ])
+    expect(document.activeElement).toBe(campo)
+
+    campo.remove()
   })
 })

@@ -8,7 +8,7 @@ import CardIndicador from '../components/ui/CardIndicador'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { etiquetaDeRol } from '../reglas/catalogos'
-import { accesosDelRol } from '../reglas/permisos'
+import { accesosDelRol, puedeGestionarEquipos } from '../reglas/permisos'
 import { distribucionDelInventario, formatearFechaYHora, resumenDeAreas } from '../reglas/reportes'
 
 // RF-13 y D-10: panel general con los seis indicadores mínimos del PDF. Los tres roles entran; el
@@ -17,6 +17,7 @@ export default function PaginaInicio() {
   const { sesion } = useSesion()
   const accesos = accesosDelRol(sesion?.rol_usuario)
   const esColaborador = sesion?.rol_usuario === 'Colaborador'
+  const puedeRegistrarEquipos = puedeGestionarEquipos(sesion?.rol_usuario)
 
   const [indicadores, setIndicadores] = useState(null)
   const [cargando, setCargando] = useState(true)
@@ -51,6 +52,7 @@ export default function PaginaInicio() {
     <div className="space-y-6">
       <EncabezadoDePagina
         titulo={`Hola, ${sesion?.nombres_usuario ?? ''}`}
+        tituloDocumento="Panel"
         descripcion={`Sesión iniciada como ${etiquetaDeRol(sesion?.rol_usuario)}. Este es el panorama de TechAsset${
           indicadores ? ` al ${formatearFechaYHora(indicadores.fecha_corte)}` : ''
         }.`}
@@ -88,9 +90,11 @@ export default function PaginaInicio() {
         </h2>
 
         {cargando ? (
-          <Cargando texto="Calculando los indicadores…" />
+          <div aria-busy="true">
+            <Cargando texto="Calculando los indicadores…" />
+          </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="false">
             <CardIndicador
               etiqueta="Total de equipos"
               valor={total}
@@ -148,9 +152,17 @@ export default function PaginaInicio() {
           </p>
 
           {total === 0 ? (
-            <p className="mt-4 rounded-xl border border-dashed border-borde px-4 py-6 text-center text-sm text-texto-suave">
-              Todavía no hay equipos registrados. Regístrelos desde Equipos para ver la distribución.
-            </p>
+            <div className="mt-4 rounded-xl border border-dashed border-borde px-4 py-6 text-center text-sm text-texto-suave">
+              <p>Todavía no hay equipos registrados. Regístrelos desde Equipos para ver la distribución.</p>
+              {puedeRegistrarEquipos && (
+                <Link
+                  to="/equipos/nuevo"
+                  className="mt-3 inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
+                >
+                  Registrar el primer equipo
+                </Link>
+              )}
+            </div>
           ) : (
             <ul className="mt-4 space-y-3">
               {distribucion.map((fila) => {

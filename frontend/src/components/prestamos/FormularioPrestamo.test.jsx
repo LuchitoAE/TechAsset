@@ -40,11 +40,35 @@ function props(extra = {}) {
 }
 
 describe('FormularioPrestamo', () => {
-  it('deshabilita la solicitud mientras faltan datos obligatorios', () => {
+  it('mantiene la solicitud activa y pide completar los obligatorios sin bloquear el envío', () => {
     render(<FormularioPrestamo {...props()} />)
 
-    expect(screen.getByRole('button', { name: 'Solicitar préstamo' })).toBeDisabled()
-    expect(screen.getByText('Complete los campos obligatorios para enviar la solicitud.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Solicitar préstamo' })).toBeEnabled()
+    expect(screen.getByText('Aún faltan campos obligatorios; se marcarán al enviar la solicitud.')).toBeInTheDocument()
+  })
+
+  it('muestra el resumen accesible después de intentar enviar', () => {
+    render(
+      <FormularioPrestamo
+        {...props({
+          intentoEnviado: true,
+          errores: { fecha_devolucion: 'Indique la fecha de devolución comprometida.' },
+          resumenErrores: [
+            {
+              campo: 'fecha_devolucion',
+              etiqueta: 'Fecha de devolución comprometida',
+              mensaje: 'Indique la fecha de devolución comprometida.',
+            },
+          ],
+        })}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Revise 1 campo antes de continuar.')
+    expect(screen.getByRole('link', { name: /Fecha de devolución comprometida/ })).toHaveAttribute(
+      'href',
+      '#fecha_devolucion',
+    )
   })
 
   it('ofrece solo los equipos disponibles y la fecha de devolución', async () => {

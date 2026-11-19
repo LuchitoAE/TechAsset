@@ -13,11 +13,26 @@ describe('TextInput', () => {
   })
 
   it('muestra el error junto al campo y lo marca como inválido', () => {
-    render(<TextInput label="Correo" name="correo_usuario" error="Escriba un correo válido." />)
+    render(
+      <TextInput
+        label="Correo"
+        name="correo_usuario"
+        ayuda="Use su correo corporativo."
+        error="Escriba un correo válido."
+      />,
+    )
 
     const campo = screen.getByLabelText('Correo')
     expect(campo).toHaveAttribute('aria-invalid', 'true')
-    expect(screen.getByRole('alert')).toHaveTextContent('Escriba un correo válido.')
+    expect(campo).toHaveAccessibleDescription(
+      'Use su correo corporativo. Error: Escriba un correo válido.',
+    )
+  })
+
+  it('no marca el campo como inválido antes de interactuar', () => {
+    render(<TextInput label="Correo" name="correo_usuario" requerido />)
+
+    expect(screen.getByRole('textbox', { name: /Correo/ })).toHaveAttribute('aria-invalid', 'false')
   })
 })
 

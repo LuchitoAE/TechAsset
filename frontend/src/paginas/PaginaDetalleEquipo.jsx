@@ -5,12 +5,14 @@ import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import EtiquetaDeEstadoEquipo from '../components/equipos/EtiquetaDeEstadoEquipo'
 import FormularioEquipo from '../components/equipos/FormularioEquipo'
 import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
+import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { etiquetaDeCategoria, etiquetaDeEstadoEquipo } from '../reglas/catalogos'
 import { puedeGestionarEquipos } from '../reglas/permisos'
 import {
@@ -58,6 +60,7 @@ export default function PaginaDetalleEquipo() {
       'categoria_equipo',
       'marca_equipo',
     ],
+    etiquetas: ETIQUETAS_DE_CAMPO,
     alEnviar: async (valores) => {
       const datos = await actualizarEquipo(equipo.id_equipo, {
         codigo_patrimonial_equipo: normalizarCodigoPatrimonial(valores.codigo_patrimonial_equipo),
@@ -141,9 +144,13 @@ export default function PaginaDetalleEquipo() {
 
   return (
     <div className="space-y-6">
-      <Link to="/equipos" className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700">
-        <span aria-hidden="true">←</span> Volver al inventario
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Equipos', ruta: '/equipos' },
+          { etiqueta: equipo.nombre_equipo },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo={equipo.nombre_equipo}
@@ -174,6 +181,9 @@ export default function PaginaDetalleEquipo() {
             mensaje={formulario.mensaje}
             enviando={formulario.enviando}
             faltanDatos={formulario.faltanDatos}
+            intentoEnviado={formulario.intentoEnviado}
+            anuncio={formulario.anuncio}
+            resumenErrores={formulario.resumenErrores}
             cambiar={formulario.cambiar}
             salirDelCampo={formulario.salirDelCampo}
             enviar={formulario.enviar}

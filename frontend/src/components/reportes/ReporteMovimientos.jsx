@@ -87,58 +87,60 @@ export default function ReporteMovimientos() {
 
   return (
     <div className="space-y-5">
-      <form
-        onSubmit={(evento) => {
-          evento.preventDefault()
-          filtrar()
-        }}
-        className="rounded-2xl border border-borde bg-superficie p-4 shadow-tarjeta sm:p-5"
-      >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <SelectInput
-            label="Tipo de movimiento"
-            name="tipo"
-            value={filtros.tipo}
-            onChange={cambiar}
-            opciones={TIPOS_DE_MOVIMIENTO}
-            placeholder="Todos los tipos"
-          />
-          <TextInput
-            label="Equipo"
-            name="equipo"
-            value={filtros.equipo}
-            onChange={cambiar}
-            placeholder="Código o nombre del equipo"
-            autoComplete="off"
-          />
-          <TextInput
-            label="Usuario"
-            name="usuario"
-            value={filtros.usuario}
-            onChange={cambiar}
-            placeholder="Nombres o apellidos"
-            autoComplete="off"
-          />
-          <DateInput label="Desde" name="desde" value={filtros.desde} onChange={cambiar} error={errores.desde} />
-          <DateInput label="Hasta" name="hasta" value={filtros.hasta} onChange={cambiar} />
-          <TextInput
-            label="Buscar en el detalle"
-            name="texto"
-            value={filtros.texto}
-            onChange={cambiar}
-            placeholder="Texto del movimiento"
-            autoComplete="off"
-          />
-        </div>
-        <div className="mt-4 flex flex-wrap justify-end gap-3">
-          <Button variante="fantasma" onClick={limpiar} disabled={cargando}>
-            Limpiar filtros
-          </Button>
-          <Button tipo="submit" cargando={cargando} textoCargando="Buscando…">
-            Filtrar
-          </Button>
-        </div>
-      </form>
+      <search aria-label="Filtros del historial de movimientos" className="block">
+        <form
+          onSubmit={(evento) => {
+            evento.preventDefault()
+            filtrar()
+          }}
+          className="rounded-2xl border border-borde bg-superficie p-4 shadow-tarjeta sm:p-5"
+        >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <SelectInput
+              label="Tipo de movimiento"
+              name="tipo"
+              value={filtros.tipo}
+              onChange={cambiar}
+              opciones={TIPOS_DE_MOVIMIENTO}
+              placeholder="Todos los tipos"
+            />
+            <TextInput
+              label="Equipo"
+              name="equipo"
+              value={filtros.equipo}
+              onChange={cambiar}
+              placeholder="Código o nombre del equipo"
+              autoComplete="off"
+            />
+            <TextInput
+              label="Usuario"
+              name="usuario"
+              value={filtros.usuario}
+              onChange={cambiar}
+              placeholder="Nombres o apellidos"
+              autoComplete="off"
+            />
+            <DateInput label="Desde" name="desde" value={filtros.desde} onChange={cambiar} error={errores.desde} />
+            <DateInput label="Hasta" name="hasta" value={filtros.hasta} onChange={cambiar} />
+            <TextInput
+              label="Buscar en el detalle"
+              name="texto"
+              value={filtros.texto}
+              onChange={cambiar}
+              placeholder="Texto del movimiento"
+              autoComplete="off"
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap justify-end gap-3">
+            <Button variante="fantasma" onClick={limpiar} disabled={cargando}>
+              Limpiar filtros
+            </Button>
+            <Button tipo="submit" cargando={cargando} textoCargando="Buscando…">
+              Filtrar
+            </Button>
+          </div>
+        </form>
+      </search>
 
       {error && (
         <AlertMessage tipo="error">
@@ -157,7 +159,9 @@ export default function ReporteMovimientos() {
       )}
 
       {cargando ? (
-        <Cargando texto="Consultando el historial de movimientos…" />
+        <div aria-busy="true">
+          <Cargando texto="Consultando el historial de movimientos…" />
+        </div>
       ) : pagina.total === 0 ? (
         <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
           <p className="text-base font-semibold text-titulo">No hay movimientos con esos filtros.</p>
@@ -205,7 +209,7 @@ export default function ReporteMovimientos() {
           </ContenedorDeTabla>
 
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-texto-suave">
-            <p>
+            <p role="status" aria-live="polite">
               {pagina.total} {pagina.total === 1 ? 'movimiento' : 'movimientos'} · página{' '}
               {pagina.pagina} de {totalPaginas}
             </p>

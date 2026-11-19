@@ -1,14 +1,17 @@
 import { forwardRef } from 'react'
 import CampoBase from './CampoBase'
+import { idsDeDescripcion } from '../../utils/descripcion'
 import { unirClases } from '../../utils/clases'
 
 // Campo de texto con etiqueta, ayuda y error en una línea. Conserva el foco visible y 44 px de alto.
+// aria-invalid siempre está presente: "false" evita que algunos lectores anuncien el campo como
+// inválido antes de que la persona lo haya tocado (guía accessible-error-announcement).
 const TextInput = forwardRef(function TextInput(
   { id, name, label, error, ayuda, requerido = false, className, sufijo, ...propiedades },
   referencia,
 ) {
   const idCampo = id ?? name
-  const descrito = error ? `${idCampo}-error` : ayuda ? `${idCampo}-ayuda` : undefined
+  const descrito = idsDeDescripcion(idCampo, ayuda, error).join(' ') || undefined
 
   return (
     <CampoBase id={idCampo} etiqueta={label} requerido={requerido} ayuda={ayuda} error={error}>
@@ -19,7 +22,7 @@ const TextInput = forwardRef(function TextInput(
           id={idCampo}
           name={name}
           required={requerido}
-          aria-invalid={error ? 'true' : undefined}
+          aria-invalid={error ? 'true' : 'false'}
           aria-describedby={descrito}
           className={unirClases(
             'h-11 w-full rounded-lg border bg-superficie px-3 text-sm text-texto shadow-campo transition-colors',

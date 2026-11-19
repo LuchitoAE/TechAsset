@@ -5,6 +5,7 @@ import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import MigasDePan from '../components/ui/MigasDePan'
 import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import EtiquetaDeEstado from '../components/usuarios/EtiquetaDeEstado'
 import EtiquetaDeRol from '../components/usuarios/EtiquetaDeRol'
@@ -12,6 +13,7 @@ import FormularioUsuario from '../components/usuarios/FormularioUsuario'
 import { useAvisos } from '../contextos/contextoDeAvisos'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
+import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { etiquetaDeRol } from '../reglas/catalogos'
 import { puedeGestionarUsuarios } from '../reglas/permisos'
 import { validarEdicionUsuario } from '../reglas/validacionUsuarios'
@@ -48,6 +50,7 @@ export default function PaginaDetalleUsuario() {
       'area_usuario',
       'rol_usuario',
     ],
+    etiquetas: ETIQUETAS_DE_CAMPO,
     alEnviar: async (valores) => {
       const datos = await actualizarUsuario(usuario.id_usuario, {
         nombres_usuario: valores.nombres_usuario,
@@ -126,9 +129,15 @@ export default function PaginaDetalleUsuario() {
 
   return (
     <div className="space-y-6">
-      <Link to="/usuarios" className="inline-flex items-center gap-1 text-sm font-semibold text-marca-700">
-        <span aria-hidden="true">←</span> Volver a usuarios
-      </Link>
+      <MigasDePan
+        items={[
+          { etiqueta: 'Inicio', ruta: '/' },
+          { etiqueta: 'Usuarios', ruta: '/usuarios' },
+          {
+            etiqueta: `${usuario.nombres_usuario} ${usuario.apellidos_usuario}`,
+          },
+        ]}
+      />
 
       <EncabezadoDePagina
         titulo={`${usuario.nombres_usuario} ${usuario.apellidos_usuario}`}
@@ -151,6 +160,9 @@ export default function PaginaDetalleUsuario() {
             mensaje={formulario.mensaje}
             enviando={formulario.enviando}
             faltanDatos={formulario.faltanDatos}
+            intentoEnviado={formulario.intentoEnviado}
+            anuncio={formulario.anuncio}
+            resumenErrores={formulario.resumenErrores}
             cambiar={formulario.cambiar}
             salirDelCampo={formulario.salirDelCampo}
             enviar={formulario.enviar}
