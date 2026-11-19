@@ -96,21 +96,22 @@ app.MapGet("/api/salud", () => Results.Ok(new
     data = new { estado = "ok", producto = "TechAsset", version = VersionDelProducto.Valor }
 })).AllowAnonymous();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-// Swagger solo en desarrollo: sirve para probar los endpoints a mano y no se publica.
+// Swagger solo en desarrollo: va antes de la autenticación para que su página no quede detrás de la
+// política «todo exige sesión» (su UI no es un endpoint de la API).
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(opciones =>
     {
         opciones.SwaggerEndpoint("/openapi/v1.json", "TechAsset v1");
         opciones.DocumentTitle = "TechAsset — API";
     });
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
 
