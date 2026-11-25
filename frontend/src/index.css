@@ -2,46 +2,56 @@
 @import 'tailwindcss';
 
 /* Paleta de TechAsset en un solo lugar. Los componentes usan nombres con significado (bg-superficie,
-   text-texto-suave, border-borde…) y nunca un color fijo: el modo oscuro se resuelve aquí. */
+   text-texto-suave, border-borde…) y nunca un color fijo: el modo oscuro se resuelve aquí.
+   Identidad «A · Tech industrial»: tinta, cian y naranja; sin sombras, la jerarquía es borde y color. */
 @theme {
-  --font-sans: 'Montserrat Variable', 'Montserrat', system-ui, Arial, sans-serif;
+  --font-sans: 'Source Sans Pro', 'Source Sans 3', system-ui, Arial, sans-serif;
 
-  /* Azul tecnológico de Innovatech y su acento ámbar. */
-  --color-marca-50: #eef6fb;
-  --color-marca-100: #d8eaf5;
-  --color-marca-300: #7fb6d6;
-  --color-marca-600: #0d6a96;
-  --color-marca-700: #0a5578;
-  --color-marca-800: #08425e;
-  --color-marca-900: #062c3f;
-  --color-acento: #f2a93b;
-  --color-acento-suave: #fdf1dc;
+  /* Cian de Innovatech. marca-700 es el tono de texto y de botón: cumple contraste AA sobre blanco. */
+  --color-marca-50: #e3f4ff;
+  --color-marca-100: #cde7ff;
+  --color-marca-300: #7fd0ff;
+  --color-marca-600: #00a3ff;
+  --color-marca-700: #0077c8;
+  --color-marca-800: #005f9e;
+  --color-marca-900: #0a3f66;
+  --color-acento: #f97316;
+  --color-acento-suave: #fde8d7;
 
-  --color-fondo: #f2f6fa;
+  --color-fondo: #f3f6fb;
   --color-superficie: #ffffff;
-  --color-superficie-tenue: #f7fafc;
-  --color-borde: #d9e3ee;
-  --color-borde-fuerte: #b8c9da;
-  --color-texto: #12212f;
-  --color-texto-suave: #4d6175;
-  --color-titulo: #0a2b40;
-  --color-enlace: #0d6a96;
-  --color-foco: #0d6a96;
+  --color-superficie-tenue: #f8fafd;
+  --color-borde: #dce3ee;
+  --color-borde-fuerte: #c5d2e2;
+  --color-texto: #0c1524;
+  --color-texto-suave: #5b6779;
+  --color-titulo: #0c1524;
+  --color-enlace: #0077c8;
+  --color-foco: #0077c8;
+  --color-relleno-glifo: #e3f4ff;
+  --color-encabezado-tabla: #eaf0f8;
 
   /* Texto sobre los botones de marca y de peligro: en oscuro los fondos son claros y el blanco
      perdería el contraste. */
   --color-sobre-marca: #ffffff;
   --color-sobre-error: #ffffff;
 
-  --color-exito: #16794a;
-  --color-exito-fondo: #e7f6ee;
-  --color-aviso: #9a5b06;
-  --color-aviso-fondo: #fdf1dc;
-  --color-error: #b42318;
+  /* Los tonos «vivo» son los del diseño y se usan en gráficos e iconos; los tonos de texto son más
+     oscuros para cumplir 4.5:1 sobre blanco (WCAG 2.2 AA). */
+  --color-exito: #0b7a4f;
+  --color-exito-vivo: #0fa36b;
+  --color-exito-fondo: #e6f7ef;
+  --color-aviso: #a65a00;
+  --color-aviso-vivo: #e58a00;
+  --color-aviso-fondo: #fdf3e3;
+  --color-error: #d92d20;
   --color-error-fondo: #fdecea;
+  --color-info: #1d5fcc;
+  --color-info-vivo: #2e7cf6;
+  --color-info-fondo: #e8effd;
 
-  --shadow-tarjeta: 0 1px 2px rgb(15 35 52 / 0.06), 0 12px 28px -12px rgb(15 35 52 / 0.18);
-  --shadow-campo: 0 1px 2px rgb(15 35 52 / 0.08);
+  --shadow-tarjeta: 0 0 0 0 transparent;
+  --shadow-campo: 0 0 0 0 transparent;
 }
 
 /* Modo oscuro: index.html pone data-tema según la elección guardada o el sistema operativo. */
@@ -55,39 +65,56 @@
 
 :root[data-tema='oscuro'] {
   color-scheme: dark;
-  --color-fondo: #07131d;
-  --color-superficie: #102433;
-  --color-superficie-tenue: #0c1c29;
-  --color-borde: #24405a;
-  --color-borde-fuerte: #35566f;
-  --color-texto: #e7eff6;
-  --color-texto-suave: #a8bccd;
-  --color-titulo: #d8eaf5;
-  --color-enlace: #7fc4e8;
-  --color-foco: #7fc4e8;
-  --color-marca-600: #3d9bc4;
-  --color-marca-700: #6ab8d9;
-  --color-marca-800: #8fcbe4;
-  --color-marca-900: #c3e2f0;
-  /* En oscuro, marca-50 es un fondo azul profundo: si conservara el azul claro del modo claro, el
-     texto marca-800 (también claro) quedaría casi invisible. */
-  --color-marca-50: #0f2f42;
-  --color-acento-suave: #3a2a0e;
-  --color-sobre-marca: #062c3f;
+  --color-fondo: #0b1220;
+  --color-superficie: #121c2f;
+  --color-superficie-tenue: #0e1728;
+  --color-borde: #2a3850;
+  --color-borde-fuerte: #3b4d6b;
+  --color-texto: #e9eff7;
+  --color-texto-suave: #a9b8cb;
+  --color-titulo: #f4f8fd;
+  --color-enlace: #7fd0ff;
+  --color-foco: #7fd0ff;
+  --color-relleno-glifo: #102a40;
+  --color-encabezado-tabla: #16233a;
+  --color-marca-50: #102a40;
+  --color-marca-100: #143a57;
+  --color-marca-300: #1e5c86;
+  --color-marca-600: #00a3ff;
+  --color-marca-700: #3fb8ff;
+  --color-marca-800: #7fd0ff;
+  --color-marca-900: #bfe6ff;
+  --color-acento: #fb923c;
+  --color-acento-suave: #3a2410;
+  --color-sobre-marca: #06121f;
   --color-sobre-error: #3a1715;
-  --color-exito: #7fdfab;
-  --color-exito-fondo: #0f2e20;
-  --color-aviso: #f7c66b;
+  --color-exito: #4ade9a;
+  --color-exito-vivo: #0fa36b;
+  --color-exito-fondo: #0f2e22;
+  --color-aviso: #f5c05a;
+  --color-aviso-vivo: #e58a00;
   --color-aviso-fondo: #35260e;
-  --color-error: #f4a49d;
+  --color-error: #ff8a80;
+  --color-error-vivo: #d92d20;
   --color-error-fondo: #3a1715;
-  --shadow-tarjeta: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 16px 32px -18px rgb(0 0 0 / 0.8);
+  --color-info: #8ab8ff;
+  --color-info-vivo: #2e7cf6;
+  --color-info-fondo: #12294a;
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-fondo font-sans text-texto antialiased;
     overflow-wrap: break-word;
+  }
+
+  ::selection {
+    background: var(--color-marca-100);
+    color: var(--color-texto);
   }
 
   /* Un solo lugar para el foco visible de toda la aplicación (WCAG 2.2, 2.4.11). */
