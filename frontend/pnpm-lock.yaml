@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@fontsource-variable/montserrat':
+      '@fontsource/source-sans-pro':
         specifier: 5.3.0
         version: 5.3.0
       react:
@@ -132,8 +132,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@fontsource-variable/montserrat@5.3.0':
-    resolution: {integrity: sha512-7PaZoxaxrWLAyrhO46v65An9LhUhfkTExWLhfbywYZCnZEgg/W1rEHnlNmZKjNZ3nJTVYyicqxlJt10z/26yTA==}
+  '@fontsource/source-sans-pro@5.3.0':
+    resolution: {integrity: sha512-nd96qXI4stbyRPNEygS2cNhMkAc1kkW9+ORmIOK0oelPTyiitRPk/+9+HUuUYuEjwRRkK/+Gat2J9/NMJest/A==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1195,7 +1195,7 @@ snapshots:
 
   '@exodus/bytes@1.16.0': {}
 
-  '@fontsource-variable/montserrat@5.3.0': {}
+  '@fontsource/source-sans-pro@5.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
