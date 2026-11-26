@@ -74,11 +74,11 @@ export default function PaginaReportes() {
         descripcion="Salidas del inventario y de los préstamos. Cuentan los préstamos activos y devueltos; las fechas se muestran en la zona de Lima."
       />
 
-      <div className="rounded-2xl border border-borde bg-superficie shadow-tarjeta">
+      <div>
         <div
           role="tablist"
           aria-label="Reportes disponibles"
-          className="flex flex-wrap gap-1 border-b border-borde p-2"
+          className="flex flex-wrap gap-1 border-b border-borde"
         >
           {REPORTES.map((reporte, indice) => {
             const seleccionado = reporte.id === activo
@@ -97,10 +97,10 @@ export default function PaginaReportes() {
                 tabIndex={seleccionado ? 0 : -1}
                 onClick={() => setActivo(reporte.id)}
                 onKeyDown={(evento) => alPresionarTecla(evento, indice)}
-                className={`inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${
+                className={`-mb-px inline-flex min-h-11 items-center border-b-2 px-4 text-sm transition-colors ${
                   seleccionado
-                    ? 'bg-marca-50 text-marca-800'
-                    : 'text-texto-suave hover:bg-superficie-tenue hover:text-texto'
+                    ? 'border-marca-600 font-bold text-marca-700'
+                    : 'border-transparent font-normal text-texto-suave hover:text-texto'
                 }`}
               >
                 {reporte.etiqueta}
@@ -114,7 +114,7 @@ export default function PaginaReportes() {
           id={`panel-${actual.id}`}
           aria-labelledby={`tab-${actual.id}`}
           tabIndex={0}
-          className="space-y-4 p-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px] sm:p-5"
+          className="space-y-4 pt-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
         >
           <p className="text-sm text-texto-suave">{actual.descripcion}</p>
           <Componente />
