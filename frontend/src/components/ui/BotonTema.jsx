@@ -45,10 +45,44 @@ const ACCIONES = {
   oscuro: 'Cambiar al tema oscuro',
 }
 
-const ICONOS = {
-  sistema: '◐',
-  claro: '☾',
-  oscuro: '☀',
+// Iconos de línea: se dibujan con SVG para que no dependan de la fuente del sistema operativo.
+function Icono({ modo }) {
+  const comun = {
+    width: 18,
+    height: 18,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    'aria-hidden': true,
+    focusable: 'false',
+  }
+
+  if (modo === 'claro') {
+    return (
+      <svg {...comun}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+    )
+  }
+
+  if (modo === 'oscuro') {
+    return (
+      <svg {...comun}>
+        <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg {...comun}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none" />
+    </svg>
+  )
 }
 
 // Alterna entre tema del sistema, claro y oscuro, y lo guarda. El modo inicial lo decide index.html
@@ -93,9 +127,11 @@ export default function BotonTema() {
       onClick={alternar}
       aria-label={`${ETIQUETAS[modo]}. ${ACCIONES[siguiente]}`}
       title={ACCIONES[siguiente]}
-      className="grid size-11 place-items-center rounded-lg border border-borde bg-superficie text-base text-texto-suave transition-colors hover:bg-superficie-tenue"
+      className="grid size-11 place-items-center rounded-lg border border-borde bg-superficie text-texto-suave transition-colors hover:bg-superficie-tenue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
     >
-      <span aria-hidden="true">{ICONOS[modo]}</span>
+      <span aria-hidden="true">
+        <Icono modo={modo} />
+      </span>
     </button>
   )
 }

@@ -47,6 +47,6 @@ describe('App', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: 'Ingresar' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Ingresar al sistema' })).toBeInTheDocument()
   })
 })
