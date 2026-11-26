@@ -1,10 +1,14 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import PaginaInicio from './PaginaInicio'
 
 vi.mock('../api/reportesApi', () => ({
   obtenerIndicadores: vi.fn(),
+}))
+
+vi.mock('../api/prestamosApi', () => ({
+  listarPrestamos: vi.fn(),
 }))
 
 vi.mock('../contextos/contextoDeSesion', () => ({
@@ -12,6 +16,7 @@ vi.mock('../contextos/contextoDeSesion', () => ({
 }))
 
 const { obtenerIndicadores } = await import('../api/reportesApi')
+const { listarPrestamos } = await import('../api/prestamosApi')
 const { useSesion } = await import('../contextos/contextoDeSesion')
 
 const INDICADORES = {
@@ -34,6 +39,10 @@ function sesion(rol) {
     cerrarSesion: vi.fn(),
   }
 }
+
+beforeEach(() => {
+  listarPrestamos.mockResolvedValue({ total: 0, pagina: 1, tamano: 3, prestamos: [] })
+})
 
 afterEach(() => {
   vi.clearAllMocks()
@@ -88,14 +97,46 @@ describe('Panel de inicio', () => {
     const seccion = (await screen.findByRole('heading', { name: 'Distribución del inventario' }))
       .closest('section')
 
-    expect(within(seccion).getByText('Disponibles')).toBeInTheDocument()
-    expect(within(seccion).getByText('Prestados')).toBeInTheDocument()
-    expect(within(seccion).getByText('En mantenimiento')).toBeInTheDocument()
-    expect(within(seccion).getByText('Baja')).toBeInTheDocument()
+    expect(within(seccion).getByText('Disponibles · 40 %')).toBeInTheDocument()
+    expect(within(seccion).getByText('Prestados · 20 %')).toBeInTheDocument()
+    expect(within(seccion).getByText('En mantenimiento · 10 %')).toBeInTheDocument()
+    expect(within(seccion).getByText('Baja · 30 %')).toBeInTheDocument()
 
     // 4 de 10 disponibles, 2 prestados, 1 en mantenimiento y 3 de baja: suma 10.
-    expect(within(seccion).getByText('4 · 40 %')).toBeInTheDocument()
-    expect(within(seccion).getByText('3 · 30 %')).toBeInTheDocument()
+    expect(within(seccion).getByText('4')).toBeInTheDocument()
+    expect(within(seccion).getByText('3')).toBeInTheDocument()
+  })
+
+  it('lista los tres préstamos más recientes con su estado', async () => {
+    useSesion.mockReturnValue(sesion('Administrador'))
+    obtenerIndicadores.mockResolvedValue(INDICADORES)
+    listarPrestamos.mockResolvedValue({
+      total: 1,
+      pagina: 1,
+      tamano: 3,
+      prestamos: [
+        {
+          id_prestamo: 'p1',
+          nombre_equipo: 'Proyector Epson',
+          nombre_responsable: 'C. Mendoza',
+          estado_prestamo: 'Activo',
+        },
+      ],
+    })
+
+    render(
+      <MemoryRouter>
+        <PaginaInicio />
+      </MemoryRouter>,
+    )
+
+    const enlace = await screen.findByRole('link', { name: 'Proyector Epson' })
+    expect(enlace).toHaveAttribute('href', '/prestamos/p1')
+
+    const tabla = enlace.closest('table')
+    expect(within(tabla).getByText('C. Mendoza')).toBeInTheDocument()
+    expect(within(tabla).getByText('Activo')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ver todos →' })).toHaveAttribute('href', '/prestamos')
   })
 
   it('ofrece reintentar cuando la consulta falla', async () => {

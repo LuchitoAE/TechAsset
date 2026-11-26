@@ -17,10 +17,10 @@ export const LIMITE_RANKING_COMPLETO = 100
 // RF-13: las cuatro barras de la distribución. Van en el orden de los estados del equipo y cada
 // una lleva su color y su nombre, para no comunicar el estado solo con color (RNF-05).
 export const DISTRIBUCION_DEL_INVENTARIO = [
-  { clave: 'equipos_disponibles', etiqueta: 'Disponibles', clase: 'bg-exito' },
+  { clave: 'equipos_disponibles', etiqueta: 'Disponibles', clase: 'bg-exito-vivo' },
   { clave: 'equipos_prestados', etiqueta: 'Prestados', clase: 'bg-marca-600' },
-  { clave: 'equipos_mantenimiento', etiqueta: 'En mantenimiento', clase: 'bg-aviso' },
-  { clave: 'equipos_baja', etiqueta: 'Baja', clase: 'bg-error' },
+  { clave: 'equipos_mantenimiento', etiqueta: 'En mantenimiento', clase: 'bg-aviso-vivo' },
+  { clave: 'equipos_baja', etiqueta: 'Baja', clase: 'bg-error-vivo' },
 ]
 
 export function etiquetaDeTipoMovimiento(tipo) {

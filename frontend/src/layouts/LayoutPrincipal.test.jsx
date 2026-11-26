@@ -76,6 +76,6 @@ describe('Pie de la aplicación', () => {
       '#contenido-principal',
     )
     expect(screen.getByText('Ana Pérez')).toHaveClass('truncate')
-    expect(screen.getByText('AP')).toBeInTheDocument()
+    expect(screen.getAllByText('AP').length).toBeGreaterThan(0)
   })
 })
