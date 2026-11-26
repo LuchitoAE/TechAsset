@@ -1,23 +1,23 @@
 // Navegación y permisos visibles. La API vuelve a comprobar el rol en cada operación (RNF-18).
 export const MENUS_POR_ROL = {
   Administrador: [
-    { ruta: '/panel', etiqueta: 'Panel' },
-    { ruta: '/usuarios', etiqueta: 'Usuarios' },
-    { ruta: '/equipos', etiqueta: 'Equipos' },
-    { ruta: '/prestamos', etiqueta: 'Préstamos' },
-    { ruta: '/reportes', etiqueta: 'Reportes' },
+    { ruta: '/panel', etiqueta: 'Panel', icono: 'panel' },
+    { ruta: '/usuarios', etiqueta: 'Usuarios', icono: 'usuarios' },
+    { ruta: '/equipos', etiqueta: 'Equipos', icono: 'equipos' },
+    { ruta: '/prestamos', etiqueta: 'Préstamos', icono: 'prestamos' },
+    { ruta: '/reportes', etiqueta: 'Reportes', icono: 'reportes' },
   ],
   ResponsableDeTecnologia: [
-    { ruta: '/panel', etiqueta: 'Panel' },
-    { ruta: '/equipos', etiqueta: 'Equipos' },
-    { ruta: '/prestamos', etiqueta: 'Préstamos' },
-    { ruta: '/reportes', etiqueta: 'Reportes' },
+    { ruta: '/panel', etiqueta: 'Panel', icono: 'panel' },
+    { ruta: '/equipos', etiqueta: 'Equipos', icono: 'equipos' },
+    { ruta: '/prestamos', etiqueta: 'Préstamos', icono: 'prestamos' },
+    { ruta: '/reportes', etiqueta: 'Reportes', icono: 'reportes' },
   ],
   Colaborador: [
-    { ruta: '/panel', etiqueta: 'Panel' },
-    { ruta: '/equipos', etiqueta: 'Equipos' },
-    { ruta: '/mis-prestamos', etiqueta: 'Mis préstamos' },
-    { ruta: '/disponibilidad', etiqueta: 'Disponibilidad' },
+    { ruta: '/panel', etiqueta: 'Panel', icono: 'panel' },
+    { ruta: '/equipos', etiqueta: 'Equipos', icono: 'equipos' },
+    { ruta: '/mis-prestamos', etiqueta: 'Mis préstamos', icono: 'prestamos' },
+    { ruta: '/disponibilidad', etiqueta: 'Disponibilidad', icono: 'disponibilidad' },
   ],
 }
 

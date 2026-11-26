@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useAvisos } from '../contextos/contextoDeAvisos'
 import { etiquetaDeRol } from '../reglas/catalogos'
@@ -8,20 +8,29 @@ import { VERSION_DEL_PRODUCTO } from '../reglas/version'
 import BotonTema from '../components/ui/BotonTema'
 import Button from '../components/ui/Button'
 import MarcaTechAsset from '../components/marca/MarcaTechAsset'
+import IconoDeMenu from '../components/navegacion/IconoDeMenu'
 
-// Estructura común de la aplicación: marca, menú según el rol, tema, sesión y pie. El contenido de
-// cada ruta se dibuja en <Outlet />.
+// Estructura común de la aplicación: barra lateral por rol, barra superior con el usuario y el tema,
+// y el contenido de cada ruta en <Outlet />. En el teléfono la barra lateral se abre como cajón.
 export default function LayoutPrincipal() {
   const { sesion, cerrarSesion } = useSesion()
   const { mostrarAviso } = useAvisos()
   const navegar = useNavigate()
+  const ubicacion = useLocation()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [saliendo, setSaliendo] = useState(false)
 
   const menu = menuDelRol(sesion?.rol_usuario)
-  const inicial = sesion?.nombres_usuario?.charAt(0)?.toUpperCase() ?? 'T'
+  const iniciales =
+    `${sesion?.nombres_usuario?.charAt(0) ?? ''}${sesion?.apellidos_usuario?.charAt(0) ?? ''}`.toUpperCase() ||
+    'T'
 
-  // Escape cierra el menú del teléfono y devuelve el foco al botón que lo abrió.
+  const seccionActual =
+    menu.find(
+      (opcion) => ubicacion.pathname === opcion.ruta || ubicacion.pathname.startsWith(`${opcion.ruta}/`),
+    )?.etiqueta ?? 'Panel'
+
+  // Escape cierra el cajón del teléfono y devuelve el foco al botón que lo abrió.
   const botonDelMenu = useRef(null)
 
   useEffect(() => {
@@ -49,8 +58,35 @@ export default function LayoutPrincipal() {
     setMenuAbierto(false)
   }
 
+  const enlacesDelMenu = (alNavegar) =>
+    menu.map((opcion) => (
+      <li key={opcion.ruta}>
+        <NavLink
+          to={opcion.ruta}
+          onClick={alNavegar}
+          className={({ isActive }) =>
+            `flex min-h-11 items-center gap-3 rounded-lg px-3 text-[15px] transition-colors ${
+              isActive
+                ? 'bg-white/10 font-semibold text-white'
+                : 'text-tinta-suave hover:bg-white/5 hover:text-white'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <IconoDeMenu
+                nombre={opcion.icono}
+                className={`size-5 shrink-0 ${isActive ? 'text-marca-400' : ''}`}
+              />
+              {opcion.etiqueta}
+            </>
+          )}
+        </NavLink>
+      </li>
+    ))
+
   return (
-    <div className="flex min-h-dvh flex-col bg-fondo">
+    <div className="min-h-dvh bg-fondo">
       <a
         href="#contenido-principal"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-superficie focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-marca-700"
@@ -58,114 +94,139 @@ export default function LayoutPrincipal() {
         Ir al contenido
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-borde bg-superficie/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
-          <Link to="/panel" className="flex shrink-0 items-center gap-2.5" onClick={cerrarMenu}>
-            <MarcaTechAsset alto={36} />
-            <span className="hidden text-[11px] leading-tight text-texto-suave sm:block">Innovatech</span>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-tinta lg:flex">
+        <div className="flex h-[76px] items-center px-5">
+          <Link to="/panel" className="rounded-lg" aria-label="TechAsset, panel">
+            <MarcaTechAsset alto={34} tema="oscuro" />
           </Link>
-
-          <nav aria-label="Menú principal" className="ml-4 hidden flex-1 items-center gap-1 md:flex">
-            {menu.map((opcion) => (
-              <NavLink
-                key={opcion.ruta}
-                to={opcion.ruta}
-                className={({ isActive }) =>
-                  `inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? 'bg-marca-50 text-marca-800'
-                      : 'text-texto-suave hover:bg-superficie-tenue hover:text-texto'
-                  }`
-                }
-              >
-                {opcion.etiqueta}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="ml-auto hidden items-center gap-3 md:flex">
-            <BotonTema />
-            <div className="text-right">
-              <p className="max-w-44 truncate text-sm font-semibold text-texto">
-                {sesion?.nombres_usuario} {sesion?.apellidos_usuario}
-              </p>
-              <p className="text-[11px] text-texto-suave">{etiquetaDeRol(sesion?.rol_usuario)}</p>
-            </div>
-            <span
-              aria-hidden="true"
-              className="grid size-10 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
-            >
-              {inicial}
-            </span>
-            <Button variante="fantasma" cargando={saliendo} textoCargando="Saliendo…" onClick={salirDeLaSesion}>
-              Salir
-            </Button>
-          </div>
-
-          <button
-            ref={botonDelMenu}
-            type="button"
-            className="ml-auto inline-flex h-11 items-center gap-2 rounded-lg border border-borde px-3 text-sm font-semibold text-texto md:hidden"
-            aria-expanded={menuAbierto}
-            aria-controls="menu-movil"
-            onClick={() => setMenuAbierto((abierto) => !abierto)}
-          >
-            <span aria-hidden="true">☰</span>
-            Menú
-          </button>
         </div>
 
-        {menuAbierto && (
-          <div id="menu-movil" className="border-t border-borde bg-superficie px-4 py-3 md:hidden">
-            <nav aria-label="Menú principal en el teléfono" className="grid gap-1">
-              {menu.map((opcion) => (
-                <NavLink
-                  key={opcion.ruta}
-                  to={opcion.ruta}
-                  onClick={cerrarMenu}
-                  className={({ isActive }) =>
-                    `inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold ${
-                      isActive ? 'bg-marca-50 text-marca-800' : 'text-texto-suave'
-                    }`
-                  }
-                >
-                  {opcion.etiqueta}
-                </NavLink>
-              ))}
+        <nav aria-label="Menú principal" className="flex-1 overflow-y-auto px-3 py-4">
+          <ul className="space-y-1">{enlacesDelMenu(cerrarMenu)}</ul>
+        </nav>
+
+        <div className="border-t border-white/10 px-5 py-4 text-[11px] leading-relaxed text-tinta-suave">
+          TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026
+        </div>
+      </aside>
+
+      <div className="lg:pl-60">
+        <header className="sticky top-0 z-30 border-b border-borde bg-superficie/95 backdrop-blur">
+          <div className="flex h-[76px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <button
+              ref={botonDelMenu}
+              type="button"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-borde px-3 text-sm font-semibold text-texto lg:hidden"
+              aria-expanded={menuAbierto}
+              aria-controls="menu-movil"
+              onClick={() => setMenuAbierto((abierto) => !abierto)}
+            >
+              <span aria-hidden="true">☰</span>
+              Menú
+            </button>
+
+            <Link to="/panel" className="rounded-lg lg:hidden" aria-label="TechAsset, panel">
+              <MarcaTechAsset alto={30} />
+            </Link>
+
+            <nav aria-label="Ubicación" className="hidden min-w-0 items-center gap-2 text-sm lg:flex">
+              <span className="text-texto-suave">TechAsset</span>
+              <span aria-hidden="true" className="text-texto-suave">
+                /
+              </span>
+              <span className="truncate font-semibold text-texto">{seccionActual}</span>
             </nav>
 
-            <div className="mt-3 flex items-center justify-between gap-3 border-t border-borde pt-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-texto">
+            <div className="ml-auto flex items-center gap-3">
+              <BotonTema />
+
+              <div className="hidden text-right sm:block">
+                <p className="max-w-44 truncate text-sm font-semibold text-texto">
                   {sesion?.nombres_usuario} {sesion?.apellidos_usuario}
                 </p>
                 <p className="text-[11px] text-texto-suave">{etiquetaDeRol(sesion?.rol_usuario)}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <BotonTema />
-                <Button variante="secundario" onClick={salirDeLaSesion} cargando={saliendo}>
+
+              <span
+                aria-hidden="true"
+                className="grid size-10 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
+              >
+                {iniciales}
+              </span>
+
+              <div className="hidden sm:block">
+                <Button
+                  variante="fantasma"
+                  cargando={saliendo}
+                  textoCargando="Saliendo…"
+                  onClick={salirDeLaSesion}
+                >
                   Salir
                 </Button>
               </div>
             </div>
           </div>
-        )}
-      </header>
+        </header>
 
-      <main
-        id="contenido-principal"
-        tabIndex={-1}
-        className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 focus:outline-none sm:px-6 sm:py-8"
-      >
-        <Outlet />
-      </main>
+        <main
+          id="contenido-principal"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-[1408px] px-4 py-6 focus:outline-none sm:px-6 lg:px-8 lg:py-8"
+        >
+          <Outlet />
+        </main>
+      </div>
 
-      <footer className="border-t border-borde bg-superficie">
-        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-texto-suave sm:px-6">
-          <p>Universidad Peruana Los Andes · Construcción de Software</p>
-          <p>TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026</p>
+      {menuAbierto && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Cerrar el menú"
+            className="absolute inset-0 bg-tinta/60"
+            onClick={cerrarMenu}
+          />
+
+          <div
+            id="menu-movil"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú principal"
+            className="relative flex h-full w-72 max-w-[85%] flex-col bg-tinta shadow-tarjeta"
+          >
+            <div className="flex h-[76px] items-center justify-between px-5">
+              <MarcaTechAsset alto={32} tema="oscuro" />
+              <button
+                type="button"
+                autoFocus
+                onClick={cerrarMenu}
+                className="grid size-10 place-items-center rounded-lg text-xl text-tinta-suave hover:bg-white/5 hover:text-white"
+                aria-label="Cerrar el menú"
+              >
+                <span aria-hidden="true">✕</span>
+              </button>
+            </div>
+
+            <nav aria-label="Menú principal en el teléfono" className="flex-1 overflow-y-auto px-3 py-2">
+              <ul className="space-y-1">{enlacesDelMenu(cerrarMenu)}</ul>
+            </nav>
+
+            <div className="border-t border-white/10 px-4 py-4">
+              <p className="truncate text-sm font-semibold text-white">
+                {sesion?.nombres_usuario} {sesion?.apellidos_usuario}
+              </p>
+              <p className="text-[11px] text-tinta-suave">{etiquetaDeRol(sesion?.rol_usuario)}</p>
+              <Button
+                variante="secundario"
+                onClick={salirDeLaSesion}
+                cargando={saliendo}
+                className="mt-3 w-full"
+              >
+                Salir
+              </Button>
+            </div>
+          </div>
         </div>
-      </footer>
+      )}
     </div>
   )
 }
