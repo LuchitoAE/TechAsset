@@ -39,6 +39,11 @@ const TRAZOS = {
       <path d="M6.5 10.2l2.4 2.4 4.6-4.8" />
     </>
   ),
+  mantenimiento: (
+    <>
+      <path d="M13.5 2.8a4.2 4.2 0 0 0-5.2 5.4L3.2 13.3a1.5 1.5 0 0 0 0 2.1l1.4 1.4a1.5 1.5 0 0 0 2.1 0l5.1-5.1a4.2 4.2 0 0 0 5.4-5.2l-2.6 2.6-2.2-2.2Z" />
+    </>
+  ),
 }
 
 export default function IconoDeMenu({ nombre, className = 'size-5' }) {

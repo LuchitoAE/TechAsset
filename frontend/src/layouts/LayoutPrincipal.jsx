@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useSesion } from '../contextos/contextoDeSesion'
 import { useAvisos } from '../contextos/contextoDeAvisos'
+import { ContextoDeEncabezado } from '../contextos/contextoDeEncabezado'
 import { etiquetaDeRol } from '../reglas/catalogos'
 import { menuDelRol } from '../reglas/permisos'
 import { VERSION_DEL_PRODUCTO } from '../reglas/version'
@@ -19,6 +20,9 @@ export default function LayoutPrincipal() {
   const ubicacion = useLocation()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [saliendo, setSaliendo] = useState(false)
+  const [tituloPagina, setTituloPagina] = useState('')
+
+  const registrarTitulo = useCallback((titulo) => setTituloPagina(titulo ?? ''), [])
 
   const menu = menuDelRol(sesion?.rol_usuario)
   const iniciales =
@@ -86,7 +90,8 @@ export default function LayoutPrincipal() {
     ))
 
   return (
-    <div className="min-h-dvh bg-fondo">
+    <ContextoDeEncabezado.Provider value={{ registrarTitulo }}>
+      <div className="min-h-dvh bg-fondo">
       <a
         href="#contenido-principal"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-superficie focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-marca-700"
@@ -105,8 +110,48 @@ export default function LayoutPrincipal() {
           <ul className="space-y-1">{enlacesDelMenu(cerrarMenu)}</ul>
         </nav>
 
-        <div className="border-t border-white/10 px-5 py-4 text-[11px] leading-relaxed text-tinta-suave">
-          TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026
+        <div className="border-t border-white/10 p-3">
+          <div className="flex items-center gap-3 rounded-[10px] bg-white/5 px-3 py-2.5">
+            <span
+              aria-hidden="true"
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-marca-600 text-xs font-bold text-tinta"
+            >
+              {iniciales}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">
+                {sesion?.nombres_usuario} {sesion?.apellidos_usuario}
+              </p>
+              <p className="truncate text-[11px] text-tinta-suave">{etiquetaDeRol(sesion?.rol_usuario)}</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={salirDeLaSesion}
+            disabled={saliendo}
+            className="mt-2 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm font-semibold text-tinta-suave transition-colors hover:bg-white/5 hover:text-white disabled:opacity-60"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+              className="size-4"
+            >
+              <path d="M12.5 5.5V4a1.5 1.5 0 0 0-1.5-1.5H4.5A1.5 1.5 0 0 0 3 4v12a1.5 1.5 0 0 0 1.5 1.5H11a1.5 1.5 0 0 0 1.5-1.5v-1.5" />
+              <path d="M8 10h9M14.5 7.5 17 10l-2.5 2.5" />
+            </svg>
+            {saliendo ? 'Saliendo…' : 'Salir'}
+          </button>
+
+          <p className="mt-2 px-3 text-[10px] leading-relaxed text-tinta-suave">
+            TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026
+          </p>
         </div>
       </aside>
 
@@ -125,45 +170,31 @@ export default function LayoutPrincipal() {
               Menú
             </button>
 
-            <Link to="/panel" className="rounded-lg lg:hidden" aria-label="TechAsset, panel">
+            <Link to="/panel" className="hidden rounded-lg sm:block lg:hidden" aria-label="TechAsset, panel">
               <MarcaTechAsset alto={30} />
             </Link>
 
-            <nav aria-label="Ubicación" className="hidden min-w-0 items-center gap-2 text-sm lg:flex">
-              <span className="text-texto-suave">TechAsset</span>
-              <span aria-hidden="true" className="text-texto-suave">
-                /
-              </span>
-              <span className="truncate font-semibold text-texto">{seccionActual}</span>
-            </nav>
+            <div className="min-w-0">
+              <nav aria-label="Ubicación" className="hidden items-center gap-2 text-[12px] text-texto-suave lg:flex">
+                <span>TechAsset</span>
+                <span aria-hidden="true">/</span>
+                <span>{seccionActual}</span>
+              </nav>
+              <h1 className="truncate text-base leading-tight font-bold tracking-tight text-titulo lg:text-[1.375rem]">
+                {tituloPagina || seccionActual}
+              </h1>
+            </div>
 
             <div className="ml-auto flex items-center gap-3">
               <BotonTema />
 
-              <div className="hidden text-right sm:block">
-                <p className="max-w-44 truncate text-sm font-semibold text-texto">
-                  {sesion?.nombres_usuario} {sesion?.apellidos_usuario}
-                </p>
-                <p className="text-[11px] text-texto-suave">{etiquetaDeRol(sesion?.rol_usuario)}</p>
-              </div>
-
               <span
                 aria-hidden="true"
-                className="grid size-10 place-items-center rounded-full bg-marca-50 text-sm font-bold text-marca-700"
+                className="grid size-10 place-items-center rounded-full bg-marca-600 text-sm font-bold text-tinta"
+                title={`${sesion?.nombres_usuario ?? ''} ${sesion?.apellidos_usuario ?? ''}`}
               >
                 {iniciales}
               </span>
-
-              <div className="hidden sm:block">
-                <Button
-                  variante="fantasma"
-                  cargando={saliendo}
-                  textoCargando="Saliendo…"
-                  onClick={salirDeLaSesion}
-                >
-                  Salir
-                </Button>
-              </div>
             </div>
           </div>
         </header>
@@ -227,6 +258,7 @@ export default function LayoutPrincipal() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </ContextoDeEncabezado.Provider>
   )
 }

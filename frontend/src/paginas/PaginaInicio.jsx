@@ -1,21 +1,29 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import { listarPrestamos } from '../api/prestamosApi'
 import { obtenerIndicadores } from '../api/reportesApi'
 import AlertMessage from '../components/ui/AlertMessage'
-import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import CardIndicador from '../components/ui/CardIndicador'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
+import IconoDeMenu from '../components/navegacion/IconoDeMenu'
 import { useSesion } from '../contextos/contextoDeSesion'
-import { etiquetaDeRol } from '../reglas/catalogos'
-import { accesosDelRol, puedeGestionarEquipos } from '../reglas/permisos'
+import { etiquetaDeRol, etiquetaDeEstadoPrestamo } from '../reglas/catalogos'
+import { puedeGestionarEquipos } from '../reglas/permisos'
 import { distribucionDelInventario, formatearFechaYHora, resumenDeAreas } from '../reglas/reportes'
 
-// RF-13 y D-10: panel general con los seis indicadores mínimos del PDF. Los tres roles entran; el
-// Colaborador ve los contadores del inventario y solo sus préstamos, porque la API aplica el alcance.
+const COLOR_DE_ESTADO = {
+  Solicitado: 'bg-aviso-vivo',
+  Activo: 'bg-marca-600',
+  Devuelto: 'bg-exito-vivo',
+  Rechazado: 'bg-error-vivo',
+}
+
+// RF-13 y D-10: panel general con los seis indicadores mínimos del PDF, la distribución del inventario
+// y los últimos préstamos. Los tres roles entran; el Colaborador ve los contadores del inventario y
+// solo sus préstamos, porque la API aplica el alcance.
 export default function PaginaInicio() {
   const { sesion } = useSesion()
-  const accesos = accesosDelRol(sesion?.rol_usuario)
   const esColaborador = sesion?.rol_usuario === 'Colaborador'
   const puedeRegistrarEquipos = puedeGestionarEquipos(sesion?.rol_usuario)
 
@@ -23,6 +31,11 @@ export default function PaginaInicio() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [recarga, setRecarga] = useState(0)
+
+  const [recientes, setRecientes] = useState([])
+  const [cargandoRecientes, setCargandoRecientes] = useState(true)
+  const [errorRecientes, setErrorRecientes] = useState(null)
+  const [recargaRecientes, setRecargaRecientes] = useState(0)
 
   useEffect(() => {
     const control = new AbortController()
@@ -43,17 +56,38 @@ export default function PaginaInicio() {
     return () => control.abort()
   }, [recarga])
 
+  useEffect(() => {
+    const control = new AbortController()
+
+    listarPrestamos({ pagina: 1, tamano: 3 }, control.signal)
+      .then((datos) => {
+        if (control.signal.aborted) return
+        setRecientes(datos.prestamos ?? [])
+        setErrorRecientes(null)
+      })
+      .catch((excepcion) => {
+        if (excepcion.name !== 'AbortError') setErrorRecientes(excepcion.message)
+      })
+      .finally(() => {
+        if (!control.signal.aborted) setCargandoRecientes(false)
+      })
+
+    return () => control.abort()
+  }, [recargaRecientes])
+
   const total = indicadores?.total_equipos ?? 0
   const distribucion = distribucionDelInventario(indicadores)
-
   const areas = indicadores?.areas_con_mayor_uso ?? []
+
+  const porcentaje = (valor) => (total === 0 ? 0 : Math.round((Number(valor) / total) * 100))
 
   return (
     <div className="space-y-6">
       <EncabezadoDePagina
-        titulo={`Hola, ${sesion?.nombres_usuario ?? ''}`}
-        tituloDocumento="Panel"
-        descripcion={`Sesión iniciada como ${etiquetaDeRol(sesion?.rol_usuario)}. Este es el panorama de TechAsset${
+        titulo="Panel general"
+        descripcion={`Hola, ${sesion?.nombres_usuario ?? ''}. Sesión iniciada como ${etiquetaDeRol(
+          sesion?.rol_usuario,
+        )}. Este es el panorama de TechAsset${
           indicadores ? ` al ${formatearFechaYHora(indicadores.fecha_corte)}` : ''
         }.`}
       />
@@ -81,14 +115,7 @@ export default function PaginaInicio() {
         </AlertMessage>
       )}
 
-      <section aria-labelledby="titulo-indicadores" className="space-y-4">
-        <h2
-          id="titulo-indicadores"
-          className="text-sm font-semibold tracking-wide text-texto-suave uppercase"
-        >
-          Indicadores del panel
-        </h2>
-
+      <section aria-label="Indicadores del panel">
         {cargando ? (
           <div aria-busy="true">
             <Cargando texto="Calculando los indicadores…" />
@@ -98,58 +125,53 @@ export default function PaginaInicio() {
             <CardIndicador
               etiqueta="Total de equipos"
               valor={total}
-              detalle="Suma de Disponibles, Prestados, Mantenimiento y Baja."
+              icono={<IconoDeMenu nombre="equipos" />}
             />
             <CardIndicador
               etiqueta="Equipos disponibles"
               valor={indicadores?.equipos_disponibles ?? 0}
-              detalle="Listos para solicitar un préstamo."
+              nota={`${porcentaje(indicadores?.equipos_disponibles)} % del total`}
+              icono={<IconoDeMenu nombre="disponibilidad" />}
             />
             <CardIndicador
               etiqueta="Equipos prestados"
               valor={indicadores?.equipos_prestados ?? 0}
-              detalle="Con un préstamo activo en este momento."
+              nota={`${porcentaje(indicadores?.equipos_prestados)} % del total`}
+              icono={<IconoDeMenu nombre="prestamos" />}
             />
             <CardIndicador
               etiqueta="En mantenimiento"
               valor={indicadores?.equipos_mantenimiento ?? 0}
-              detalle="Fuera de servicio; no se pueden prestar."
+              nota={`${porcentaje(indicadores?.equipos_mantenimiento)} % del total`}
+              icono={<IconoDeMenu nombre="mantenimiento" />}
             />
             <CardIndicador
               etiqueta="Total de préstamos"
               valor={indicadores?.total_prestamos ?? 0}
-              detalle={
-                esColaborador
-                  ? 'Sus préstamos activos y devueltos.'
-                  : 'Préstamos activos y devueltos de la empresa; los rechazados no cuentan.'
-              }
+              nota={esColaborador ? 'Solo los suyos' : 'Activos y devueltos'}
+              notaClassName="text-texto-suave"
+              icono={<IconoDeMenu nombre="prestamos" />}
             />
             <CardIndicador
               etiqueta="Área con mayor uso"
               valor={resumenDeAreas(areas)}
               valorClassName="text-xl"
-              detalle={
-                areas.length > 1
-                  ? 'Hay un empate: se muestran todas las áreas con el máximo.'
-                  : 'Área del responsable con más préstamos contados.'
-              }
+              nota={areas.length > 0 ? 'Con más préstamos' : undefined}
+              notaClassName="text-texto-suave"
+              icono={<IconoDeMenu nombre="reportes" />}
             />
           </div>
         )}
       </section>
 
-      {!cargando && indicadores && (
+      <div className="grid gap-4 xl:grid-cols-2">
         <section
           aria-labelledby="titulo-distribucion"
-          className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta"
+          className="rounded-[14px] border border-borde bg-superficie p-5"
         >
-          <h2 id="titulo-distribucion" className="text-base font-bold text-titulo">
+          <h2 id="titulo-distribucion" className="text-[17px] font-bold text-titulo">
             Distribución del inventario
           </h2>
-          <p className="mt-1 text-sm text-texto-suave">
-            Cada barra compara el estado con el total de equipos. El número y el nombre acompañan
-            siempre al color.
-          </p>
 
           {total === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-borde px-4 py-6 text-center text-sm text-texto-suave">
@@ -164,88 +186,122 @@ export default function PaginaInicio() {
               )}
             </div>
           ) : (
-            <ul className="mt-4 space-y-3">
-              {distribucion.map((fila) => {
-                return (
-                  <li key={fila.etiqueta}>
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="font-semibold text-texto">{fila.etiqueta}</span>
-                      <span className="text-texto-suave">
-                        {fila.valor} · {fila.porcentaje} %
-                      </span>
-                    </div>
-                    <div
-                      aria-hidden="true"
-                      className="mt-1 h-2 overflow-hidden rounded-full bg-superficie-tenue"
-                    >
-                      <div
-                        className={`h-full rounded-full ${fila.clase}`}
-                        style={{ width: `${fila.porcentaje}%` }}
-                      />
-                    </div>
+            <>
+              <div
+                aria-hidden="true"
+                className="mt-5 flex h-7 overflow-hidden rounded-[6px] bg-superficie-tenue"
+              >
+                {distribucion.map((fila) => (
+                  <div
+                    key={fila.etiqueta}
+                    className={fila.clase}
+                    style={{ width: `${fila.porcentaje}%` }}
+                  />
+                ))}
+              </div>
+
+              <ul className="mt-5 space-y-2">
+                {distribucion.map((fila) => (
+                  <li key={fila.etiqueta} className="flex items-center gap-2.5 text-[13px]">
+                    <span aria-hidden="true" className={`size-2.5 shrink-0 rounded-full ${fila.clase}`} />
+                    <span className="font-semibold text-texto">
+                      {fila.etiqueta} · {fila.porcentaje} %
+                    </span>
+                    <span className="ml-auto text-texto-suave">{fila.valor}</span>
                   </li>
-                )
-              })}
-            </ul>
+                ))}
+              </ul>
+            </>
           )}
         </section>
-      )}
 
-      <section aria-labelledby="titulo-accesos" className="space-y-4">
-        <h2 id="titulo-accesos" className="text-sm font-semibold tracking-wide text-texto-suave uppercase">
-          Accesos de su rol
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {accesos.map((acceso) => (
+        <section
+          aria-labelledby="titulo-recientes"
+          className="rounded-[14px] border border-borde bg-superficie p-5"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="titulo-recientes" className="text-[17px] font-bold text-titulo">
+              Préstamos recientes
+            </h2>
             <Link
-              key={acceso.ruta}
-              to={acceso.ruta}
-              className="group rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta transition-colors hover:border-marca-300 hover:bg-superficie-tenue"
+              to={esColaborador ? '/mis-prestamos' : '/prestamos'}
+              className="rounded text-[13px] font-semibold text-marca-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
             >
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="text-base font-bold text-titulo">{acceso.titulo}</h3>
-                <span
-                  aria-hidden="true"
-                  className="text-marca-700 transition-transform group-hover:translate-x-0.5"
-                >
-                  →
-                </span>
-              </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">{acceso.detalle}</p>
+              Ver todos →
             </Link>
-          ))}
-        </div>
-      </section>
+          </div>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <article className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta">
-          <h2 className="text-base font-bold text-titulo">Inventario y préstamos</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">
-            Altas con código patrimonial único, cambios de estado, solicitudes, aprobaciones y
-            devoluciones con observación obligatoria.
-          </p>
-          <p className="mt-4 rounded-lg bg-exito-fondo px-3 py-2 text-xs font-semibold text-exito">
-            Disponible
-          </p>
-        </article>
+          {cargandoRecientes ? (
+            <div aria-busy="true">
+              <Cargando texto="Consultando los últimos préstamos…" />
+            </div>
+          ) : errorRecientes ? (
+            <AlertMessage tipo="error">
+              {errorRecientes}{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  setCargandoRecientes(true)
+                  setRecargaRecientes((actual) => actual + 1)
+                }}
+                className="font-semibold underline underline-offset-2"
+              >
+                Reintentar
+              </button>
+            </AlertMessage>
+          ) : recientes.length === 0 ? (
+            <p className="mt-4 rounded-xl border border-dashed border-borde px-4 py-5 text-center text-sm text-texto-suave">
+              Todavía no hay préstamos registrados.
+            </p>
+          ) : (
+            <table className="mt-4 w-full text-left text-[13px]">
+              <caption className="sr-only">Los tres préstamos más recientes</caption>
+              <thead>
+                <tr className="text-[11px] font-semibold tracking-wide text-texto-suave uppercase">
+                  <th scope="col" className="pb-2 font-semibold">
+                    Equipo
+                  </th>
+                  <th scope="col" className="hidden pb-2 font-semibold sm:table-cell">
+                    Colaborador
+                  </th>
+                  <th scope="col" className="pb-2 font-semibold">
+                    Estado
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {recientes.map((prestamo) => (
+                  <tr
+                    key={prestamo.id_prestamo}
+                    className="border-t border-borde transition-colors hover:bg-superficie-tenue"
+                  >
+                    <td className="py-3 pr-2 font-semibold text-titulo">
+                      <Link to={`/prestamos/${prestamo.id_prestamo}`} className="hover:underline">
+                        {prestamo.nombre_equipo}
+                      </Link>
+                    </td>
+                    <td className="hidden py-3 pr-2 text-texto-suave sm:table-cell">
+                      {prestamo.nombre_responsable}
+                    </td>
+                    <td className="py-3">
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-titulo">
+                        <span
+                          aria-hidden="true"
+                          className={`size-2 shrink-0 rounded-full ${
+                            COLOR_DE_ESTADO[prestamo.estado_prestamo] ?? 'bg-texto-suave'
+                          }`}
+                        />
+                        {etiquetaDeEstadoPrestamo(prestamo.estado_prestamo)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </div>
 
-        <article className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta">
-          <h2 className="text-base font-bold text-titulo">Reportes e historial</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">
-            Equipos por estado, equipos más utilizados, préstamos por área e historial de movimientos,
-            con filtros y estados vacíos.
-          </p>
-          <p className="mt-4 rounded-lg bg-exito-fondo px-3 py-2 text-xs font-semibold text-exito">
-            {esColaborador ? 'El panel es suyo; los reportes son del Responsable y del Administrador.' : 'Disponible'}
-          </p>
-        </article>
-      </section>
-
-      {!cargando && !indicadores && !error && (
-        <Button variante="secundario" onClick={() => setRecarga((actual) => actual + 1)}>
-          Volver a consultar los indicadores
-        </Button>
-      )}
     </div>
   )
 }
