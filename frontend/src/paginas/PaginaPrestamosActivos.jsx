@@ -5,7 +5,6 @@ import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
-import MigasDePan from '../components/ui/MigasDePan'
 import EtiquetaDeEstadoPrestamo from '../components/prestamos/EtiquetaDeEstadoPrestamo'
 import { formatearFecha } from '../utils/fechas'
 
@@ -41,18 +40,10 @@ export default function PaginaPrestamosActivos() {
   const vencidos = pagina.prestamos.filter((prestamo) => prestamo.vencido_prestamo).length
 
   return (
-    <div className="space-y-6">
-      <MigasDePan
-        items={[
-          { etiqueta: 'Inicio', ruta: '/' },
-          { etiqueta: 'Préstamos', ruta: '/prestamos' },
-          { etiqueta: 'Préstamos activos' },
-        ]}
-      />
-
+    <div className="space-y-4">
       <EncabezadoDePagina
         titulo="Préstamos activos"
-        descripcion="Equipos que hoy están en manos de un colaborador. Los que ya pasaron su fecha de devolución comprometida se marcan como vencidos."
+        descripcion="Equipos que hoy están en manos de un colaborador. Los que pasaron su fecha de devolución se marcan como vencidos."
       />
 
       {error && (
@@ -75,7 +66,7 @@ export default function PaginaPrestamosActivos() {
           <Cargando texto="Consultando los préstamos activos…" />
         </div>
       ) : pagina.prestamos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
+        <div className="rounded-[14px] border border-dashed border-borde bg-superficie p-10 text-center">
           <p className="text-base font-semibold text-titulo">No hay préstamos activos.</p>
           <p className="mt-1 text-sm text-texto-suave">
             Cuando se apruebe una solicitud, el préstamo aparecerá aquí hasta que se registre la
@@ -90,120 +81,119 @@ export default function PaginaPrestamosActivos() {
         </div>
       ) : (
         <>
-          <p className="text-sm text-texto-suave">
-            {pagina.total} {pagina.total === 1 ? 'préstamo activo' : 'préstamos activos'}
-            {vencidos > 0 && (
-              <span className="font-semibold text-error"> · {vencidos} vencido(s)</span>
-            )}
+          <p role="status" className="text-sm font-semibold text-titulo">
+            {pagina.total} {pagina.total === 1 ? 'activo' : 'activos'}
+            {vencidos > 0 && <span className="text-error"> · {vencidos} vencen hoy o antes</span>}
           </p>
 
-          <div className="overflow-hidden rounded-2xl border border-borde bg-superficie shadow-tarjeta">
-            <table className="hidden w-full border-collapse text-left text-sm sm:table">
+          <div className="hidden sm:block">
+            <table className="w-full border-separate border-spacing-y-2 text-left text-sm">
               <caption className="sr-only">
-                Préstamos activos con su equipo, responsable y fecha de devolución comprometida
+                Préstamos activos con su equipo, colaborador y fecha de devolución comprometida
               </caption>
-              <thead className="bg-superficie-tenue text-xs tracking-wide text-texto-suave uppercase">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+              <thead>
+                <tr className="text-[11px] tracking-wide text-texto-suave uppercase">
+                  <th scope="col" className="rounded-l-lg bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Equipo
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
-                    Responsable
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
+                    Colaborador
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
-                    Prestado el
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
+                    Prestado
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
-                    Devolver hasta
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
+                    Devuelve
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Estado
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">
-                    Acciones
+                  <th scope="col" className="rounded-r-lg bg-encabezado-tabla px-4 py-2.5 font-semibold">
+                    Acción
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-borde">
+              <tbody>
                 {pagina.prestamos.map((prestamo) => (
-                  <tr
-                    key={prestamo.id_prestamo}
-                    className={prestamo.vencido_prestamo ? 'bg-error-fondo/40' : 'hover:bg-superficie-tenue'}
-                  >
-                    <th scope="row" className="px-4 py-3 font-normal">
-                      <span className="block font-mono text-xs font-semibold text-texto">
+                  <tr key={prestamo.id_prestamo} className="group">
+                    <th
+                      scope="row"
+                      className="rounded-l-lg border-y border-l border-borde bg-superficie px-4 py-3.5 font-normal group-hover:bg-superficie-tenue"
+                    >
+                      <span className="block font-mono text-[11px] font-semibold text-texto-suave">
                         {prestamo.codigo_patrimonial_equipo}
                       </span>
-                      <span className="block text-sm text-texto-suave">{prestamo.nombre_equipo}</span>
+                      <span className="block font-semibold text-texto">{prestamo.nombre_equipo}</span>
                     </th>
-                    <td className="px-4 py-3">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
                       <span className="block text-texto">{prestamo.nombre_responsable}</span>
                       <span className="block text-xs text-texto-suave">{prestamo.area_responsable}</span>
                     </td>
-                    <td className="px-4 py-3 text-texto-suave">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 text-texto-suave group-hover:bg-superficie-tenue">
                       {formatearFecha(prestamo.fecha_prestamo)}
                     </td>
-                    <td className="px-4 py-3 font-semibold text-texto">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 font-semibold text-texto group-hover:bg-superficie-tenue">
                       {formatearFecha(prestamo.fecha_devolucion)}
                     </td>
-                    <td className="px-4 py-3">
-                      <EtiquetaDeEstadoPrestamo estado={prestamo.estado_prestamo} vencido={prestamo.vencido_prestamo} />
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
+                      <EtiquetaDeEstadoPrestamo
+                        estado={prestamo.estado_prestamo}
+                        vencido={prestamo.vencido_prestamo}
+                        variante="punto"
+                      />
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="rounded-r-lg border-y border-r border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
                       <Link
                         to={`/prestamos/${prestamo.id_prestamo}`}
-                        className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
+                        className="inline-flex h-9 items-center rounded-lg bg-marca-700 px-3 text-xs font-bold text-sobre-marca transition-colors hover:bg-marca-800"
                       >
-                        Registrar devolución
+                        Devolver
                       </Link>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
-            <ul className="divide-y divide-borde sm:hidden">
-              {pagina.prestamos.map((prestamo) => (
-                <li
-                  key={prestamo.id_prestamo}
-                  className={`p-4 ${prestamo.vencido_prestamo ? 'bg-error-fondo/40' : ''}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-mono text-xs font-semibold text-texto">
-                        {prestamo.codigo_patrimonial_equipo}
-                      </p>
-                      <p className="truncate text-sm font-semibold text-texto">{prestamo.nombre_equipo}</p>
-                      <p className="truncate text-xs text-texto-suave">
-                        {prestamo.nombre_responsable} · {prestamo.area_responsable}
-                      </p>
-                      <p className="mt-1 text-xs text-texto-suave">
-                        Devolver hasta {formatearFecha(prestamo.fecha_devolucion)}
-                      </p>
-                    </div>
-                    <EtiquetaDeEstadoPrestamo
-                      estado={prestamo.estado_prestamo}
-                      vencido={prestamo.vencido_prestamo}
-                    />
-                  </div>
-                  <div className="mt-3 text-right">
-                    <Link
-                      to={`/prestamos/${prestamo.id_prestamo}`}
-                      className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
-                    >
-                      Registrar devolución
-                    </Link>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </div>
 
-          <div className="text-right">
-            <Link to="/prestamos" className="text-sm font-semibold text-marca-700">
-              Ver todo el historial
-            </Link>
-          </div>
+          <ul className="space-y-2 sm:hidden">
+            {pagina.prestamos.map((prestamo) => (
+              <li
+                key={prestamo.id_prestamo}
+                className={`rounded-[14px] border bg-superficie p-4 ${
+                  prestamo.vencido_prestamo ? 'border-error/40' : 'border-borde'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] font-semibold text-texto-suave">
+                      {prestamo.codigo_patrimonial_equipo}
+                    </p>
+                    <p className="truncate text-sm font-semibold text-texto">{prestamo.nombre_equipo}</p>
+                    <p className="truncate text-xs text-texto-suave">
+                      {prestamo.nombre_responsable} · {prestamo.area_responsable}
+                    </p>
+                    <p className="mt-1 text-xs text-texto-suave">
+                      Devolver hasta {formatearFecha(prestamo.fecha_devolucion)}
+                    </p>
+                  </div>
+                  <EtiquetaDeEstadoPrestamo
+                    estado={prestamo.estado_prestamo}
+                    vencido={prestamo.vencido_prestamo}
+                    variante="punto"
+                  />
+                </div>
+                <div className="mt-3 text-right">
+                  <Link
+                    to={`/prestamos/${prestamo.id_prestamo}`}
+                    className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
+                  >
+                    Devolver →
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
         </>
       )}
     </div>

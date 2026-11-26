@@ -6,7 +6,6 @@ import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
-import MigasDePan from '../components/ui/MigasDePan'
 import ModalConfirmacion from '../components/ui/ModalConfirmacion'
 import TextAreaInput from '../components/ui/TextAreaInput'
 import EtiquetaDeEstadoPrestamo from '../components/prestamos/EtiquetaDeEstadoPrestamo'
@@ -170,98 +169,155 @@ export default function PaginaDetallePrestamo() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      <MigasDePan
-        items={[
-          { etiqueta: 'Inicio', ruta: '/' },
-          { etiqueta: 'Préstamos', ruta: '/prestamos' },
-          { etiqueta: prestamo.nombre_equipo },
-        ]}
-      />
+  const aprobado = Boolean(prestamo.fecha_prestamo)
+  const devuelto = Boolean(prestamo.fecha_devolucion_real)
 
+  return (
+    <div className="space-y-4">
       <EncabezadoDePagina
-        titulo={prestamo.nombre_equipo}
-        descripcion={`${prestamo.codigo_patrimonial_equipo} · ${prestamo.nombre_responsable} (${prestamo.area_responsable})`}
-      >
-        <div className="mt-3">
+        titulo={`Préstamo de ${prestamo.nombre_equipo}`}
+        acciones={
           <EtiquetaDeEstadoPrestamo
             estado={prestamo.estado_prestamo}
             vencido={prestamo.vencido_prestamo}
           />
-        </div>
-      </EncabezadoDePagina>
+        }
+      />
 
       {error && <AlertMessage tipo="error">{error}</AlertMessage>}
 
-      <section className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6">
-        <h2 className="text-base font-bold text-titulo">Datos del préstamo</h2>
-        <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-semibold tracking-wide text-texto-suave uppercase">
-              Responsable
-            </dt>
-            <dd className="mt-1 text-sm text-texto">{prestamo.nombre_responsable}</dd>
-            <dd className="text-xs text-texto-suave">{prestamo.correo_responsable}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold tracking-wide text-texto-suave uppercase">Área</dt>
-            <dd className="mt-1 text-sm text-texto">{prestamo.area_responsable}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold tracking-wide text-texto-suave uppercase">
-              Fecha de préstamo
-            </dt>
-            <dd className="mt-1 text-sm text-texto">{formatearFecha(prestamo.fecha_prestamo)}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold tracking-wide text-texto-suave uppercase">
-              Devolución comprometida
-            </dt>
-            <dd className="mt-1 text-sm font-semibold text-texto">
-              {formatearFecha(prestamo.fecha_devolucion)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold tracking-wide text-texto-suave uppercase">
-              Devolución real
-            </dt>
-            <dd className="mt-1 text-sm text-texto">
-              {formatearFecha(prestamo.fecha_devolucion_real)}
-            </dd>
-          </div>
-        </dl>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_456px]">
+        <section
+          aria-labelledby="titulo-datos-prestamo"
+          className="rounded-[16px] border border-borde bg-superficie p-5 sm:p-6"
+        >
+          <h2 id="titulo-datos-prestamo" className="sr-only">
+            Datos del préstamo
+          </h2>
 
-        {prestamo.observacion_prestamo && (
-          <div className="mt-5 rounded-lg bg-superficie-tenue px-3 py-2.5">
-            <p className="text-xs font-semibold tracking-wide text-texto-suave uppercase">
-              Observaciones de la devolución
-            </p>
-            <p className="mt-1 text-sm text-texto">{prestamo.observacion_prestamo}</p>
-          </div>
-        )}
+          <dl className="grid gap-5 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <dt className="text-xs font-semibold text-texto-suave">Equipo</dt>
+              <dd className="mt-1 text-[17px] font-bold text-titulo">{prestamo.nombre_equipo}</dd>
+              <dd className="font-mono text-xs text-texto-suave">
+                {prestamo.codigo_patrimonial_equipo}
+              </dd>
+            </div>
 
-        {prestamo.motivo_rechazo_prestamo && (
-          <div className="mt-5 rounded-lg bg-error-fondo px-3 py-2.5">
-            <p className="text-xs font-semibold tracking-wide text-error uppercase">
-              Motivo del rechazo
-            </p>
-            <p className="mt-1 text-sm text-error">{prestamo.motivo_rechazo_prestamo}</p>
-          </div>
-        )}
-      </section>
+            <div>
+              <dt className="text-xs font-semibold text-texto-suave">Colaborador responsable</dt>
+              <dd className="mt-1 text-[17px] font-bold text-titulo">{prestamo.nombre_responsable}</dd>
+              <dd className="text-xs text-texto-suave">{prestamo.area_responsable}</dd>
+            </div>
+
+            <div>
+              <dt className="text-xs font-semibold text-texto-suave">Prestado el</dt>
+              <dd className="mt-1 text-[17px] font-bold text-titulo">
+                {formatearFecha(prestamo.fecha_prestamo)}
+              </dd>
+            </div>
+
+            <div>
+              <dt className="text-xs font-semibold text-texto-suave">Comprometido al</dt>
+              <dd className="mt-1 text-[17px] font-bold text-titulo">
+                {formatearFecha(prestamo.fecha_devolucion)}
+              </dd>
+            </div>
+
+            <div>
+              <dt className="text-xs font-semibold text-texto-suave">Devolución real</dt>
+              <dd className="mt-1 text-[17px] font-bold text-titulo">
+                {devuelto ? formatearFecha(prestamo.fecha_devolucion_real) : 'Pendiente'}
+              </dd>
+            </div>
+          </dl>
+
+          {prestamo.observacion_prestamo && (
+            <div className="mt-5 rounded-xl bg-superficie-tenue px-4 py-3">
+              <p className="text-xs font-semibold text-texto-suave">Observaciones de la devolución</p>
+              <p className="mt-1 text-sm text-texto">{prestamo.observacion_prestamo}</p>
+            </div>
+          )}
+
+          {prestamo.motivo_rechazo_prestamo && (
+            <div className="mt-5 rounded-xl bg-error-fondo px-4 py-3">
+              <p className="text-xs font-semibold text-error">Motivo del rechazo</p>
+              <p className="mt-1 text-sm text-error">{prestamo.motivo_rechazo_prestamo}</p>
+            </div>
+          )}
+        </section>
+
+        <section
+          aria-labelledby="titulo-ciclo-prestamo"
+          className="rounded-[16px] border border-borde bg-superficie p-5 sm:p-6"
+        >
+          <h2 id="titulo-ciclo-prestamo" className="text-[17px] font-bold text-titulo">
+            Ciclo del préstamo
+          </h2>
+
+          <ol className="mt-5 space-y-0">
+            <li className="relative flex gap-4 pb-6">
+              <span aria-hidden="true" className="absolute top-4 left-[5px] h-full w-0.5 bg-borde" />
+              <span aria-hidden="true" className="relative mt-1 size-3 shrink-0 rounded-full bg-marca-600" />
+              <div>
+                <p className="text-[15px] font-semibold text-titulo">Solicitud enviada</p>
+                <p className="text-xs text-texto-suave">
+                  {aprobado ? 'Revisada por Tecnología' : 'Esperando la revisión del responsable'}
+                </p>
+              </div>
+            </li>
+
+            <li className="relative flex gap-4 pb-6">
+              <span aria-hidden="true" className="absolute top-4 left-[5px] h-full w-0.5 bg-borde" />
+              <span
+                aria-hidden="true"
+                className={`relative mt-1 size-3 shrink-0 rounded-full ${
+                  aprobado ? 'bg-exito-vivo' : 'bg-borde-fuerte'
+                }`}
+              />
+              <div>
+                <p className={`text-[15px] font-semibold ${aprobado ? 'text-titulo' : 'text-texto-suave'}`}>
+                  Aprobación
+                </p>
+                <p className="text-xs text-texto-suave">
+                  {aprobado ? formatearFecha(prestamo.fecha_prestamo) : 'Pendiente'}
+                </p>
+              </div>
+            </li>
+
+            <li className="flex gap-4">
+              <span
+                aria-hidden="true"
+                className={`mt-1 size-3 shrink-0 rounded-full ${
+                  devuelto ? 'bg-exito-vivo' : 'bg-aviso-vivo'
+                }`}
+              />
+              <div>
+                <p className={`text-[15px] font-semibold ${devuelto ? 'text-titulo' : 'text-texto-suave'}`}>
+                  {devuelto ? 'Devolución registrada' : 'Devolución pendiente'}
+                </p>
+                <p className="text-xs text-texto-suave">
+                  {devuelto
+                    ? formatearFecha(prestamo.fecha_devolucion_real)
+                    : `Esperada antes del ${formatearFecha(prestamo.fecha_devolucion)}`}
+                </p>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </div>
 
       {gestiona && puedeAprobarse(prestamo) && (
         <section
           aria-labelledby="titulo-decision-prestamo"
-          className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6"
+          className="rounded-[16px] border border-borde bg-superficie p-5 sm:p-6"
         >
-          <h2 id="titulo-decision-prestamo" className="text-base font-bold text-titulo">
+          <h2 id="titulo-decision-prestamo" className="text-[17px] font-bold text-titulo">
             Decisión de la solicitud
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">
-            Al aprobar, el préstamo queda activo con la fecha de hoy y el equipo pasa a Prestado.
-            Si rechaza, registre el motivo y el equipo seguirá disponible.
+            Al aprobar, el préstamo queda activo con la fecha de hoy y el equipo pasa a Prestado. Si
+            rechaza, registre el motivo y el equipo seguirá disponible.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -296,17 +352,17 @@ export default function PaginaDetallePrestamo() {
       {gestiona && puedeDevolverse(prestamo) && (
         <section
           aria-labelledby="titulo-devolucion-prestamo"
-          className="rounded-2xl border border-borde bg-superficie p-5 shadow-tarjeta sm:p-6"
+          className="rounded-[16px] border border-borde bg-superficie p-5 sm:p-6"
         >
-          <h2 id="titulo-devolucion-prestamo" className="text-base font-bold text-titulo">
+          <h2 id="titulo-devolucion-prestamo" className="text-[17px] font-bold text-titulo">
             Registrar devolución
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-texto-suave">
             La devolución usa la fecha de hoy y exige observaciones sobre el estado en que vuelve el
-            equipo (RN-10). El equipo quedará disponible para un nuevo préstamo.
+            equipo. El equipo quedará disponible para un nuevo préstamo.
           </p>
 
-          <form onSubmit={devolver} noValidate className="mt-5 space-y-4" aria-label="Registrar devolución">
+          <form onSubmit={devolver} noValidate className="mt-4 space-y-4" aria-label="Registrar devolución">
             <p className="sr-only" aria-live="polite">
               {errorObservacion ?? ''}
             </p>
@@ -322,7 +378,7 @@ export default function PaginaDetallePrestamo() {
             />
             <div className="flex justify-end">
               <Button tipo="submit" cargando={procesando} textoCargando="Registrando…">
-                Registrar devolución
+                Confirmar devolución
               </Button>
             </div>
           </form>
@@ -330,7 +386,7 @@ export default function PaginaDetallePrestamo() {
       )}
 
       {!gestiona && (
-        <p className="rounded-lg bg-superficie-tenue px-3 py-2 text-xs text-texto-suave">
+        <p className="rounded-xl bg-superficie-tenue px-4 py-3 text-xs text-texto-suave">
           Su rol permite consultar el préstamo. Para aprobarlo, rechazarlo o registrar la devolución,
           diríjase al Responsable de Tecnología.
         </p>
