@@ -15,6 +15,7 @@ import {
 describe('permisos y navegación por rol', () => {
   it('el Administrador ve usuarios, equipos, préstamos y reportes', () => {
     expect(menuDelRol('Administrador').map((opcion) => opcion.etiqueta)).toEqual([
+      'Panel',
       'Usuarios',
       'Equipos',
       'Préstamos',
@@ -24,6 +25,7 @@ describe('permisos y navegación por rol', () => {
 
   it('el Responsable ve equipos, préstamos y reportes', () => {
     expect(menuDelRol('ResponsableDeTecnologia').map((opcion) => opcion.etiqueta)).toEqual([
+      'Panel',
       'Equipos',
       'Préstamos',
       'Reportes',
@@ -32,6 +34,7 @@ describe('permisos y navegación por rol', () => {
 
   it('el Colaborador ve el inventario, sus préstamos y la disponibilidad', () => {
     expect(menuDelRol('Colaborador').map((opcion) => opcion.etiqueta)).toEqual([
+      'Panel',
       'Equipos',
       'Mis préstamos',
       'Disponibilidad',

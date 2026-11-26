@@ -8,6 +8,28 @@ afterEach(() => {
 })
 
 describe('App', () => {
+  it('abre la landing pública sin exigir sesión', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: { get: () => 'application/json' },
+        json: async () => ({ success: false, message: 'Debe iniciar sesión.' }),
+      }),
+    )
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /Inventario y préstamos de equipos/ }),
+    ).toBeInTheDocument()
+  })
+
   it('manda al ingreso cuando no hay sesión', async () => {
     vi.stubGlobal(
       'fetch',
