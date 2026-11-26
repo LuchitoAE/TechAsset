@@ -11,10 +11,16 @@ import { useSesion } from '../contextos/contextoDeSesion'
 import { useFormulario } from '../hooks/useFormulario'
 import { ETIQUETAS_DE_CAMPO } from '../reglas/campos'
 import { validarIngreso } from '../reglas/validacionUsuarios'
-import { VERSION_DEL_PRODUCTO } from '../reglas/version'
 import { useTituloDePagina } from '../utils/titulo'
 
+const ROLES = [
+  { nombre: 'Administrador', detalle: 'Usuarios, equipos y reportes' },
+  { nombre: 'Responsable de Tecnología', detalle: 'Aprobaciones y devoluciones' },
+  { nombre: 'Colaborador', detalle: 'Solicitudes y su historial' },
+]
+
 // Pantalla de ingreso (RN-11): correo y contraseña, un solo mensaje si no coinciden y estado de carga.
+// El panel oscuro presenta el producto; la tarjeta conserva la validación y los mensajes accesibles.
 export default function PaginaIngreso() {
   const { sesion, iniciarSesion } = useSesion()
   const ubicacion = useLocation()
@@ -38,60 +44,68 @@ export default function PaginaIngreso() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col bg-fondo">
-      <div className="absolute top-4 right-4 z-10">
-        <BotonTema />
-      </div>
+    <div className="flex min-h-dvh flex-col bg-fondo lg:flex-row">
+      <aside className="fondo-reticula-oscura relative hidden w-[42%] max-w-[600px] shrink-0 flex-col border-r border-white/10 px-12 py-12 lg:flex">
+        <MarcaTechAsset alto={40} tema="oscuro" />
 
-      <main className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
-        <section aria-label="TechAsset" className="hidden lg:block">
-          <div className="flex items-center gap-3">
-            <MarcaTechAsset alto={44} />
-          </div>
-
-          <h1 className="mt-10 max-w-xl text-4xl leading-tight font-bold tracking-tight text-titulo">
-            Cada equipo, en su lugar y con su responsable.
-          </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-texto-suave">
-            Ingrese con su correo corporativo para consultar el inventario, solicitar un préstamo o
-            administrar las cuentas de Innovatech.
+        <div className="my-auto max-w-[430px]">
+          <p className="text-xs font-bold tracking-[0.08em] text-marca-400 uppercase">
+            Innovatech · Gerencia de Tecnología
+          </p>
+          <p className="mt-5 text-[2.75rem] leading-[1.06] font-bold tracking-tight text-white">
+            Sus equipos,
+            <br />
+            bajo control.
+          </p>
+          <p className="mt-8 text-lg leading-relaxed text-tinta-suave">
+            Ingrese con su correo corporativo para gestionar el inventario y los préstamos de
+            Innovatech.
           </p>
 
-          <ul className="mt-8 grid max-w-lg gap-3 text-sm text-texto-suave">
-            {[
-              'Un inventario único, sin hojas de cálculo duplicadas.',
-              'Préstamos con responsable, fechas y devolución registrada.',
-              'Cada rol ve solo lo que necesita para su trabajo.',
-            ].map((texto) => (
-              <li key={texto} className="flex items-start gap-2.5">
-                <span
-                  aria-hidden="true"
-                  className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-exito-fondo text-[10px] font-bold text-exito"
-                >
-                  ✓
+          <ul className="mt-10 grid gap-5">
+            {ROLES.map(({ nombre, detalle }) => (
+              <li key={nombre} className="flex items-start gap-3">
+                <span aria-hidden="true" className="mt-1.5 size-2.5 shrink-0 rounded-full bg-marca-400" />
+                <span>
+                  <span className="block text-[15px] font-bold text-white">{nombre}</span>
+                  <span className="block text-[13px] text-tinta-suave">{detalle}</span>
                 </span>
-                {texto}
               </li>
             ))}
           </ul>
-        </section>
+        </div>
+
+        <p className="text-[13px] text-tinta-suave">
+          ¿No tiene cuenta? Pídala al administrador de su área.
+        </p>
+      </aside>
+
+      <main
+        id="contenido-principal"
+        tabIndex={-1}
+        className="relative flex flex-1 items-center justify-center px-4 py-12 focus:outline-none sm:px-6"
+      >
+        <div className="absolute top-4 right-4 z-10">
+          <BotonTema />
+        </div>
 
         <section
           aria-labelledby="titulo-ingreso"
-          className="mx-auto w-full max-w-md rounded-2xl border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8"
+          className="w-full max-w-[432px] rounded-2xl border border-borde bg-superficie p-6 sm:p-8"
         >
-          <div className="flex items-center gap-2.5 lg:hidden">
+          <div className="lg:hidden">
             <MarcaTechAsset alto={36} />
           </div>
 
-          <h2 id="titulo-ingreso" className="mt-4 text-2xl font-bold tracking-tight text-titulo lg:mt-0">
-            Ingresar
-          </h2>
-          <p className="mt-1 text-sm text-texto-suave">
-            Use el correo y la contraseña que le entregó el Administrador.
-          </p>
+          <h1
+            id="titulo-ingreso"
+            className="mt-8 text-[1.75rem] leading-tight font-bold tracking-tight text-titulo lg:mt-0"
+          >
+            Ingresar al sistema
+          </h1>
+          <p className="mt-2 text-[15px] text-texto-suave">Use su correo corporativo y su contraseña.</p>
 
-          <form noValidate onSubmit={formulario.enviar} className="mt-6 space-y-4" aria-label="Ingreso a TechAsset">
+          <form noValidate onSubmit={formulario.enviar} className="mt-8 space-y-5" aria-label="Ingreso a TechAsset">
             <p className="sr-only" aria-live="polite">
               {formulario.anuncio}
             </p>
@@ -100,9 +114,7 @@ export default function PaginaIngreso() {
               <AlertMessage tipo={formulario.mensaje.tipo}>{formulario.mensaje.texto}</AlertMessage>
             )}
 
-            {formulario.intentoEnviado && (
-              <ResumenDeErrores errores={formulario.resumenErrores} />
-            )}
+            {formulario.intentoEnviado && <ResumenDeErrores errores={formulario.resumenErrores} />}
 
             <p className="text-xs text-texto-suave">
               Los campos con <span aria-hidden="true">*</span> son obligatorios.
@@ -117,6 +129,8 @@ export default function PaginaIngreso() {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
+              placeholder="colaborador@innovatech.pe"
+              ayuda="El mismo que usa en su cuenta de Innovatech."
               value={formulario.valores.correo_usuario}
               onChange={formulario.cambiar}
               onBlur={formulario.salirDelCampo}
@@ -140,7 +154,7 @@ export default function PaginaIngreso() {
                   type="button"
                   onClick={() => setVerContrasena((visible) => !visible)}
                   aria-pressed={verContrasena}
-                  className="rounded px-2 py-1 text-xs font-semibold text-marca-700 hover:bg-marca-50"
+                  className="rounded-lg px-2 py-1 text-xs font-semibold text-marca-700 hover:bg-marca-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
                 >
                   {verContrasena ? 'Ocultar' : 'Mostrar'}
                 </button>
@@ -149,7 +163,7 @@ export default function PaginaIngreso() {
 
             <Button
               tipo="submit"
-              className="w-full"
+              className="h-12 w-full text-base"
               cargando={formulario.enviando}
               textoCargando="Ingresando…"
             >
@@ -157,19 +171,11 @@ export default function PaginaIngreso() {
             </Button>
           </form>
 
-          <p className="mt-6 border-t border-borde pt-4 text-xs leading-relaxed text-texto-suave">
-            ¿No tiene acceso? El Administrador de TechAsset crea las cuentas. No existe registro propio ni
-            recuperación automática de contraseña.
+          <p className="mt-6 border-t border-borde pt-4 text-center text-xs leading-relaxed text-texto-suave">
+            Los intentos fallidos se limitan por seguridad.
           </p>
         </section>
       </main>
-
-      <footer className="border-t border-borde bg-superficie">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-texto-suave sm:px-6">
-          <p>Universidad Peruana Los Andes · Construcción de Software</p>
-          <p>TechAsset · versión {VERSION_DEL_PRODUCTO} · 2026</p>
-        </div>
-      </footer>
     </div>
   )
 }
