@@ -171,63 +171,68 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border border-borde bg-superficie shadow-tarjeta">
-            <table className="hidden w-full border-collapse text-left text-sm sm:table">
+            <table className="hidden w-full border-separate border-spacing-y-2 text-left text-sm sm:table">
               <caption className="sr-only">
                 Historial de préstamos con su equipo, responsable, fechas y estado
               </caption>
-              <thead className="bg-superficie-tenue text-xs tracking-wide text-texto-suave uppercase">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+              <thead>
+                <tr className="text-[11px] tracking-wide text-texto-suave uppercase">
+                  <th scope="col" className="rounded-l-lg bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Equipo
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Responsable
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Préstamo
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Devolución
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Estado
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">
+                  <th scope="col" className="rounded-r-lg bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-borde">
+              <tbody>
                 {pagina.prestamos.map((prestamo) => (
-                  <tr key={prestamo.id_prestamo} className="hover:bg-superficie-tenue">
-                    <th scope="row" className="px-4 py-3 font-normal">
-                      <span className="block font-mono text-xs font-semibold text-texto">
+                  <tr key={prestamo.id_prestamo} className="group">
+                    <th
+                      scope="row"
+                      className="rounded-l-lg border-y border-l border-borde bg-superficie px-4 py-3.5 font-normal group-hover:bg-superficie-tenue"
+                    >
+                      <span className="block font-mono text-[11px] font-semibold text-texto-suave">
                         {prestamo.codigo_patrimonial_equipo}
                       </span>
-                      <span className="block text-sm text-texto-suave">{prestamo.nombre_equipo}</span>
+                      <span className="block font-semibold text-texto">{prestamo.nombre_equipo}</span>
                     </th>
-                    <td className="px-4 py-3">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
                       <span className="block text-texto">{prestamo.nombre_responsable}</span>
                       <span className="block text-xs text-texto-suave">{prestamo.area_responsable}</span>
                     </td>
-                    <td className="px-4 py-3 text-texto-suave">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 text-texto-suave group-hover:bg-superficie-tenue">
                       {formatearFecha(prestamo.fecha_prestamo)}
                     </td>
-                    <td className="px-4 py-3 text-texto-suave">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 text-texto-suave group-hover:bg-superficie-tenue">
                       {formatearFecha(prestamo.fecha_devolucion_real ?? prestamo.fecha_devolucion)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
                       <EtiquetaDeEstadoPrestamo
                         estado={prestamo.estado_prestamo}
                         vencido={prestamo.vencido_prestamo}
+                        variante="punto"
                       />
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="rounded-r-lg border-y border-r border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
                       <Link
                         to={`/prestamos/${prestamo.id_prestamo}`}
-                        className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
+                        className="inline-flex items-center gap-1 rounded text-sm font-semibold text-marca-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
                       >
                         Ver
+                        <span aria-hidden="true">→</span>
                       </Link>
                     </td>
                   </tr>
@@ -257,6 +262,7 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
                     <EtiquetaDeEstadoPrestamo
                       estado={prestamo.estado_prestamo}
                       vencido={prestamo.vencido_prestamo}
+                      variante="punto"
                     />
                   </div>
                   <div className="mt-3 text-right">

@@ -11,6 +11,18 @@ import Button from '../components/ui/Button'
 import MarcaTechAsset from '../components/marca/MarcaTechAsset'
 import IconoDeMenu from '../components/navegacion/IconoDeMenu'
 
+// Etiqueta de la ubicación para rutas que no están en el menú del rol (por ejemplo, una solicitud
+// de préstamo del Colaborador, que no tiene la opción «Préstamos»).
+const SECCIONES_DE_RUTA = [
+  ['/panel', 'Panel'],
+  ['/usuarios', 'Usuarios'],
+  ['/equipos', 'Equipos'],
+  ['/prestamos', 'Préstamos'],
+  ['/mis-prestamos', 'Mis préstamos'],
+  ['/disponibilidad', 'Disponibilidad'],
+  ['/reportes', 'Reportes'],
+]
+
 // Estructura común de la aplicación: barra lateral por rol, barra superior con el usuario y el tema,
 // y el contenido de cada ruta en <Outlet />. En el teléfono la barra lateral se abre como cajón.
 export default function LayoutPrincipal() {
@@ -29,10 +41,15 @@ export default function LayoutPrincipal() {
     `${sesion?.nombres_usuario?.charAt(0) ?? ''}${sesion?.apellidos_usuario?.charAt(0) ?? ''}`.toUpperCase() ||
     'T'
 
+  const opcionDelMenu = menu.find(
+    (opcion) => ubicacion.pathname === opcion.ruta || ubicacion.pathname.startsWith(`${opcion.ruta}/`),
+  )
   const seccionActual =
-    menu.find(
-      (opcion) => ubicacion.pathname === opcion.ruta || ubicacion.pathname.startsWith(`${opcion.ruta}/`),
-    )?.etiqueta ?? 'Panel'
+    opcionDelMenu?.etiqueta ??
+    SECCIONES_DE_RUTA.find(
+      ([ruta]) => ubicacion.pathname === ruta || ubicacion.pathname.startsWith(`${ruta}/`),
+    )?.[1] ??
+    'Panel'
 
   // Escape cierra el cajón del teléfono y devuelve el foco al botón que lo abrió.
   const botonDelMenu = useRef(null)
