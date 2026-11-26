@@ -12,10 +12,10 @@ import { useSesion } from '../contextos/contextoDeSesion'
 import { etiquetaDeCategoria } from '../reglas/catalogos'
 import { puedeGestionarEquipos } from '../reglas/permisos'
 
-const FILTROS_VACIOS = { texto: '', estado: '', categoria: '', marca: '', pagina: 1, tamano: 20 }
+const FILTROS_VACIOS = { texto: '', estado: '', categoria: '', pagina: 1, tamano: 20 }
 const PAGINA_VACIA = { total: 0, pagina: 1, tamano: 20, conteo_por_estado: [], equipos: [] }
 
-// RF-07: inventario con filtros por texto, estado, categoría y marca, chips con conteo y paginación.
+// RF-07: inventario con filtros por texto, estado y categoría, chips con conteo y paginación.
 // El Colaborador lo consulta en solo lectura; la API vuelve a comprobar el rol al escribir.
 export default function PaginaEquipos() {
   const { sesion } = useSesion()
@@ -48,7 +48,14 @@ export default function PaginaEquipos() {
 
   function cambiarFiltro(evento) {
     const { name, value } = evento.target
-    setFiltros((actuales) => ({ ...actuales, [name]: value }))
+    const siguientes = { ...filtros, [name]: value, pagina: 1 }
+    setFiltros(siguientes)
+
+    // Los selectores se aplican al elegir; el texto espera al envío del formulario.
+    if (name !== 'texto') {
+      setCargando(true)
+      setAplicados(siguientes)
+    }
   }
 
   function aplicarFiltros() {
@@ -74,30 +81,19 @@ export default function PaginaEquipos() {
     setAplicados((actuales) => ({ ...actuales, pagina: numero }))
   }
 
-  const totalGeneral = pagina.conteo_por_estado.reduce((suma, conteo) => suma + conteo.total, 0)
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / (pagina.tamano || 20)))
-  const hayFiltros = ['texto', 'estado', 'categoria', 'marca'].some(
+  const hayFiltros = ['texto', 'estado', 'categoria'].some(
     (campo) => String(aplicados[campo] ?? '').trim() !== '',
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <EncabezadoDePagina
-        titulo={puedeGestionar ? 'Equipos' : 'Inventario'}
+        titulo="Inventario de equipos"
         descripcion={
           puedeGestionar
-            ? 'Registre equipos con su código patrimonial único, corríjalos y cambie su estado entre Disponible, Mantenimiento y Baja.'
+            ? 'Consulte los equipos por código, estado o categoría, y registre o corrija sus datos.'
             : 'Consulte los equipos de Innovatech por estado, categoría y marca. Su rol permite la consulta en solo lectura.'
-        }
-        acciones={
-          puedeGestionar ? (
-            <Link
-              to="/equipos/nuevo"
-              className="inline-flex h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca transition-colors hover:bg-marca-800"
-            >
-              Nuevo equipo
-            </Link>
-          ) : null
         }
       />
 
@@ -123,12 +119,13 @@ export default function PaginaEquipos() {
         onFiltrar={aplicarFiltros}
         onLimpiar={limpiarFiltros}
         cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        hayFiltros={hayFiltros}
       />
 
       <ChipsDeEstadoEquipo
         conteos={pagina.conteo_por_estado}
         seleccionado={filtros.estado}
-        total={totalGeneral}
         onSeleccionar={seleccionarEstado}
       />
 
@@ -137,7 +134,7 @@ export default function PaginaEquipos() {
           <Cargando texto="Consultando el inventario…" />
         </div>
       ) : pagina.equipos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-borde bg-superficie p-10 text-center">
+        <div className="rounded-[14px] border border-dashed border-borde bg-superficie p-10 text-center">
           <p className="text-base font-semibold text-titulo">
             {hayFiltros ? 'No hay equipos con esos filtros.' : 'El inventario está vacío.'}
           </p>
@@ -161,112 +158,122 @@ export default function PaginaEquipos() {
         </div>
       ) : (
         <>
-          <div className="overflow-hidden rounded-2xl border border-borde bg-superficie shadow-tarjeta">
-            <table className="hidden w-full border-collapse text-left text-sm sm:table">
+          <div className="hidden sm:block">
+            <table className="w-full border-separate border-spacing-y-2 text-left text-sm">
               <caption className="sr-only">Inventario de equipos con su categoría, marca y estado</caption>
-              <thead className="bg-superficie-tenue text-xs tracking-wide text-texto-suave uppercase">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+              <thead>
+                <tr className="text-[11px] tracking-wide text-texto-suave uppercase">
+                  <th scope="col" className="rounded-l-lg bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Código
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
-                    Nombre
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
+                    Equipo
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Categoría
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Marca
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold">
+                  <th scope="col" className="bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Estado
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">
+                  <th scope="col" className="rounded-r-lg bg-encabezado-tabla px-4 py-2.5 font-semibold">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-borde">
+              <tbody>
                 {pagina.equipos.map((equipo) => (
-                  <tr key={equipo.id_equipo} className="hover:bg-superficie-tenue">
-                    <th scope="row" className="px-4 py-3 font-mono text-xs font-semibold text-texto">
+                  <tr key={equipo.id_equipo} className="group">
+                    <th
+                      scope="row"
+                      className="rounded-l-lg border-y border-l border-borde bg-superficie px-4 py-3.5 font-mono text-xs font-semibold text-texto group-hover:bg-superficie-tenue"
+                    >
                       {equipo.codigo_patrimonial_equipo}
                     </th>
-                    <td className="px-4 py-3 text-texto">{equipo.nombre_equipo}</td>
-                    <td className="px-4 py-3 text-texto-suave">
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 font-semibold text-texto group-hover:bg-superficie-tenue">
+                      {equipo.nombre_equipo}
+                    </td>
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 text-texto-suave group-hover:bg-superficie-tenue">
                       {etiquetaDeCategoria(equipo.categoria_equipo)}
                     </td>
-                    <td className="px-4 py-3 text-texto-suave">{equipo.marca_equipo}</td>
-                    <td className="px-4 py-3">
-                      <EtiquetaDeEstadoEquipo estado={equipo.estado_equipo} />
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 text-texto-suave group-hover:bg-superficie-tenue">
+                      {equipo.marca_equipo}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      {puedeGestionar ? (
-                        <Link
-                          to={`/equipos/${equipo.id_equipo}`}
-                          className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold text-marca-700 hover:bg-marca-50"
-                        >
-                          Editar
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-texto-suave">Solo lectura</span>
-                      )}
+                    <td className="border-y border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
+                      <EtiquetaDeEstadoEquipo estado={equipo.estado_equipo} variante="punto" />
+                    </td>
+                    <td className="rounded-r-lg border-y border-r border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
+                      <Link
+                        to={`/equipos/${equipo.id_equipo}`}
+                        className="inline-flex items-center gap-1 rounded text-sm font-semibold text-marca-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
+                      >
+                        {puedeGestionar ? 'Editar' : 'Ver'}
+                        <span aria-hidden="true">⋯</span>
+                      </Link>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
-            <ul className="divide-y divide-borde sm:hidden">
-              {pagina.equipos.map((equipo) => (
-                <li key={equipo.id_equipo} className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-mono text-xs font-semibold text-texto">
-                        {equipo.codigo_patrimonial_equipo}
-                      </p>
-                      <p className="truncate text-sm font-semibold text-texto">{equipo.nombre_equipo}</p>
-                      <p className="truncate text-xs text-texto-suave">
-                        {etiquetaDeCategoria(equipo.categoria_equipo)} · {equipo.marca_equipo}
-                      </p>
-                    </div>
-                    <EtiquetaDeEstadoEquipo estado={equipo.estado_equipo} />
-                  </div>
-                  {puedeGestionar && (
-                    <div className="mt-3 text-right">
-                      <Link
-                        to={`/equipos/${equipo.id_equipo}`}
-                        className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
-                      >
-                        Editar
-                      </Link>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-texto-suave">
+          <ul className="space-y-2 sm:hidden">
+            {pagina.equipos.map((equipo) => (
+              <li
+                key={equipo.id_equipo}
+                className="rounded-[14px] border border-borde bg-superficie p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] font-semibold text-texto-suave">
+                      {equipo.codigo_patrimonial_equipo}
+                    </p>
+                    <p className="truncate text-sm font-semibold text-texto">{equipo.nombre_equipo}</p>
+                    <p className="truncate text-xs text-texto-suave">
+                      {etiquetaDeCategoria(equipo.categoria_equipo)} · {equipo.marca_equipo}
+                    </p>
+                  </div>
+                  <EtiquetaDeEstadoEquipo estado={equipo.estado_equipo} variante="punto" />
+                </div>
+                <div className="mt-3 text-right">
+                  <Link
+                    to={`/equipos/${equipo.id_equipo}`}
+                    className="inline-flex min-h-11 items-center text-sm font-semibold text-marca-700"
+                  >
+                    {puedeGestionar ? 'Editar' : 'Ver detalle'} →
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-borde bg-superficie px-5 py-3 text-sm text-texto-suave">
             <p role="status" aria-live="polite">
-              {pagina.total} {pagina.total === 1 ? 'equipo' : 'equipos'} · página {pagina.pagina} de{' '}
-              {totalPaginas}
+              <span className="font-semibold text-texto">{pagina.total}</span>{' '}
+              {pagina.total === 1 ? 'equipo' : 'equipos'} · página {pagina.pagina} de {totalPaginas}
             </p>
-            <div className="flex gap-2">
-              <Button
-                variante="secundario"
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
                 onClick={() => irAPagina(pagina.pagina - 1)}
                 disabled={pagina.pagina <= 1 || cargando}
+                aria-label="Página anterior"
+                className="grid size-9 place-items-center rounded-lg border border-borde bg-fondo text-base font-bold text-texto transition-colors hover:bg-superficie-tenue disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Anterior
-              </Button>
-              <Button
-                variante="secundario"
+                <span aria-hidden="true">‹</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => irAPagina(pagina.pagina + 1)}
                 disabled={pagina.pagina >= totalPaginas || cargando}
+                aria-label="Página siguiente"
+                className="grid size-9 place-items-center rounded-lg border border-borde bg-fondo text-base font-bold text-texto transition-colors hover:bg-superficie-tenue disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Siguiente
-              </Button>
+                <span aria-hidden="true">›</span>
+              </button>
             </div>
           </div>
         </>

@@ -1,41 +1,44 @@
 import { ESTADOS_EQUIPO } from '../../reglas/catalogos'
 
-// Chips de estado con su conteo. El conteo viene de la API con el resto de filtros aplicados,
-// excepto el estado, para que el usuario vea cuántos equipos hay en cada situación.
-export default function ChipsDeEstadoEquipo({ conteos = [], seleccionado, total, onSeleccionar }) {
+// Conteo por estado como píldoras seleccionables. El conteo llega de la API con el resto de filtros
+// aplicados excepto el estado, así que siempre dice cuántos equipos hay en cada situación.
+const PUNTOS = {
+  Disponible: 'bg-exito-vivo',
+  Prestado: 'bg-marca-600',
+  Mantenimiento: 'bg-aviso-vivo',
+  Baja: 'bg-error-vivo',
+}
+
+export default function ChipsDeEstadoEquipo({ conteos = [], seleccionado, onSeleccionar }) {
   function contar(estado) {
     return conteos.find((conteo) => conteo.estado_equipo === estado)?.total ?? 0
   }
 
-  const opciones = [{ valor: '', etiqueta: 'Todos', total }, ...ESTADOS_EQUIPO.map((estado) => ({
-    ...estado,
-    total: contar(estado.valor),
-  }))]
-
   return (
-    <div role="group" aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
-      {opciones.map((opcion) => {
-        const activo = (seleccionado ?? '') === opcion.valor
+    <div role="group" aria-label="Filtrar por estado" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      {ESTADOS_EQUIPO.map((estado) => {
+        const activo = (seleccionado ?? '') === estado.valor
+        const total = contar(estado.valor)
 
         return (
           <button
-            key={opcion.valor || 'todos'}
+            key={estado.valor}
             type="button"
             aria-pressed={activo}
-            onClick={() => onSeleccionar(opcion.valor)}
-            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition-colors ${
+            onClick={() => onSeleccionar(activo ? '' : estado.valor)}
+            title={activo ? 'Quitar este filtro' : `Ver solo ${estado.etiqueta.toLowerCase()}`}
+            className={`inline-flex h-11 items-center gap-2.5 rounded-full border px-4 text-sm font-semibold transition-colors ${
               activo
-                ? 'border-marca-700 bg-marca-700 text-sobre-marca'
-                : 'border-borde bg-superficie text-texto-suave hover:border-marca-300 hover:text-texto'
+                ? 'border-marca-600 bg-marca-50 text-marca-800'
+                : 'border-borde bg-superficie text-texto hover:border-marca-300'
             }`}
           >
-            {opcion.etiqueta}
             <span
-              className={`rounded-full px-1.5 py-0.5 text-[11px] ${
-                activo ? 'bg-white/20 text-sobre-marca' : 'bg-superficie-tenue text-texto-suave'
-              }`}
-            >
-              {opcion.total}
+              aria-hidden="true"
+              className={`size-2.5 shrink-0 rounded-full ${PUNTOS[estado.valor] ?? 'bg-texto-suave'}`}
+            />
+            <span className="truncate">
+              {estado.etiqueta} · {total}
             </span>
           </button>
         )
