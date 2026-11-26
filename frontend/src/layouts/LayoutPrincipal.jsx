@@ -7,6 +7,7 @@ import { menuDelRol } from '../reglas/permisos'
 import { VERSION_DEL_PRODUCTO } from '../reglas/version'
 import BotonTema from '../components/ui/BotonTema'
 import Button from '../components/ui/Button'
+import MarcaTechAsset from '../components/marca/MarcaTechAsset'
 
 // Estructura común de la aplicación: marca, menú según el rol, tema, sesión y pie. El contenido de
 // cada ruta se dibuja en <Outlet />.
@@ -59,17 +60,9 @@ export default function LayoutPrincipal() {
 
       <header className="sticky top-0 z-40 border-b border-borde bg-superficie/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex shrink-0 items-center gap-2.5" onClick={cerrarMenu}>
-            <span
-              aria-hidden="true"
-              className="grid size-9 place-items-center rounded-lg bg-marca-700 text-sm font-bold text-sobre-marca shadow-campo"
-            >
-              TA
-            </span>
-            <span className="hidden sm:block">
-              <span className="block text-base leading-tight font-bold text-titulo">TechAsset</span>
-              <span className="block text-[11px] leading-tight text-texto-suave">Innovatech</span>
-            </span>
+          <Link to="/panel" className="flex shrink-0 items-center gap-2.5" onClick={cerrarMenu}>
+            <MarcaTechAsset alto={36} />
+            <span className="hidden text-[11px] leading-tight text-texto-suave sm:block">Innovatech</span>
           </Link>
 
           <nav aria-label="Menú principal" className="ml-4 hidden flex-1 items-center gap-1 md:flex">

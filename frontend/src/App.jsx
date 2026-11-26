@@ -11,6 +11,7 @@ import PaginaDisponibilidad from './paginas/PaginaDisponibilidad'
 import PaginaEquipos from './paginas/PaginaEquipos'
 import PaginaIngreso from './paginas/PaginaIngreso'
 import PaginaInicio from './paginas/PaginaInicio'
+import PaginaLanding from './paginas/PaginaLanding'
 import PaginaNoEncontrada from './paginas/PaginaNoEncontrada'
 import PaginaNuevoEquipo from './paginas/PaginaNuevoEquipo'
 import PaginaNuevoPrestamo from './paginas/PaginaNuevoPrestamo'
@@ -20,19 +21,21 @@ import PaginaPrestamosActivos from './paginas/PaginaPrestamosActivos'
 import PaginaReportes from './paginas/PaginaReportes'
 import PaginaUsuarios from './paginas/PaginaUsuarios'
 
-// Mapa de rutas de la SPA. Todo exige sesión salvo /ingreso; cada módulo declara los roles que
-// pueden entrar y la API vuelve a comprobarlos (RNF-18). El proveedor de avisos envuelve a las
-// rutas para que cualquier pantalla pueda confirmar una acción con el aviso flotante (RNF-04).
+// Mapa de rutas de la SPA. La landing y el ingreso son públicos; todo lo demás exige sesión y cada
+// módulo declara los roles que pueden entrar, mientras la API vuelve a comprobarlos (RNF-18). El
+// proveedor de avisos envuelve a las rutas para que cualquier pantalla pueda confirmar una acción
+// con el aviso flotante (RNF-04).
 export default function App() {
   return (
     <ProveedorDeSesion>
       <ProveedorDeAvisos>
         <Routes>
+          <Route path="/" element={<PaginaLanding />} />
           <Route path="/ingreso" element={<PaginaIngreso />} />
 
           <Route element={<RutaProtegida />}>
             <Route element={<LayoutPrincipal />}>
-              <Route index element={<PaginaInicio />} />
+              <Route path="panel" element={<PaginaInicio />} />
 
               <Route element={<RutaPorRol roles={['Administrador', 'ResponsableDeTecnologia']} />}>
                 <Route path="usuarios" element={<PaginaUsuarios />} />

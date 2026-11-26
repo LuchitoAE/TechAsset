@@ -21,7 +21,7 @@ export default function PaginaNoEncontrada() {
         El enlace puede estar incompleto o la pantalla cambió de lugar.
       </p>
       <Link
-        to="/"
+        to="/panel"
         className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
       >
         Volver al inicio

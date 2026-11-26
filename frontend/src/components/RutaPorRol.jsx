@@ -18,7 +18,7 @@ function AccesoDenegado() {
         Su rol no permite entrar a esta sección. Vuelva al inicio para continuar con sus tareas.
       </AlertMessage>
       <Link
-        to="/"
+        to="/panel"
         className="inline-flex min-h-11 items-center rounded-lg bg-marca-700 px-4 text-sm font-semibold text-sobre-marca hover:bg-marca-800"
       >
         Volver al inicio

@@ -11,6 +11,7 @@
   --color-marca-50: #e3f4ff;
   --color-marca-100: #cde7ff;
   --color-marca-300: #7fd0ff;
+  --color-marca-400: #33b5ff;
   --color-marca-600: #00a3ff;
   --color-marca-700: #0077c8;
   --color-marca-800: #005f9e;
@@ -49,6 +50,11 @@
   --color-info: #1d5fcc;
   --color-info-vivo: #2e7cf6;
   --color-info-fondo: #e8effd;
+
+  /* Tinta: no cambia con el tema. Es el fondo de las franjas oscuras de la landing y el color de la
+     marca; tinta-suave es su texto secundario. */
+  --color-tinta: #0c1524;
+  --color-tinta-suave: #9aa7ba;
 
   --shadow-tarjeta: 0 0 0 0 transparent;
   --shadow-campo: 0 0 0 0 transparent;
@@ -251,4 +257,21 @@
   .oculto-movil {
     display: none !important;
   }
+}
+
+/* Retícula tenue de la landing: líneas de 1 px cada 88 px, como en el archivo de diseño. Se usa
+   sobre el fondo claro del héroe y, en blanco translúcido, sobre las franjas de tinta. */
+.fondo-reticula {
+  background-image:
+    linear-gradient(to right, rgb(12 21 36 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(12 21 36 / 0.045) 1px, transparent 1px);
+  background-size: 88px 88px;
+}
+
+.fondo-reticula-oscura {
+  background-color: var(--color-tinta);
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 88px 88px;
 }

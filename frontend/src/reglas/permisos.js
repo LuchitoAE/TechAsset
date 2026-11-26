@@ -1,17 +1,20 @@
 // Navegación y permisos visibles. La API vuelve a comprobar el rol en cada operación (RNF-18).
 export const MENUS_POR_ROL = {
   Administrador: [
+    { ruta: '/panel', etiqueta: 'Panel' },
     { ruta: '/usuarios', etiqueta: 'Usuarios' },
     { ruta: '/equipos', etiqueta: 'Equipos' },
     { ruta: '/prestamos', etiqueta: 'Préstamos' },
     { ruta: '/reportes', etiqueta: 'Reportes' },
   ],
   ResponsableDeTecnologia: [
+    { ruta: '/panel', etiqueta: 'Panel' },
     { ruta: '/equipos', etiqueta: 'Equipos' },
     { ruta: '/prestamos', etiqueta: 'Préstamos' },
     { ruta: '/reportes', etiqueta: 'Reportes' },
   ],
   Colaborador: [
+    { ruta: '/panel', etiqueta: 'Panel' },
     { ruta: '/equipos', etiqueta: 'Equipos' },
     { ruta: '/mis-prestamos', etiqueta: 'Mis préstamos' },
     { ruta: '/disponibilidad', etiqueta: 'Disponibilidad' },

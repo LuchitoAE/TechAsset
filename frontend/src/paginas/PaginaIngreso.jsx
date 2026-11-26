@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { ingresar } from '../api/autenticacionApi'
+import MarcaTechAsset from '../components/marca/MarcaTechAsset'
 import AlertMessage from '../components/ui/AlertMessage'
 import BotonTema from '../components/ui/BotonTema'
 import Button from '../components/ui/Button'
@@ -32,7 +33,7 @@ export default function PaginaIngreso() {
   })
 
   if (sesion) {
-    const destino = ubicacion.state?.desde || '/'
+    const destino = ubicacion.state?.desde || '/panel'
     return <Navigate to={destino} replace />
   }
 
@@ -43,20 +44,9 @@ export default function PaginaIngreso() {
       </div>
 
       <main className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
-        <section aria-labelledby="titulo-marca" className="hidden lg:block">
+        <section aria-label="TechAsset" className="hidden lg:block">
           <div className="flex items-center gap-3">
-            <span
-              aria-hidden="true"
-              className="grid size-12 place-items-center rounded-xl bg-marca-700 text-lg font-bold text-sobre-marca shadow-campo"
-            >
-              TA
-            </span>
-            <div>
-              <p id="titulo-marca" className="text-xl font-bold tracking-tight text-titulo">
-                TechAsset
-              </p>
-              <p className="text-sm text-texto-suave">Inventario y préstamo de equipos</p>
-            </div>
+            <MarcaTechAsset alto={44} />
           </div>
 
           <h1 className="mt-10 max-w-xl text-4xl leading-tight font-bold tracking-tight text-titulo">
@@ -91,13 +81,7 @@ export default function PaginaIngreso() {
           className="mx-auto w-full max-w-md rounded-2xl border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8"
         >
           <div className="flex items-center gap-2.5 lg:hidden">
-            <span
-              aria-hidden="true"
-              className="grid size-10 place-items-center rounded-lg bg-marca-700 text-sm font-bold text-sobre-marca"
-            >
-              TA
-            </span>
-            <p className="text-lg font-bold text-titulo">TechAsset</p>
+            <MarcaTechAsset alto={36} />
           </div>
 
           <h2 id="titulo-ingreso" className="mt-4 text-2xl font-bold tracking-tight text-titulo lg:mt-0">
