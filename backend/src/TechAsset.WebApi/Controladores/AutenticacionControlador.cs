@@ -13,6 +13,7 @@ namespace TechAsset.WebApi.Controladores;
 
 // RN-11 y RNF-17: ingreso con correo y contraseña, consulta de la sesión y salida. La cookie la emite
 // el manejador de cookies de ASP.NET Core y el JavaScript de la página no puede leerla.
+[Produces("application/json")]
 [ApiController]
 [Route("api/autenticacion")]
 public sealed class AutenticacionControlador(

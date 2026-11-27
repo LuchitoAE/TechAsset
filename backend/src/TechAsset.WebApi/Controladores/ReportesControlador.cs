@@ -11,6 +11,7 @@ namespace TechAsset.WebApi.Controladores;
 // RF-13 a RF-17: salidas del sistema. El panel lo consulta cualquier sesión (con el alcance del
 // Colaborador); los cuatro reportes son del Responsable de Tecnología y del Administrador. Todas
 // las consultas se leen de la base en cada petición.
+[Produces("application/json")]
 [ApiController]
 [Route("api/reportes")]
 [Authorize]

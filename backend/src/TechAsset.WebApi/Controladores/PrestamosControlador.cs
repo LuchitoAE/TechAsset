@@ -15,6 +15,7 @@ namespace TechAsset.WebApi.Controladores;
 // RF-09 a RF-12: préstamos y devoluciones. El Colaborador solicita y consulta lo suyo; el
 // Responsable de Tecnología y el Administrador aprueban, rechazan, devuelven y ven todo el
 // historial. La API comprueba el rol y el alcance en cada operación (D-04, RNF-18).
+[Produces("application/json")]
 [ApiController]
 [Route("api/prestamos")]
 [Authorize]
