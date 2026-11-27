@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useLocation } from 'react-router'
+import { Link, Navigate, useLocation } from 'react-router'
 import { ingresar } from '../api/autenticacionApi'
 import MarcaTechAsset from '../components/marca/MarcaTechAsset'
 import AlertMessage from '../components/ui/AlertMessage'
@@ -19,12 +19,21 @@ const ROLES = [
   { nombre: 'Colaborador', detalle: 'Solicitudes y su historial' },
 ]
 
+// En un teléfono o una tableta el teclado se abre solo si se enfoca un campo: no conviene adelantarlo.
+// En escritorio, el foco inicial ahorra un clic.
+function punteroFino() {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(pointer: fine)').matches
+    : true
+}
+
 // Pantalla de ingreso (RN-11): correo y contraseña, un solo mensaje si no coinciden y estado de carga.
 // El panel oscuro presenta el producto; la tarjeta conserva la validación y los mensajes accesibles.
 export default function PaginaIngreso() {
   const { sesion, iniciarSesion } = useSesion()
   const ubicacion = useLocation()
   const [verContrasena, setVerContrasena] = useState(false)
+  const [enfocarCorreo] = useState(punteroFino)
   useTituloDePagina('Ingresar')
 
   const formulario = useFormulario({
@@ -89,6 +98,13 @@ export default function PaginaIngreso() {
           <BotonTema />
         </div>
 
+        <Link
+          to="/"
+          className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-texto-suave hover:text-texto sm:left-6"
+        >
+          <span aria-hidden="true">←</span> Volver al inicio
+        </Link>
+
         <section
           aria-labelledby="titulo-ingreso"
           className="w-full max-w-[432px] rounded-2xl border border-borde bg-superficie p-6 sm:p-8"
@@ -136,7 +152,7 @@ export default function PaginaIngreso() {
               onBlur={formulario.salirDelCampo}
               error={formulario.errores.correo_usuario}
               requerido
-              autoFocus
+              autoFocus={enfocarCorreo}
             />
 
             <TextInput
