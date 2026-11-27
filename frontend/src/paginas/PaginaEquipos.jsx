@@ -46,6 +46,19 @@ export default function PaginaEquipos() {
     return () => control.abort()
   }, [aplicados])
 
+  // La búsqueda se aplica sola 400 ms después de la última tecla: quien escribe ve el resultado sin
+  // tener que buscar un botón. Enter sigue aplicándola al instante.
+  useEffect(() => {
+    if (filtros.texto === aplicados.texto) return undefined
+
+    const temporizador = setTimeout(() => {
+      setCargando(true)
+      setAplicados((actuales) => ({ ...actuales, texto: filtros.texto, pagina: 1 }))
+    }, 400)
+
+    return () => clearTimeout(temporizador)
+  }, [filtros.texto, aplicados.texto])
+
   function cambiarFiltro(evento) {
     const { name, value } = evento.target
     const siguientes = { ...filtros, [name]: value, pagina: 1 }
@@ -209,8 +222,8 @@ export default function PaginaEquipos() {
                         to={`/equipos/${equipo.id_equipo}`}
                         className="inline-flex min-h-6 items-center gap-1 rounded py-1 text-sm font-semibold text-marca-700 hover:underline"
                       >
-                        {puedeGestionar ? 'Editar' : 'Ver'}
-                        <span aria-hidden="true">⋯</span>
+                        {puedeGestionar ? 'Editar' : 'Ver detalle'}
+                        <span aria-hidden="true">→</span>
                       </Link>
                     </td>
                   </tr>

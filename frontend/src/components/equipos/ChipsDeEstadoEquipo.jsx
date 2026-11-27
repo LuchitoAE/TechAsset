@@ -40,6 +40,11 @@ export default function ChipsDeEstadoEquipo({ conteos = [], seleccionado, onSele
             <span className="truncate">
               {estado.etiqueta} · {total}
             </span>
+            {activo && (
+              <span aria-hidden="true" className="ml-0.5 text-base leading-none">
+                ×
+              </span>
+            )}
           </button>
         )
       })}
