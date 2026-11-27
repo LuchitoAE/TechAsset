@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { listarPrestamosActivos } from '../api/prestamosApi'
+import { listarPrestamos, listarPrestamosActivos } from '../api/prestamosApi'
 import AlertMessage from '../components/ui/AlertMessage'
 import Button from '../components/ui/Button'
 import Cargando from '../components/ui/Cargando'
@@ -14,6 +14,7 @@ const PAGINA_VACIA = { total: 0, pagina: 1, tamano: 50, prestamos: [] }
 // ofrece la devolución. Solo lo ven el Responsable de Tecnología y el Administrador.
 export default function PaginaPrestamosActivos() {
   const [pagina, setPagina] = useState(PAGINA_VACIA)
+  const [pendientes, setPendientes] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [intento, setIntento] = useState(0)
@@ -34,6 +35,14 @@ export default function PaginaPrestamosActivos() {
         if (!control.signal.aborted) setCargando(false)
       })
 
+    // Solicitudes que esperan decisión: el Responsable las ve aquí, sin tener que buscarlas en el
+    // historial (Nielsen 6: reconocer en vez de recordar).
+    listarPrestamos({ estado: 'Solicitado', pagina: 1, tamano: 50 }, control.signal)
+      .then((datos) => {
+        if (!control.signal.aborted) setPendientes(datos.prestamos ?? [])
+      })
+      .catch(() => {})
+
     return () => control.abort()
   }, [intento])
 
@@ -45,6 +54,50 @@ export default function PaginaPrestamosActivos() {
         titulo="Préstamos activos"
         descripcion="Equipos que hoy están en manos de un colaborador. Los que pasaron su fecha de devolución se marcan como vencidos."
       />
+
+      {pendientes.length > 0 && (
+        <section
+          aria-labelledby="titulo-por-aprobar"
+          className="rounded-[14px] border border-marca-300/60 bg-marca-50/40 p-5"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="titulo-por-aprobar" className="text-[17px] font-bold text-titulo">
+              Solicitudes por aprobar
+            </h2>
+            <span className="text-sm font-semibold text-texto-suave">
+              {pendientes.length} {pendientes.length === 1 ? 'pendiente' : 'pendientes'}
+            </span>
+          </div>
+
+          <ul className="mt-3 divide-y divide-borde">
+            {pendientes.map((prestamo) => (
+              <li
+                key={prestamo.id_prestamo}
+                className="flex flex-wrap items-center justify-between gap-3 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-titulo">
+                    {prestamo.nombre_equipo}{' '}
+                    <span className="font-mono text-[11px] font-normal text-texto-suave">
+                      {prestamo.codigo_patrimonial_equipo}
+                    </span>
+                  </p>
+                  <p className="text-xs text-texto-suave">
+                    {prestamo.nombre_responsable} · {prestamo.area_responsable} · hasta el{' '}
+                    {formatearFecha(prestamo.fecha_devolucion)}
+                  </p>
+                </div>
+                <Link
+                  to={`/prestamos/${prestamo.id_prestamo}`}
+                  className="inline-flex h-9 items-center rounded-lg border border-borde-fuerte bg-superficie px-3 text-xs font-bold text-texto transition-colors hover:bg-superficie-tenue"
+                >
+                  Revisar
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {error && (
         <AlertMessage tipo="error">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { actualizarEquipo, cambiarEstadoEquipo, obtenerEquipo } from '../api/equiposApi'
 import { listarPrestamos } from '../api/prestamosApi'
 import { listarMovimientos } from '../api/reportesApi'
@@ -59,7 +59,6 @@ const COLOR_DE_MOVIMIENTO = {
 // Administrador y el Responsable editan los datos y cambian el estado con confirmación.
 export default function PaginaDetalleEquipo() {
   const { id } = useParams()
-  const navegar = useNavigate()
   const { sesion } = useSesion()
   const { mostrarAviso, mostrarError } = useAvisos()
   const puedeGestionar = puedeGestionarEquipos(sesion?.rol_usuario)
@@ -203,7 +202,12 @@ export default function PaginaDetalleEquipo() {
         acciones={
           puedeGestionar ? (
             <>
-              <Button variante="secundario" onClick={() => setEditando((valor) => !valor)}>
+              <Button
+                variante="secundario"
+                onClick={() => setEditando((valor) => !valor)}
+                aria-expanded={editando}
+                aria-controls="panel-edicion"
+              >
                 {editando ? 'Cerrar edición' : 'Editar'}
               </Button>
               <Button
@@ -281,6 +285,29 @@ export default function PaginaDetalleEquipo() {
         </p>
       </section>
 
+      {editando && puedeGestionar && (
+        <section id="panel-edicion" aria-label="Editar equipo">
+          <FormularioEquipo
+            esNuevo={false}
+            valores={formulario.valores}
+            errores={formulario.errores}
+            mensaje={formulario.mensaje}
+            enviando={formulario.enviando}
+            faltanDatos={formulario.faltanDatos}
+            intentoEnviado={formulario.intentoEnviado}
+            anuncio={formulario.anuncio}
+            resumenErrores={formulario.resumenErrores}
+            cambiar={formulario.cambiar}
+            salirDelCampo={formulario.salirDelCampo}
+            enviar={formulario.enviar}
+            onCancelar={() => {
+              formulario.establecerValores(equipo)
+              setEditando(false)
+            }}
+          />
+        </section>
+      )}
+
       {puedeGestionar && mostrarEstados && (
         <section
           id="panel-estados"
@@ -313,28 +340,6 @@ export default function PaginaDetalleEquipo() {
             </div>
           )}
         </section>
-      )}
-
-      {editando && puedeGestionar && (
-        <FormularioEquipo
-          esNuevo={false}
-          valores={formulario.valores}
-          errores={formulario.errores}
-          mensaje={formulario.mensaje}
-          enviando={formulario.enviando}
-          faltanDatos={formulario.faltanDatos}
-          intentoEnviado={formulario.intentoEnviado}
-          anuncio={formulario.anuncio}
-          resumenErrores={formulario.resumenErrores}
-          cambiar={formulario.cambiar}
-          salirDelCampo={formulario.salirDelCampo}
-          enviar={formulario.enviar}
-          onCancelar={() => {
-            formulario.establecerValores(equipo)
-            setEditando(false)
-            navegar('/equipos')
-          }}
-        />
       )}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_456px]">

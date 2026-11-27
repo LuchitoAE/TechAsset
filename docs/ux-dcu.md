@@ -157,4 +157,43 @@ a menudo con el equipo en la mano. Se prioriza reconocer sobre recordar y evitar
 - `Evidencias/iteracion-8/ux/07-inventario-filtro.png`: filtro activo con «×», «Limpiar» y acción
   «Editar →».
 
+## Parte 4 — Tareas críticas: detalle y préstamos (26/11/2026)
+
+### Lo que ya cumplía
+
+- El detalle confirma los cambios de estado con un diálogo y avisa al terminar; el préstamo pide
+  observaciones antes de devolver y motivo antes de rechazar.
+- La solicitud muestra solo equipos disponibles, con el código y el nombre a la vista, y la fecha
+  mínima la calcula el formulario.
+- Aprobar, rechazar y devolver tienen confirmación y cierre con aviso.
+
+### Hallazgos
+
+| # | Hallazgo | Heurística / regla | Norma |
+| --- | --- | --- | --- |
+| 1 | «Cancelar» al editar un equipo llevaba al inventario en vez de cerrar la edición | Nielsen 3 · Shneiderman 6 y 7 | — |
+| 2 | El formulario de edición aparecía después del panel de estado y lejos del botón que lo abría | Nielsen 1 y 6 | ISO 9241-112 §6.1 |
+| 3 | Las solicitudes pendientes no se veían en «Préstamos activos»: había que ir al historial y filtrar | Nielsen 6 · Shneiderman 8 | — |
+| 4 | El ciclo de un préstamo rechazado mostraba «Aprobación pendiente» y una devolución que nunca ocurrirá | Nielsen 2 | ISO 9241-112 §6.4 |
+| 5 | En una solicitud sin aprobar, «Prestado el» mostraba un guion | Nielsen 2 | ISO 9241-112 §6.5 |
+| 6 | «Comprometido al» es más técnico que «Devolución comprometida» | Nielsen 2 | — |
+
+### Correcciones
+
+1. **Cancelar cierra la edición** y conserva los valores originales; ya no saca de la pantalla.
+2. **Formulario junto al resumen** y botón con `aria-expanded` y `aria-controls` al panel de edición.
+3. **«Solicitudes por aprobar»** en Préstamos activos: equipo, colaborador, área y fecha, con «Revisar».
+   El Responsable ya no tiene que buscar las pendientes en el historial.
+4. **Ciclo honesto:** un rechazo muestra «Solicitud rechazada · No se aprobó» y termina ahí; la
+   devolución solo aparece cuando el préstamo se aprobó.
+5. **«Aún no aprobado»** en lugar del guion, y los campos de devolución real se ocultan en un rechazo.
+6. **«Devolución comprometida»** en lugar de «Comprometido al».
+
+### Evidencia
+
+- `Evidencias/iteracion-8/ux/08-solicitudes.png`: cola de aprobación en Préstamos activos.
+- `Evidencias/iteracion-8/ux/09-prestamo-rechazado.png`: ciclo de dos pasos y motivo a la vista.
+- `Evidencias/iteracion-8/ux/10-prestamo-pendiente.png`: «Aún no aprobado» y decisión disponible.
+
+
 
