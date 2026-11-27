@@ -265,6 +265,40 @@ a menudo con el equipo en la mano. Se prioriza reconocer sobre recordar y evitar
 - `Evidencias/iteracion-8/ux/14-contraste.txt`: los 26 pares medidos.
 - `Evidencias/iteracion-8/ux/15-teclado.txt`: orden de tabulación del panel.
 
+## Parte 7 — Cierre: métricas y documentación (26/11/2026)
+
+### Métricas propuestas (ISO 9241-11)
+
+| Dimensión | Indicador | Cómo se mide | Meta |
+| --- | --- | --- | --- |
+| Eficacia | Tareas completadas sin error | Registro de 5 tareas: alta de equipo, solicitud, aprobación, devolución y consulta de reporte | ≥ 95 % |
+| Eficiencia | Tiempo por tarea | Cronómetro desde que se abre la pantalla hasta el aviso de éxito | Alta de equipo < 2 min; solicitud y devolución < 1 min |
+| Satisfacción | Escala de 1 a 5 | Cuestionario breve al final de la prueba (claridad, confianza, esfuerzo) | ≥ 4,0 |
+| Accesibilidad | Barreras detectadas | Recorrido con teclado y lector de pantalla | 0 bloqueos |
+
+La prueba con usuarios del PDF sigue pendiente; las métricas quedan listas para aplicarla.
+
+### Dónde quedó documentado
+
+- **SDD 0100 (26 hojas):** nueva subsección «Rediseño visual y diseño centrado en el usuario (iteración
+  8)», con la identidad, la tabla de auditoría por partes, los componentes nuevos y la evaluación
+  actualizada. Se agregó la revisión de la iteración 8 al historial.
+- **Informe técnico breve (9 hojas):** estándares de interfaz, párrafo del rediseño en reutilización y en
+  salidas, capturas nuevas en formularios, panel y galería; pruebas actualizadas a 225 xUnit y 123 Vitest.
+- **Sustentación (13 diapositivas):** capturas nuevas en las diapositivas 7 y 9, cifra de 123 pruebas y
+  mención de la auditoría UX en la diapositiva 9; el guion acompaña el cambio.
+- **`Entrega/`:** capturas de frontend, formularios, consultas y dashboard regeneradas con el rediseño;
+  `00-LEEME.md` con 123 pruebas y el SDD de 26 hojas.
+
+### Resultado de la auditoría
+
+- 9 rutas revisadas: un `h1` y un `main`, 0 controles sin nombre, 0 enlaces vacíos, 0 imágenes sin
+  alternativa, 0 identificadores duplicados.
+- 26 pares de contraste AA en claro y oscuro; el cian 600 queda reservado para gráficos.
+- Orden de tabulación sin trampas y sin desbordes a 390 px.
+- Deuda declarada: lector de pantalla real y prueba con usuarios.
+
+
 
 
 
