@@ -14,6 +14,7 @@ namespace TechAsset.WebApi.Controladores;
 
 // RF-01 a RF-04: usuarios. La API comprueba el rol en cada operación (RN-09, RNF-18); la interfaz
 // solo oculta lo que el rol no puede hacer.
+[Produces("application/json")]
 [ApiController]
 [Route("api/usuarios")]
 [Authorize]

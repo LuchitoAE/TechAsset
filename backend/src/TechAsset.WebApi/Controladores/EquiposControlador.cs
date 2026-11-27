@@ -14,6 +14,7 @@ namespace TechAsset.WebApi.Controladores;
 
 // RF-05 a RF-08: equipos e inventario. Los tres roles consultan; solo el Administrador y el
 // Responsable de Tecnología registran, actualizan y cambian el estado (RNF-18).
+[Produces("application/json")]
 [ApiController]
 [Route("api/equipos")]
 [Authorize]
