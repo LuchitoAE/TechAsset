@@ -103,8 +103,8 @@ describe('Panel de inicio', () => {
     expect(within(seccion).getByText('Baja · 30 %')).toBeInTheDocument()
 
     // 4 de 10 disponibles, 2 prestados, 1 en mantenimiento y 3 de baja: suma 10.
-    expect(within(seccion).getByText('4')).toBeInTheDocument()
-    expect(within(seccion).getByText('3')).toBeInTheDocument()
+    expect(within(seccion).getByText('4 equipos')).toBeInTheDocument()
+    expect(within(seccion).getByText('3 equipos')).toBeInTheDocument()
   })
 
   it('lista los tres préstamos más recientes con su estado', async () => {

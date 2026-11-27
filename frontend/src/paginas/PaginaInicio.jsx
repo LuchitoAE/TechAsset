@@ -85,11 +85,9 @@ export default function PaginaInicio() {
     <div className="space-y-6">
       <EncabezadoDePagina
         titulo="Panel general"
-        descripcion={`Hola, ${sesion?.nombres_usuario ?? ''}. Sesión iniciada como ${etiquetaDeRol(
+        descripcion={`Hola, ${sesion?.nombres_usuario ?? ''} · ${etiquetaDeRol(
           sesion?.rol_usuario,
-        )}. Este es el panorama de TechAsset${
-          indicadores ? ` al ${formatearFechaYHora(indicadores.fecha_corte)}` : ''
-        }.`}
+        )}${indicadores ? ` · datos al ${formatearFechaYHora(indicadores.fecha_corte)}` : ''}`}
       />
 
       {error && (
@@ -207,7 +205,9 @@ export default function PaginaInicio() {
                     <span className="font-semibold text-texto">
                       {fila.etiqueta} · {fila.porcentaje} %
                     </span>
-                    <span className="ml-auto text-texto-suave">{fila.valor}</span>
+                    <span className="ml-auto text-texto-suave">
+                      {fila.valor} {fila.valor === 1 ? 'equipo' : 'equipos'}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -225,7 +225,7 @@ export default function PaginaInicio() {
             </h2>
             <Link
               to={esColaborador ? '/mis-prestamos' : '/prestamos'}
-              className="rounded text-[13px] font-semibold text-marca-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
+              className="inline-flex min-h-6 items-center rounded py-1 text-[13px] font-semibold text-marca-700 hover:underline"
             >
               Ver todos →
             </Link>

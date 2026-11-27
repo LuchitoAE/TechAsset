@@ -122,3 +122,39 @@ a menudo con el equipo en la mano. Se prioriza reconocer sobre recordar y evitar
 - `Evidencias/iteracion-8/ux/04-ingreso-movil.png`: sin teclado automático y con el enlace de vuelta.
 - `Evidencias/iteracion-8/ux/05-foco-landing.png`: foco visible en «Conocer más».
 
+## Parte 3 — Trabajo diario: panel e inventario (26/11/2026)
+
+### Lo que ya cumplía
+
+- Los KPI llevan glifo, valor, nota y nombre; el estado de la barra va acompañado de leyenda con
+  nombre y porcentaje, así que el color no es el único canal.
+- El inventario conserva los conteos por estado, el estado vacío con acción y el error con
+  «Reintentar»; en el teléfono la tabla se vuelve tarjetas y se oculta la columna de colaborador.
+- La paginación anuncia el total y la página, y los botones tienen nombre accesible.
+
+### Hallazgos
+
+| # | Hallazgo | Heurística / regla | Norma |
+| --- | --- | --- | --- |
+| 1 | Al escribir en «Buscar» no pasaba nada hasta pulsar Enter: no había botón visible ni aviso | Nielsen 1 · Shneiderman 3 | ISO 9241-112 §6.1 |
+| 2 | La píldora activa no mostraba cómo quitar el filtro; solo se descubría volviendo a pulsarla | Nielsen 3 y 6 | — |
+| 3 | «Editar · ⋯» prometía un menú que no existe | Nielsen 4 · Shneiderman 1 | — |
+| 4 | Los totales de la leyenda decían «6» sin unidad | Nielsen 2 | ISO 9241-112 §6.4 |
+| 5 | La descripción del panel repetía el rol en dos frases | Nielsen 8 | ISO 9241-112 §6.5 |
+
+### Correcciones
+
+1. **Búsqueda con retardo de 400 ms:** el resultado aparece mientras se escribe; Enter lo aplica al
+   instante. El formulario conserva un botón de envío oculto para el teclado.
+2. **Píldora activa con «×»** y título «Quitar el filtro de …»; sigue funcionando con `aria-pressed`.
+3. **«Editar →»** en lugar de «Editar · ⋯», sin prometer un menú.
+4. **Unidades en la leyenda:** «6 equipos», «1 equipo».
+5. **Descripción breve del panel:** «Hola, Luis Walter · Administrador · datos al …».
+
+### Evidencia
+
+- `Evidencias/iteracion-8/ux/06-panel.png`: leyendas con unidad y descripción breve.
+- `Evidencias/iteracion-8/ux/07-inventario-filtro.png`: filtro activo con «×», «Limpiar» y acción
+  «Editar →».
+
+
