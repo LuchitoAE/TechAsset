@@ -124,6 +124,7 @@ export default function PaginaReportes() {
           tabIndex={0}
           className="space-y-4 pt-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
         >
+          <h2 className="sr-only">{actual.etiqueta}</h2>
           <p className="text-sm text-texto-suave">{actual.descripcion}</p>
           <Componente />
         </div>

@@ -97,7 +97,7 @@ export default function PaginaLanding() {
               <a
                 key={destino}
                 href={destino}
-                className="rounded text-[15px] font-semibold text-texto-suave hover:text-texto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
+                className="inline-flex min-h-6 items-center rounded py-1 text-[15px] font-semibold text-texto-suave hover:text-texto"
               >
                 {texto}
               </a>
@@ -266,7 +266,7 @@ export default function PaginaLanding() {
             <ul className="mt-4 space-y-2 text-sm text-tinta-suave">
               {ENLACES.map(({ destino, texto }) => (
                 <li key={destino}>
-                  <a href={destino} className="hover:text-white">
+                  <a href={destino} className="inline-flex min-h-6 items-center py-1 hover:text-white">
                     {texto}
                   </a>
                 </li>

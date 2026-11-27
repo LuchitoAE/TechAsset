@@ -380,7 +380,7 @@ export default function PaginaDetalleEquipo() {
                     <td className="py-3 pr-2">
                       <Link
                         to={`/prestamos/${prestamo.id_prestamo}`}
-                        className="font-semibold text-titulo hover:underline"
+                        className="inline-flex min-h-6 items-center py-1 font-semibold text-titulo hover:underline"
                       >
                         {prestamo.fecha_prestamo
                           ? formatearFecha(prestamo.fecha_prestamo)
