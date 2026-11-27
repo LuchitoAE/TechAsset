@@ -159,3 +159,14 @@ hojas) y SDD (23 hojas) con los estados de implementación de la iteración 6; i
 `Entrega/` con los diez productos del caso y sustentación de 13 diapositivas; `docs/despliegue.md`
 con Render + Vercel + Supabase, `backend/Dockerfile` y `frontend/vercel.json`. No se desplegó ni se
 crearon cuentas. La versión 1.0.0 queda integrada en `develop`; `main` conserva la línea base.
+**Iteración 7 (19/11/2026):** diseño centrado en el usuario, patrones y accesibilidad: validación tras
+interacción, resumen de errores con foco en el primero, diálogo nativo `<dialog>`, tablas ordenables con
+`aria-sort`, avisos con cola y pausa, tema sistema/claro/oscuro, migas y fechas civiles en
+`America/Lima`; 114 pruebas de componente y 50 comprobaciones E2E.
+**Iteración 8 (26/11/2026):** rediseño visual y auditoría UX: identidad con Source Sans Pro y tokens
+(tinta, cian y naranja, sin sombras), landing pública en `/`, panel en `/panel`, barra lateral con
+cajón móvil, ocho pantallas rediseñadas y marca propia. La auditoría por partes (Nielsen, Shneiderman,
+WCAG 2.2 e ISO 9241-11/112) está en `docs/ux-dcu.md`: foco visible global, movimiento reducido, aviso
+oscuro, búsqueda con retardo, cola de aprobaciones, contrastes corregidos y 0 nombres accesibles
+faltantes en nueve rutas. SDD de 26 hojas, informe de 9 y sustentación de 13; `Entrega/` regenerada.
+225 pruebas xUnit, 123 de componente y 50 E2E en verde.

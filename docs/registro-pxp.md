@@ -1178,3 +1178,49 @@ cambiar requisitos, reglas de negocio ni textos de negocio. La iteración 5 solo
 - El límite de avisos y el de intentos de ingreso viven en memoria de una instancia; con varias réplicas necesitan
   un almacén compartido.
 - Publicar en Vercel/Render/Supabase sigue siendo opcional y no se ejecutó.
+
+## Iteración 8 — Rediseño visual y auditoría de experiencia (26/11/2026)
+
+**Objetivo:** reemplazar la interfaz anterior por el rediseño completo del archivo de Penpot y revisarlo
+con diseño centrado en el usuario antes de cerrar la entrega.
+
+### Qué se hizo
+
+- **Identidad y sistema visual:** Source Sans Pro (400/600/700), tinta, cian y naranja; sin sombras; barra
+  lateral de 240 px, barra superior de 76 px y contenido de 272 a 1408 px. Marca propia (etiqueta de activo)
+  en SVG con el wordmark trazado a curvas.
+- **Pantallas:** landing pública en `/`, panel en `/panel`, ingreso con panel oscuro, panel general con seis
+  KPI y tres préstamos recientes, inventario con filtros y píldoras de conteo, detalle con préstamos y
+  movimientos, solicitud en dos columnas, activos con cola de aprobación y reportes con pestañas en la URL.
+- **Auditoría UX por partes:** foco visible global, movimiento reducido, aviso flotante oscuro, búsqueda con
+  retardo de 400 ms, píldora activa con «×», cola de solicitudes por aprobar, ciclo honesto del préstamo
+  rechazado, contraste corregido (cian 700 a `#0070BE` y error a `#C92A1E`), objetivos táctiles de 24 px y
+  encabezados sin saltos. El registro completo está en `docs/ux-dcu.md`.
+- **Documentos:** SDD de 26 hojas con la subsección de rediseño y auditoría, informe de 9 hojas, PPTX de 13
+  diapositivas y `Entrega/` regenerada con las capturas nuevas y un documento de evidencias de los siete
+  escenarios mínimos.
+
+### Defectos encontrados y corregidos
+
+1. El token `--color-error-vivo` faltaba en el tema claro y la barra de «Baja» quedaba sin color.
+2. El cian 700 sobre `marca-50` daba 4,17 y el error sobre su fondo 4,22; se ajustaron los tokens.
+3. La búsqueda del inventario no daba respuesta hasta pulsar Enter; ahora espera 400 ms y aplica sola.
+4. «Editar · ⋯» prometía un menú inexistente; quedó «Editar →».
+5. Cancelar la edición de un equipo llevaba al inventario; ahora cierra la edición.
+6. El ciclo de un préstamo rechazado mostraba una devolución que nunca ocurriría.
+7. La suite E2E quedó desalineada con el rediseño (panel en `/`, nombre en la barra lateral, filtros sin
+   `id`, conteos fijos) y daba 40/50; se actualizó a 50/50 sin tocar los datos de demostración.
+
+### Retrospectiva
+
+- **Bien:** el rediseño se pudo auditar por partes con evidencia real (capturas, contraste medido, teclado y
+  auditoría automática) y la suite E2E detectó la deuda de selectores antes de cerrar.
+- **Difícil:** la exportación del tablero de Penpot seguía en blanco; se resolvió exportando grupos. El
+  lector de pantalla real no está disponible en el equipo.
+- **Aprendizaje:** una interfaz más limpia no basta si las pruebas dependen de textos y rutas; conviene que
+  los filtros tengan `id` y que la suite compare contra la base.
+
+### Pendiente y riesgos
+
+- Revisión con lector de pantalla real y prueba con usuarios; las métricas de ISO 9241-11 quedaron definidas.
+- Publicación opcional, no ejecutada por decisión del alumno.
