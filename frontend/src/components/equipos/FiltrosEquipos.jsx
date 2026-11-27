@@ -43,6 +43,7 @@ export default function FiltrosEquipos({
               </svg>
             </span>
             <input
+              id="texto"
               type="search"
               name="texto"
               value={filtros.texto}
@@ -55,6 +56,7 @@ export default function FiltrosEquipos({
           </div>
 
           <select
+            id="estado"
             name="estado"
             value={filtros.estado}
             onChange={onCambiar}
@@ -70,6 +72,7 @@ export default function FiltrosEquipos({
           </select>
 
           <select
+            id="categoria"
             name="categoria"
             value={filtros.categoria}
             onChange={onCambiar}
