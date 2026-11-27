@@ -1,0 +1,172 @@
+# TechAsset
+
+Sistema de gestión de inventario y préstamo de equipos tecnológicos de **Innovatech Solutions S.A.C.**
+Caso práctico integrador de la Unidad 3 del curso **Construcción de Software** (Universidad Peruana Los Andes).
+
+## Qué hace
+
+- Gestiona usuarios, equipos e inventario tecnológico.
+- Registra solicitudes de préstamo, su aprobación y la devolución del equipo.
+- Consulta el historial de préstamos, los préstamos activos y los movimientos.
+- Muestra un panel con seis indicadores: total de equipos, disponibles, prestados, en mantenimiento,
+  total de préstamos y área con mayor uso.
+
+El alcance completo está en la ERS y el diseño en el SDD, dentro de `../Analisis/`.
+
+## Estructura
+
+```
+TechAsset/
+  backend/                     API .NET 10 con arquitectura limpia
+    src/TechAsset.Domain/            Entidades y reglas del negocio
+    src/TechAsset.Application/       Casos de uso e interfaces
+    src/TechAsset.Infrastructure/    EF Core, PostgreSQL, repositorios y consultas
+    src/TechAsset.WebApi/            Controladores, sesión, errores y Swagger
+    tests/TechAsset.Pruebas/         Pruebas unitarias (xUnit)
+  frontend/                    SPA React 19 + Vite + Tailwind CSS 4
+  docs/registro-pxp.md         Bitácora de las iteraciones
+  ESTANDARES.md                Nombres, carpetas, commits, ramas y pruebas
+```
+
+## Cómo se ejecuta
+
+Requisitos: .NET SDK 10, Node 20 o superior, pnpm 9 o superior y PostgreSQL 16 o superior.
+
+```bash
+# Base local (una vez): rol y base de datos
+sudo -u postgres createuser --pwprompt reservaupla
+sudo -u postgres createdb -O reservaupla techasset
+
+# API: http://localhost:5321 (Swagger solo en Development)
+cd backend
+dotnet tool restore
+dotnet ef database update --project src/TechAsset.Infrastructure --startup-project src/TechAsset.WebApi
+dotnet run --project src/TechAsset.WebApi --launch-profile http
+
+# SPA: http://localhost:5191 (reenvía /api a la API)
+cd frontend
+pnpm install
+pnpm dev
+```
+
+La cadena de conexión y la cuenta del primer Administrador van en los **user-secrets** de .NET, nunca en el
+repositorio:
+
+```bash
+cd backend/src/TechAsset.WebApi
+dotnet user-secrets set "ConnectionStrings:TechAsset" "Host=localhost;Database=techasset;Username=techasset;Password=..."
+dotnet user-secrets set "AdministradorInicial:NombresUsuario" "..."
+dotnet user-secrets set "AdministradorInicial:ApellidosUsuario" "..."
+dotnet user-secrets set "AdministradorInicial:CorreoUsuario" "admin@innovatech.pe"
+dotnet user-secrets set "AdministradorInicial:AreaUsuario" "Gerencia de Tecnología"
+dotnet user-secrets set "AdministradorInicial:Contrasena" "..."
+```
+
+Al arrancar, la API crea el primer Administrador solo si no existe ninguno activo. Después, las cuentas se
+crean desde la pantalla de Usuarios.
+
+## API
+
+| Método y ruta | Para qué | Roles |
+|---|---|---|
+| `GET /api/salud` | Comprobar que la API vive | Público |
+| `POST /api/autenticacion/ingreso` | Ingreso con correo y contraseña | Público |
+| `GET /api/autenticacion/sesion` | Consultar la sesión al abrir la SPA | Sesión |
+| `POST /api/autenticacion/salida` | Cerrar sesión | Sesión |
+| `GET /api/usuarios` | Listado con filtros y paginación | Administrador y Responsable |
+| `GET /api/usuarios/{id}` | Detalle de un usuario | Administrador y Responsable |
+| `POST /api/usuarios` | Registrar usuario | Administrador |
+| `PUT /api/usuarios/{id}` | Actualizar usuario y reponer contraseña | Administrador |
+| `PATCH /api/usuarios/{id}/estado` | Habilitar o deshabilitar | Administrador |
+| `GET /api/equipos` | Inventario con filtros, conteo por estado y paginación (RF-07) | Los tres roles |
+| `GET /api/equipos/{id}` | Detalle de un equipo (RF-07) | Los tres roles |
+| `POST /api/equipos` | Registrar equipo con código único (RF-05, RN-07) | Administrador y Responsable |
+| `PUT /api/equipos/{id}` | Actualizar datos del equipo (RF-06) | Administrador y Responsable |
+| `PATCH /api/equipos/{id}/estado` | Cambiar entre Disponible, Mantenimiento y Baja (RF-08) | Administrador y Responsable |
+| `GET /api/prestamos` | Historial con filtros; el Colaborador ve solo lo suyo (RF-11) | Los tres roles |
+| `GET /api/prestamos/{id}` | Detalle de un préstamo (RF-11) | Los tres roles, con alcance por rol |
+| `GET /api/prestamos/activos` | Préstamos activos y vencidos (RF-12) | Administrador y Responsable |
+| `POST /api/prestamos` | Solicitar un préstamo (RF-09) | Colaborador |
+| `PATCH /api/prestamos/{id}/aprobacion` | Aprobar o rechazar una solicitud (RF-09) | Administrador y Responsable |
+| `PATCH /api/prestamos/{id}/devolucion` | Registrar la devolución con observaciones (RF-10) | Administrador y Responsable |
+| `GET /api/reportes/panel` | Seis indicadores del panel, con alcance por rol (RF-13) | Los tres roles |
+| `GET /api/reportes/equipos-por-estado` | Equipos por estado con filtros (RF-14) | Administrador y Responsable |
+| `GET /api/reportes/equipos-mas-utilizados` | Ranking de equipos por préstamos (RF-15) | Administrador y Responsable |
+| `GET /api/reportes/prestamos-por-area` | Préstamos por área del responsable (RF-16) | Administrador y Responsable |
+| `GET /api/reportes/movimientos` | Historial de movimientos paginado; también `/api/movimientos` (RF-17) | Administrador y Responsable |
+
+Las respuestas exitosas son `{ success, message, data }`; los errores usan ProblemDetails con `success: false`,
+`message` y `errors` por campo. La sesión es una cookie `HttpOnly` y `SameSite=Strict` de 8 horas.
+
+## Verificación
+
+```bash
+cd backend && dotnet build -warnaserror && dotnet test
+cd frontend && pnpm install && pnpm lint && pnpm test && pnpm build
+```
+
+Las pruebas de punta a punta de los escenarios E-01 a E-15 del SDD viven en
+`../.herramientas/caso_unidad3_2/pruebas.py` (desde `Semanas/`). Arrancan la API y la SPA si no están
+en marcha, usan Brave sin interfaz, guardan capturas en `../Evidencias/iteracion-6/`, limpian sus
+datos y detienen lo que arrancaron:
+
+```bash
+python3 .herramientas/caso_unidad3_2/pruebas.py
+```
+
+## Publicación
+
+La publicación está preparada, **no ejecutada**: la SPA va a Vercel, la API a Render en Docker y la
+base a Supabase. El procedimiento, las variables y las comprobaciones están en
+[`docs/despliegue.md`](docs/despliegue.md); los archivos son `backend/Dockerfile`,
+`backend/.dockerignore` y `frontend/vercel.json`. No se crearon cuentas ni se subieron secretos.
+
+## Ramas y versiones
+
+`main` guarda lo entregado; `develop` integra el trabajo; cada requisito se desarrolla en su rama
+`feature/…` y se une con `git merge --no-ff`. Los commits siguen Conventional Commits en español.
+El detalle está en `ESTANDARES.md`.
+
+## Estado
+
+**Iteración 1 (17/11/2026):** análisis, ERS 0100, SDD 0100, diagramas, estándares y el esqueleto.
+**Iteración 2 (17/11/2026):** usuarios y acceso completos: RF-01 a RF-04, RN-08, RN-09 y RN-11;
+ingreso, sesión y salida con cookie; migración `CrearUsuarios`; listado, registro, edición y
+deshabilitación en la SPA; 51 pruebas de backend y 28 de frontend.
+**Iteración 3 (17/11/2026):** equipos e inventario: RF-05 a RF-08, RN-07 y D-08; código patrimonial
+único, siete categorías, estados, filtros y conteo por estado; migración `CrearEquipos`; alta, edición
+y cambio de estado en la SPA; 100 pruebas de backend y 42 de frontend.
+**Iteración 4 (17/11/2026):** préstamos y devoluciones: RF-09 a RF-12 y RN-01 a RN-06 y RN-10; entidad
+`Prestamo` con estados Solicitado, Activo, Devuelto y Rechazado; índice único parcial del préstamo
+activo, CHECK de fechas y de observaciones, claves foráneas que impiden borrar un equipo con historial;
+migración `CrearPrestamos`; solicitud, aprobación o rechazo, devolución, activos e historial en la SPA;
+175 pruebas de backend y 68 de frontend.
+**Iteración 5 (18/11/2026):** salidas, dashboard e interfaz: RF-13 a RF-17 y D-03; tabla `movimientos`
+que registra altas, actualizaciones, cambios de estado, solicitudes, aprobaciones, rechazos y
+devoluciones en la misma transacción; panel con los seis indicadores; equipos por estado, equipos más
+utilizados, préstamos por área e historial de movimientos con filtros y paginación; migración
+`CrearMovimientos`; modo oscuro corregido, tablas apiladas a 390 px y capturas en
+`../Evidencias/iteracion-5/`; 215 pruebas de backend y 87 de frontend. Queda para el cierre el aviso
+flotante global de RNF-04, el E2E y la publicación.
+**Iteración 6, primera parte (18/11/2026):** integración y endurecimiento: barra de `Baja` en la
+distribución del panel; aviso flotante global de RNF-04 con `role="status"`, cierre a los 8 s y
+botón de cerrar, conectado a las acciones principales; versión única `1.0.0` en el pie; refactor de
+formularios y validaciones; límite de cinco ingresos fallidos por minuto con 429 y mensaje en
+español; suite E2E de los escenarios E-01 a E-15 (50 comprobaciones) con capturas en
+`../Evidencias/iteracion-6/`; 225 pruebas de backend y 95 de frontend.
+**Iteración 6, segunda parte (18/11/2026):** cierre documental y publicación preparada: ERS (50
+hojas) y SDD (23 hojas) con los estados de implementación de la iteración 6; informe técnico breve,
+`Entrega/` con los diez productos del caso y sustentación de 13 diapositivas; `docs/despliegue.md`
+con Render + Vercel + Supabase, `backend/Dockerfile` y `frontend/vercel.json`. No se desplegó ni se
+crearon cuentas. La versión 1.0.0 queda integrada en `develop`; `main` conserva la línea base.
+**Iteración 7 (19/11/2026):** diseño centrado en el usuario, patrones y accesibilidad: validación tras
+interacción, resumen de errores con foco en el primero, diálogo nativo `<dialog>`, tablas ordenables con
+`aria-sort`, avisos con cola y pausa, tema sistema/claro/oscuro, migas y fechas civiles en
+`America/Lima`; 114 pruebas de componente y 50 comprobaciones E2E.
+**Iteración 8 (26/11/2026):** rediseño visual y auditoría UX: identidad con Source Sans Pro y tokens
+(tinta, cian y naranja, sin sombras), landing pública en `/`, panel en `/panel`, barra lateral con
+cajón móvil, ocho pantallas rediseñadas y marca propia. La auditoría por partes (Nielsen, Shneiderman,
+WCAG 2.2 e ISO 9241-11/112) está en `docs/ux-dcu.md`: foco visible global, movimiento reducido, aviso
+oscuro, búsqueda con retardo, cola de aprobaciones, contrastes corregidos y 0 nombres accesibles
+faltantes en nueve rutas. SDD de 26 hojas, informe de 9 y sustentación de 13; `Entrega/` regenerada.
+225 pruebas xUnit, 123 de componente y 50 E2E en verde.

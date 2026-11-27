@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Node y Vite
+node_modules/
+dist/
+*.local
+*.log
+.vite/
+
+# Editores y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secretos: la cadena de conexión vive en los user-secrets de .NET, nunca en el repositorio
+appsettings.*.local.json
+.env
+.env.*
+!.env.example
