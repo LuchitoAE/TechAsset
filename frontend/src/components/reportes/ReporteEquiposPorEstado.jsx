@@ -177,7 +177,12 @@ export default function ReporteEquiposPorEstado() {
                   <ContenedorDeTabla
                     id={`equipos-${grupo.estado_equipo}`}
                     titulo={`Equipos en estado ${etiquetaDeEstadoEquipo(grupo.estado_equipo)}`}
-                    columnas={['Código', 'Equipo', 'Categoría', 'Marca']}
+                    columnas={[
+                      { etiqueta: 'Código' },
+                      { etiqueta: 'Equipo' },
+                      { etiqueta: 'Categoría', clase: 'oculto-movil' },
+                      { etiqueta: 'Marca', clase: 'oculto-movil' },
+                    ]}
                   >
                     {grupo.equipos.map((equipo) => (
                       <tr key={equipo.id_equipo} className="hover:bg-superficie-tenue">
@@ -187,13 +192,14 @@ export default function ReporteEquiposPorEstado() {
                         >
                           {equipo.codigo_patrimonial_equipo}
                         </th>
-                        <td className="px-4 py-3 text-texto" data-etiqueta="Equipo">
-                          {equipo.nombre_equipo}
-                        </td>
-                        <td className="px-4 py-3 text-texto-suave" data-etiqueta="Categoría">
+                        <td className="px-4 py-3 text-texto">{equipo.nombre_equipo}</td>
+                        <td
+                          className="oculto-movil px-4 py-3 text-texto-suave"
+                          data-etiqueta="Categoría"
+                        >
                           {etiquetaDeCategoria(equipo.categoria_equipo)}
                         </td>
-                        <td className="px-4 py-3 text-texto-suave" data-etiqueta="Marca">
+                        <td className="oculto-movil px-4 py-3 text-texto-suave" data-etiqueta="Marca">
                           {equipo.marca_equipo}
                         </td>
                       </tr>

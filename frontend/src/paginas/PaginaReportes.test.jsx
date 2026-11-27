@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import PaginaReportes from './PaginaReportes'
 
@@ -20,7 +21,11 @@ describe('PaginaReportes', () => {
   it('abre el primer reporte y cambia de pestaña', async () => {
     const usuario = userEvent.setup()
 
-    render(<PaginaReportes />)
+    render(
+      <MemoryRouter>
+        <PaginaReportes />
+      </MemoryRouter>,
+    )
 
     expect(screen.getByRole('tab', { name: 'Equipos por estado' })).toHaveAttribute(
       'aria-selected',
@@ -40,7 +45,11 @@ describe('PaginaReportes', () => {
   it('recorre las pestañas con las flechas del teclado', async () => {
     const usuario = userEvent.setup()
 
-    render(<PaginaReportes />)
+    render(
+      <MemoryRouter>
+        <PaginaReportes />
+      </MemoryRouter>,
+    )
 
     const primera = screen.getByRole('tab', { name: 'Equipos por estado' })
     primera.focus()
