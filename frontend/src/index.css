@@ -13,7 +13,7 @@
   --color-marca-300: #7fd0ff;
   --color-marca-400: #33b5ff;
   --color-marca-600: #00a3ff;
-  --color-marca-700: #0077c8;
+  --color-marca-700: #0070be;
   --color-marca-800: #005f9e;
   --color-marca-900: #0a3f66;
   --color-acento: #f97316;
@@ -27,8 +27,8 @@
   --color-texto: #0c1524;
   --color-texto-suave: #5b6779;
   --color-titulo: #0c1524;
-  --color-enlace: #0077c8;
-  --color-foco: #0077c8;
+  --color-enlace: #0070be;
+  --color-foco: #0070be;
   --color-relleno-glifo: #e3f4ff;
   --color-encabezado-tabla: #eaf0f8;
 
@@ -45,7 +45,7 @@
   --color-aviso: #a65a00;
   --color-aviso-vivo: #e58a00;
   --color-aviso-fondo: #fdf3e3;
-  --color-error: #d92d20;
+  --color-error: #c92a1e;
   --color-error-vivo: #d92d20;
   --color-error-fondo: #fdecea;
   --color-info: #1d5fcc;
@@ -112,6 +112,7 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
 
   body {
