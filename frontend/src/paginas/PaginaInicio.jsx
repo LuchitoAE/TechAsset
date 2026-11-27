@@ -113,7 +113,11 @@ export default function PaginaInicio() {
         </AlertMessage>
       )}
 
-      <section aria-label="Indicadores del panel">
+      <section aria-labelledby="titulo-indicadores">
+        <h2 id="titulo-indicadores" className="sr-only">
+          Indicadores del panel
+        </h2>
+
         {cargando ? (
           <div aria-busy="true">
             <Cargando texto="Calculando los indicadores…" />
@@ -276,7 +280,7 @@ export default function PaginaInicio() {
                     className="border-t border-borde transition-colors hover:bg-superficie-tenue"
                   >
                     <td className="py-3 pr-2 font-semibold text-titulo">
-                      <Link to={`/prestamos/${prestamo.id_prestamo}`} className="hover:underline">
+                      <Link to={`/prestamos/${prestamo.id_prestamo}`} className="inline-flex min-h-6 items-center py-1 hover:underline">
                         {prestamo.nombre_equipo}
                       </Link>
                     </td>

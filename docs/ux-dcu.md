@@ -229,6 +229,43 @@ a menudo con el equipo en la mano. Se prioriza reconocer sobre recordar y evitar
 - `Evidencias/iteracion-8/ux/11-reportes-enlace.png`: pestaña «Movimientos» abierta por URL.
 - `Evidencias/iteracion-8/ux/12-reportes-movil.png`: reporte compacto en 390 px.
 
+## Parte 6 — Evaluación de accesibilidad (26/11/2026)
+
+### Lo que se comprobó
+
+| Comprobación | Método | Resultado |
+| --- | --- | --- |
+| Un solo `h1`, un solo `main`, `lang="es"` | Recorrido automatizado en 9 rutas | Cumple |
+| Jerarquía de encabezados | Se detectaron saltos h1→h3 en panel y reportes | **Corregido** con `h2` de sección |
+| Controles de formulario con nombre accesible | Etiqueta, `aria-label` o `aria-labelledby` | 0 sin nombre |
+| Enlaces y botones sin nombre | Texto o `aria-label` | 0 vacíos |
+| Imágenes sin alternativa | `alt` o `aria-hidden` | 0 |
+| Identificadores duplicados | Recorrido de `id` | 0 |
+| Objetivos táctiles | Rectángulos de enlaces y botones | Enlaces de nav y tabla ajustados a 24 px; el enlace de salto es `sr-only` |
+| Orden de tabulación | 16 pulsaciones de Tab en el panel | Salto → marca → menú → Salir → tema → contenido; sin trampas |
+| Contraste | 26 pares texto/fondo, temas claro y oscuro | Todos ≥ 4,5 salvo el cian 600, reservado para gráficos |
+
+### Correcciones
+
+1. **`h2` de sección** en el panel («Indicadores del panel») y en cada reporte (su nombre), para que los
+   `h3` de las tarjetas no salten un nivel.
+2. **Objetivos de 24 px** en los enlaces de navegación de la landing, el pie y los enlaces de equipo de
+   las tablas.
+
+### Límites de esta parte
+
+- La revisión con lector de pantalla real (NVDA o VoiceOver) sigue pendiente: no hay uno instalado en
+  este equipo. Queda anotada como deuda en el `CONTEXTO`.
+- La prueba con usuarios del PDF también queda pendiente; las métricas de ISO 9241-11 (eficacia,
+  eficiencia y satisfacción) se proponen en el informe.
+
+### Evidencia
+
+- `Evidencias/iteracion-8/ux/13-auditoria.txt`: salida del recorrido por las nueve rutas.
+- `Evidencias/iteracion-8/ux/14-contraste.txt`: los 26 pares medidos.
+- `Evidencias/iteracion-8/ux/15-teclado.txt`: orden de tabulación del panel.
+
+
 
 
 
