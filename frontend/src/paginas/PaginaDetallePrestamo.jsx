@@ -171,6 +171,8 @@ export default function PaginaDetallePrestamo() {
 
   const aprobado = Boolean(prestamo.fecha_prestamo)
   const devuelto = Boolean(prestamo.fecha_devolucion_real)
+  const rechazado = prestamo.estado_prestamo === 'Rechazado'
+  const revisado = aprobado || rechazado
 
   return (
     <div className="space-y-4">
@@ -210,26 +212,30 @@ export default function PaginaDetallePrestamo() {
               <dd className="text-xs text-texto-suave">{prestamo.area_responsable}</dd>
             </div>
 
-            <div>
-              <dt className="text-xs font-semibold text-texto-suave">Prestado el</dt>
-              <dd className="mt-1 text-[17px] font-bold text-titulo">
-                {formatearFecha(prestamo.fecha_prestamo)}
-              </dd>
-            </div>
+            {!rechazado && (
+              <div>
+                <dt className="text-xs font-semibold text-texto-suave">Prestado el</dt>
+                <dd className="mt-1 text-[17px] font-bold text-titulo">
+                  {aprobado ? formatearFecha(prestamo.fecha_prestamo) : 'Aún no aprobado'}
+                </dd>
+              </div>
+            )}
 
             <div>
-              <dt className="text-xs font-semibold text-texto-suave">Comprometido al</dt>
+              <dt className="text-xs font-semibold text-texto-suave">Devolución comprometida</dt>
               <dd className="mt-1 text-[17px] font-bold text-titulo">
                 {formatearFecha(prestamo.fecha_devolucion)}
               </dd>
             </div>
 
-            <div>
-              <dt className="text-xs font-semibold text-texto-suave">Devolución real</dt>
-              <dd className="mt-1 text-[17px] font-bold text-titulo">
-                {devuelto ? formatearFecha(prestamo.fecha_devolucion_real) : 'Pendiente'}
-              </dd>
-            </div>
+            {!rechazado && (
+              <div>
+                <dt className="text-xs font-semibold text-texto-suave">Devolución real</dt>
+                <dd className="mt-1 text-[17px] font-bold text-titulo">
+                  {devuelto ? formatearFecha(prestamo.fecha_devolucion_real) : 'Pendiente'}
+                </dd>
+              </div>
+            )}
           </dl>
 
           {prestamo.observacion_prestamo && (
@@ -262,47 +268,55 @@ export default function PaginaDetallePrestamo() {
               <div>
                 <p className="text-[15px] font-semibold text-titulo">Solicitud enviada</p>
                 <p className="text-xs text-texto-suave">
-                  {aprobado ? 'Revisada por Tecnología' : 'Esperando la revisión del responsable'}
+                  {revisado ? 'Revisada por Tecnología' : 'Esperando la revisión del responsable'}
                 </p>
               </div>
             </li>
 
-            <li className="relative flex gap-4 pb-6">
-              <span aria-hidden="true" className="absolute top-4 left-[5px] h-full w-0.5 bg-borde" />
+            <li className={`relative flex gap-4 ${rechazado ? '' : 'pb-6'}`}>
+              {!rechazado && (
+                <span aria-hidden="true" className="absolute top-4 left-[5px] h-full w-0.5 bg-borde" />
+              )}
               <span
                 aria-hidden="true"
                 className={`relative mt-1 size-3 shrink-0 rounded-full ${
-                  aprobado ? 'bg-exito-vivo' : 'bg-borde-fuerte'
+                  rechazado ? 'bg-error-vivo' : aprobado ? 'bg-exito-vivo' : 'bg-borde-fuerte'
                 }`}
               />
               <div>
-                <p className={`text-[15px] font-semibold ${aprobado ? 'text-titulo' : 'text-texto-suave'}`}>
-                  Aprobación
+                <p className={`text-[15px] font-semibold ${revisado ? 'text-titulo' : 'text-texto-suave'}`}>
+                  {rechazado ? 'Solicitud rechazada' : 'Aprobación'}
                 </p>
                 <p className="text-xs text-texto-suave">
-                  {aprobado ? formatearFecha(prestamo.fecha_prestamo) : 'Pendiente'}
+                  {rechazado
+                    ? 'No se aprobó; el equipo siguió disponible'
+                    : aprobado
+                      ? formatearFecha(prestamo.fecha_prestamo)
+                      : 'Pendiente'}
                 </p>
               </div>
             </li>
 
-            <li className="flex gap-4">
-              <span
-                aria-hidden="true"
-                className={`mt-1 size-3 shrink-0 rounded-full ${
-                  devuelto ? 'bg-exito-vivo' : 'bg-aviso-vivo'
-                }`}
-              />
-              <div>
-                <p className={`text-[15px] font-semibold ${devuelto ? 'text-titulo' : 'text-texto-suave'}`}>
-                  {devuelto ? 'Devolución registrada' : 'Devolución pendiente'}
-                </p>
-                <p className="text-xs text-texto-suave">
-                  {devuelto
-                    ? formatearFecha(prestamo.fecha_devolucion_real)
-                    : `Esperada antes del ${formatearFecha(prestamo.fecha_devolucion)}`}
-                </p>
-              </div>
-            </li>
+            {!rechazado && (
+              <li className="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  className={`mt-1 size-3 shrink-0 rounded-full ${
+                    devuelto ? 'bg-exito-vivo' : 'bg-aviso-vivo'
+                  }`}
+                />
+                <div>
+                  <p className={`text-[15px] font-semibold ${devuelto ? 'text-titulo' : 'text-texto-suave'}`}>
+                    {devuelto ? 'Devolución registrada' : 'Devolución pendiente'}
+                  </p>
+                  <p className="text-xs text-texto-suave">
+                    {devuelto
+                      ? formatearFecha(prestamo.fecha_devolucion_real)
+                      : `Esperada antes del ${formatearFecha(prestamo.fecha_devolucion)}`}
+                  </p>
+                </div>
+              </li>
+            )}
           </ol>
         </section>
       </div>
