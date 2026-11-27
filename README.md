@@ -54,7 +54,7 @@ repositorio:
 
 ```bash
 cd backend/src/TechAsset.WebApi
-dotnet user-secrets set "ConnectionStrings:TechAsset" "Host=localhost;Database=techasset;Username=reservaupla;Password=..."
+dotnet user-secrets set "ConnectionStrings:TechAsset" "Host=localhost;Database=techasset;Username=techasset;Password=..."
 dotnet user-secrets set "AdministradorInicial:NombresUsuario" "..."
 dotnet user-secrets set "AdministradorInicial:ApellidosUsuario" "..."
 dotnet user-secrets set "AdministradorInicial:CorreoUsuario" "admin@innovatech.pe"
