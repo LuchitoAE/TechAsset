@@ -119,9 +119,28 @@
     overflow-wrap: break-word;
   }
 
+  /* Foco visible único para enlaces, botones y controles con tabindex. `:where` no suma
+     especificidad, así cada componente puede ajustarlo si lo necesita. */
+  :where(a, button, [role='tab'], summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-foco);
+    outline-offset: 2px;
+  }
+
   ::selection {
     background: var(--color-marca-100);
     color: var(--color-texto);
+  }
+
+  /* Quien pide menos movimiento no recibe animaciones ni desplazamientos suaves. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* Un solo lugar para el foco visible de toda la aplicación (WCAG 2.2, 2.4.11). */

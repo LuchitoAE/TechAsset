@@ -1,17 +1,21 @@
 const ESTILOS = {
   exito: {
-    clases: 'border-exito/30 bg-exito-fondo text-exito',
+    titulo: 'Listo',
     icono: '✓',
+    fondoIcono: 'bg-exito-vivo',
   },
   error: {
-    clases: 'border-error/30 bg-error-fondo text-error',
+    titulo: 'No se pudo completar',
     icono: '!',
+    fondoIcono: 'bg-error-vivo',
   },
 }
 
 // Aviso flotante global de RNF-04. La región role="status" existe siempre —aunque esté vacía— para
 // que los lectores de pantalla anuncien el texto cuando aparece. Admite varios avisos en cola: se
 // apilan, cada uno tiene su botón de cerrar con nombre y el puntero o el foco pausan su cierre.
+// El estilo oscuro es el mismo de las franjas de la landing, para que el aviso no parezca de otra
+// aplicación.
 export default function AvisoFlotante({ avisos = [], onCerrar, onPausar, onReanudar }) {
   function alSalirDelAviso(evento, id) {
     if (!evento.currentTarget.contains(evento.relatedTarget)) onReanudar?.(id)
@@ -52,7 +56,7 @@ export default function AvisoFlotante({ avisos = [], onCerrar, onPausar, onReanu
           return (
             <div
               key={aviso.id}
-              className={`pointer-events-auto flex animate-[aparecer-aviso_160ms_ease-out] items-start gap-3 rounded-xl border px-4 py-3 shadow-tarjeta ${configuracion.clases}`}
+              className="pointer-events-auto flex animate-[aparecer-aviso_160ms_ease-out] items-start gap-3 rounded-[14px] bg-tinta px-4 py-3 text-white"
               onMouseEnter={() => onPausar?.(aviso.id)}
               onMouseLeave={() => onReanudar?.(aviso.id)}
               onFocus={() => onPausar?.(aviso.id)}
@@ -60,16 +64,19 @@ export default function AvisoFlotante({ avisos = [], onCerrar, onPausar, onReanu
             >
               <span
                 aria-hidden="true"
-                className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border border-current text-xs font-bold"
+                className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg text-sm font-bold text-white ${configuracion.fondoIcono}`}
               >
                 {configuracion.icono}
               </span>
-              <p className="min-w-0 flex-1 text-sm leading-relaxed font-medium">{aviso.texto}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold">{configuracion.titulo}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-tinta-suave">{aviso.texto}</p>
+              </div>
               <button
                 type="button"
                 onClick={(evento) => cerrarAviso(evento, aviso.id)}
                 aria-label="Cerrar el aviso"
-                className="-mt-1 -mr-1 grid size-9 shrink-0 place-items-center rounded-lg text-lg leading-none hover:bg-current/10 focus-visible:outline-2 focus-visible:outline-offset-2"
+                className="-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-lg text-lg leading-none text-tinta-suave hover:bg-white/10 hover:text-white"
               >
                 <span aria-hidden="true">×</span>
               </button>

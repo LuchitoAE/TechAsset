@@ -229,7 +229,7 @@ export default function PaginaPrestamos({ soloMisPrestamos = false }) {
                     <td className="rounded-r-lg border-y border-r border-borde bg-superficie px-4 py-3.5 group-hover:bg-superficie-tenue">
                       <Link
                         to={`/prestamos/${prestamo.id_prestamo}`}
-                        className="inline-flex items-center gap-1 rounded text-sm font-semibold text-marca-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foco"
+                        className="inline-flex min-h-6 items-center gap-1 rounded py-1 text-sm font-semibold text-marca-700 hover:underline"
                       >
                         Ver
                         <span aria-hidden="true">→</span>
