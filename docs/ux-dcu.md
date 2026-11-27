@@ -195,5 +195,40 @@ a menudo con el equipo en la mano. Se prioriza reconocer sobre recordar y evitar
 - `Evidencias/iteracion-8/ux/09-prestamo-rechazado.png`: ciclo de dos pasos y motivo a la vista.
 - `Evidencias/iteracion-8/ux/10-prestamo-pendiente.png`: «Aún no aprobado» y decisión disponible.
 
+## Parte 5 — Salidas y móvil (26/11/2026)
+
+### Lo que ya cumplía
+
+- Las pestañas de reportes se recorren con flechas, Inicio y Fin, y cada panel tiene su descripción,
+  filtros, estados vacíos y error con reintento.
+- Las tablas de reportes se desplazan dentro de su región, con encabezado fijo y `aria-sort` cuando se
+  ordenan; el pie explica la zona horaria.
+- En el teléfono, el menú es un cajón con Escape y retorno de foco, y las tablas de inventario y
+  préstamos se apilan.
+
+### Hallazgos
+
+| # | Hallazgo | Heurística / regla | Norma |
+| --- | --- | --- | --- |
+| 1 | La pestaña abierta no se podía compartir ni conservar al recargar | Nielsen 6 · Shneiderman 7 | — |
+| 2 | En el teléfono, cada equipo mostraba cuatro campos etiquetados aunque Categoría y Marca ya están en su ficha | Nielsen 8 | ISO 9241-112 §6.5 |
+| 3 | La etiqueta «Equipo:» se repetía en cada fila cuando era el único dato visible | Nielsen 8 | ISO 9241-112 §6.5 |
+
+### Correcciones
+
+1. **La pestaña vive en la URL** (`/reportes?reporte=movimientos`): recargar o compartir mantiene el
+   reporte abierto y permite enlazarlo desde otro sitio.
+2. **Columnas secundarias ocultas en el teléfono** (Categoría y Marca) y sin la etiqueta redundante:
+   el reporte de equipos por estado pasó de 3060 a 1868 px de alto a 390 px de ancho.
+3. **Sin desbordes horizontales:** se midió `scrollWidth` en nueve rutas a 390 px (landing, ingreso,
+   panel, inventario, préstamos, activos, reportes, detalle de equipo y detalle de préstamo) y todas
+   coinciden con el ancho de la ventana.
+
+### Evidencia
+
+- `Evidencias/iteracion-8/ux/11-reportes-enlace.png`: pestaña «Movimientos» abierta por URL.
+- `Evidencias/iteracion-8/ux/12-reportes-movil.png`: reporte compacto en 390 px.
+
+
 
 

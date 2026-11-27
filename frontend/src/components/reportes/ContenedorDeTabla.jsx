@@ -63,7 +63,7 @@ export default function ContenedorDeTabla({
                     }
                     className={`px-4 py-3 font-semibold whitespace-nowrap ${
                       columna.etiqueta === 'Acciones' ? 'text-right' : ''
-                    }`}
+                    } ${columna.clase ?? ''}`}
                   >
                     {ordenable ? (
                       <button

@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
+import { useSearchParams } from 'react-router'
 import EncabezadoDePagina from '../components/ui/EncabezadoDePagina'
 import ReporteEquiposMasUtilizados from '../components/reportes/ReporteEquiposMasUtilizados'
 import ReporteEquiposPorEstado from '../components/reportes/ReporteEquiposPorEstado'
@@ -36,16 +37,23 @@ const REPORTES = [
 // tiene sus propios filtros, estados vacíos y errores. El teclado recorre las pestañas con las
 // flechas, Inicio y Fin.
 export default function PaginaReportes() {
-  const [activo, setActivo] = useState(REPORTES[0].id)
+  const [parametros, setParametros] = useSearchParams()
   const botones = useRef([])
 
+  // La pestaña vive en la URL: recargar o compartir el enlace mantiene el reporte abierto.
+  const solicitado = parametros.get('reporte')
+  const activo = REPORTES.some((reporte) => reporte.id === solicitado) ? solicitado : REPORTES[0].id
   const actual = REPORTES.find((reporte) => reporte.id === activo) ?? REPORTES[0]
   const Componente = actual.Componente
+
+  function cambiarReporte(id) {
+    setParametros({ reporte: id }, { replace: true })
+  }
 
   function seleccionar(indice) {
     const reporte = REPORTES[indice]
     if (!reporte) return
-    setActivo(reporte.id)
+    cambiarReporte(reporte.id)
     botones.current[indice]?.focus()
   }
 
@@ -95,7 +103,7 @@ export default function PaginaReportes() {
                 aria-selected={seleccionado}
                 aria-controls={`panel-${reporte.id}`}
                 tabIndex={seleccionado ? 0 : -1}
-                onClick={() => setActivo(reporte.id)}
+                onClick={() => cambiarReporte(reporte.id)}
                 onKeyDown={(evento) => alPresionarTecla(evento, indice)}
                 className={`-mb-px inline-flex min-h-11 items-center border-b-2 px-4 text-sm transition-colors ${
                   seleccionado
